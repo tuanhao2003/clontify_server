@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_container
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d:ro
+    command: ["postgres", "-c", "log_statement=all"]
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_container
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@clontify.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+  auth:
+    build:
+      context: ./appServices/auth
+      dockerfile: Dockerfile
+    container_name: auth_service
+    restart: no
+    volumes:
+      - ./appServices/common:/auth_service/common
+    environment:
+      - dbName=authservice
+      - dbUser=admin
+      - dbPass=admin
+      - dbHost=postgres
+      - dbPort=5432
+      - PYTHONPATH=/auth_service/common
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:

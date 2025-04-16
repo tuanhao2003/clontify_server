@@ -1,0 +1,9 @@
+django
+djangorestframework
+psycopg2-binary
+djangorestframework-simplejwt
+grpcio
+grpcio-tools
+gunicorn
+uvicorn
+django-cors-headers
