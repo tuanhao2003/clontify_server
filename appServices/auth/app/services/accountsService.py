@@ -1,130 +1,103 @@
 from app.repositories.accountsRepo import AccountsRepo
 from datetime import datetime
 from app.entities.accounts import Accounts
-from common.baseResponse import BaseResponse
-from app.serializers.accountSerializer import AccountSerializer
+from django.contrib.auth.hashers import make_password
 
 
 class AccountsService:
     @staticmethod
-    def findByID(data: dict):
-        id = data.get("id")
+    def findByID(id: str):
         if not id:
-            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+            return -1
         account = AccountsRepo.getByID(id)
         if not account:
-            return BaseResponse.notFound("Không tìm thấy tài khoản")
-        return BaseResponse.success(data=AccountSerializer(account).data)
+            return None
+        return account
 
     @staticmethod
-    def findByUsername(data: dict):
-        username = data.get("username")
+    def findByUsername(username: str):
         if not username:
-            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+            return -1
         account = AccountsRepo.getByUsername(username)
         if not account:
-            return BaseResponse.notFound("Không tìm thấy tài khoản")
-        return BaseResponse.success(data=AccountSerializer(account).data)
+            return None
+        return account
 
     @staticmethod
-    def findByEmail(data: dict):
-        email = data.get("email")
+    def findByEmail(email: str):
         if not email:
-            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+            return -1
         account = AccountsRepo.getByEmail(email)
         if not account:
-            return BaseResponse.notFound("Không tìm thấy tài khoản")
-        return BaseResponse.success(data=AccountSerializer(account).data)
+            return None
+        return account
 
     @staticmethod
-    def findByStatus(data: dict):
-        status = data.get("isActive")
+    def findByStatus(status: bool):
         if status is None:
-            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+            return -1
         accounts = AccountsRepo.filterByStatus(status)
         if not accounts:
-            return BaseResponse.notFound("Không có tài khoản phù hợp")
-        serialized = AccountSerializer(accounts, many=True).data
-        return BaseResponse.success(data=serialized)
+            return None
+        return accounts
 
     @staticmethod
-    def findByDateCreated(data: dict):
-        start = data.get("start")
-        end = data.get("end")
+    def findByDateCreated(start: datetime, end: datetime):
 
         if not start or not end:
-            return BaseResponse.badRequest(
-                "Dữ liệu không hợp lệ"
-            )
-
+            return -1
         try:
             startDate = datetime.fromisoformat(start)
             endDate = datetime.fromisoformat(end)
         except ValueError:
-            return BaseResponse.badRequest(
-                "Sai định dạng"
-            )
+            return -1
 
         accounts = AccountsRepo.filterByDateCreated(startDate, endDate)
         if not accounts or len(accounts) == 0:
-            return BaseResponse.notFound(
-                "Không có tài khoản nào được tạo trong khoảng thời gian này"
-            )
-
-        accountToJSON = AccountSerializer(accounts, many=True).data
-        return BaseResponse.success(data=accountToJSON)
+            return None
+        return accounts
 
     @staticmethod
-    def doCreate(data: dict):
-        requiredFields = ["username", "email", "password"]
-        for field in requiredFields:
-            if not data.get(field):
-                return BaseResponse.badRequest(f"{field} không được để trống")
+    def doCreate(username: str, email: str, password: str):
+        if not username or not email or not password:
+            return -1
 
-        if AccountsRepo.getByUsername(data["username"]) or AccountsRepo.getByEmail(
-            data["email"]
-        ):
-            return BaseResponse.conflict("Tài khoản đã tồn tại")
+        if AccountsRepo.getByUsername(username) or AccountsRepo.getByEmail(email):
+            return None
 
         account = Accounts(
-            username=data["username"],
-            email=data["email"],
-            password=data["password"],
+            username=username,
+            email=email,
+            password=make_password(password),
             isActive=True,
         )
         created = AccountsRepo.create(account)
-        return BaseResponse.success(
-            "Tạo tài khoản thành công", AccountSerializer(created).data
-        )
+        return created
 
     @staticmethod
-    def doUpdate(data: dict):
-        id = data.get("id")
+    def doUpdate(account: Accounts):
+        id = account.id
         if not id:
-            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+            return -1
 
-        account = AccountsRepo.getByID(id)
-        if not account:
-            return BaseResponse.notFound("Không tìm thấy tài khoản")
+        acc = AccountsRepo.getByID(id)
+        if not acc:
+            return None
 
-        email = data.get("email")
-        if email and AccountsRepo.getByEmail(email) and account.email != email:
-            return BaseResponse.conflict("Email đã được sử dụng")
+        if (account.email and AccountsRepo.getByEmail(account.email)) and (acc.email != account.email):
+            return None
 
-        account.email = email or account.email
-        account.password = data.get("password", account.password)
-        account.isActive = data.get("isActive", account.isActive)
-        updated = AccountsRepo.update(account)
-        return BaseResponse.success(
-            "Cập nhật tài khoản thành công", AccountSerializer(updated).data
-        )
-
+        acc.email = account.email or acc.email
+        acc.password = account.password or acc.password 
+        acc.isActive = account.isActive or acc.isActive 
+        updated = AccountsRepo.update(acc)
+        return updated
+    
     @staticmethod
-    def doDelete(data: dict):
-        id = data.get("id")
+    def doDelete(id: str):
         if not id:
-            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+            return -1
         deleted = AccountsRepo.delete(id)
         if deleted:
-            return BaseResponse.success("Xoá tài khoản thành công")
-        return BaseResponse.notFound("Không tìm thấy tài khoản")
+            return None
+        return deleted

@@ -4,5 +4,6 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', LoginController.as_view(), name='auth-login'),
+    path('login/', LoginController.as_view(), name='authLogin'),
+    path('csrf/', GetCsrfToken.as_view(), name="authGetCsrf")
 ]
