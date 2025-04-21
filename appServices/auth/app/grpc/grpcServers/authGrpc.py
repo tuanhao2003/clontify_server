@@ -1,96 +1,116 @@
 import grpc
+from concurrent import futures
+import time
+import uuid
+from datetime import datetime
+from google.protobuf.timestamp_pb2 import Timestamp
 from protosParsed import authService_pb2, authService_pb2_grpc
 from app.services.accountsService import AccountsService
 from app.serializers.accountSerializer import AccountSerializer
-import time
-from concurrent import futures
-import json
-import uuid
+
 
 class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
-    def findByID(id: str):
-        return AccountsService.findByID(uuid.UUID(id))
+    def findByID(self, request, context):
+        account = AccountsService.findByID(uuid.UUID(request.id))
+        if account:
+            return authService_pb2.AccountResponse(
+                success=True,
+                account=authService_pb2.Account(
+                    id=str(account.id),
+                    username=account.username,
+                    email=account.email,
+                    isActive=account.isActive,
+                )
+            )
+        return authService_pb2.AccountResponse(success=False)
 
-    # def findByUsername(username: str):
-    #     if not username:
-    #         return -1
-    #     account = AccountsRepo.getByUsername(username)
-    #     if not account:
-    #         return None
-    #     return account
+    def findByUsername(self, request, context):
+        account = AccountsService.findByUsername(request.username)
+        if account:
+            return authService_pb2.AccountResponse(
+                success=True,
+                account=authService_pb2.Account(
+                    id=str(account.id),
+                    username=account.username,
+                    email=account.email,
+                    isActive=account.isActive,
+                )
+            )
+        return authService_pb2.AccountResponse(success=False)
 
-    # def findByEmail(email: str):
-    #     if not email:
-    #         return -1
-    #     account = AccountsRepo.getByEmail(email)
-    #     if not account:
-    #         return None
-    #     return account
+    def findByEmail(self, request, context):
+        account = AccountsService.findByEmail(request.email)
+        if account:
+            return authService_pb2.AccountResponse(
+                success=True,
+                account=authService_pb2.Account(
+                    id=str(account.id),
+                    username=account.username,
+                    email=account.email,
+                    isActive=account.isActive,
+                )
+            )
+        return authService_pb2.AccountResponse(success=False)
 
-    # def findByStatus(status: bool):
-    #     if status is None:
-    #         return -1
-    #     accounts = AccountsRepo.filterByStatus(status)
-    #     if not accounts:
-    #         return None
-    #     return accounts
+    def findByStatus(self, request, context):
+        accounts = AccountsService.findByStatus(request.status)
+        response = authService_pb2.AccountListResponse(success=True)
+        if accounts:
+            for acc in accounts:
+                response.accounts.add(
+                    id=str(acc.id),
+                    username=acc.username,
+                    email=acc.email,
+                    isActive=acc.isActive
+                )
+        else:
+            response.success = False
+        return response
 
-    # def findByDateCreated(start: datetime, end: datetime):
+    def findByDateCreated(self, request, context):
+        try:
+            start = datetime.fromisoformat(request.startDate)
+            end = datetime.fromisoformat(request.endDate)
+            accounts = AccountsService.findByDateCreated({
+                "startDate": start.isoformat(),
+                "endDate": end.isoformat()
+            }).data
+            response = authService_pb2.AccountListResponse(success=True)
+            for acc in accounts:
+                response.accounts.add(
+                    id=acc["id"],
+                    username=acc["username"],
+                    email=acc["email"],
+                    isActive=acc["isActive"]
+                )
+            return response
+        except Exception:
+            return authService_pb2.AccountListResponse(success=False)
 
-    #     if not start or not end:
-    #         return -1
-    #     try:
-    #         startDate = datetime.fromisoformat(start)
-    #         endDate = datetime.fromisoformat(end)
-    #     except ValueError:
-    #         return -1
+    def doCreate(self, request, context):
+        data = {
+            "username": request.username,
+            "email": request.email,
+            "password": request.password
+        }
+        result = AccountsService.doCreate(data)
+        if result:
+            return authService_pb2.OperationResponse(success=True)
+        return authService_pb2.OperationResponse(success=False)
 
-    #     accounts = AccountsRepo.filterByDateCreated(startDate, endDate)
-    #     if not accounts or len(accounts) == 0:
-    #         return None
-    #     return accounts
+    def doUpdate(self, request, context):
+        data = {
+            "id": request.id,
+            "email": request.email,
+            "password": request.password,
+            "isActive": request.isActive
+        }
+        result = AccountsService.doUpdate(data)
+        return authService_pb2.OperationResponse(success=bool(result))
 
-    # def doCreate(username: str, email: str, password: str):
-    #     if not username or not email or not password:
-    #         return -1
-
-    #     if AccountsRepo.getByUsername(username) or AccountsRepo.getByEmail(email):
-    #         return None
-
-    #     account = Accounts(
-    #         username=username,
-    #         email=email,
-    #         password=make_password(password),
-    #         isActive=True,
-    #     )
-    #     created = AccountsRepo.create(account)
-    #     return created
-
-    # def doUpdate(account: Accounts):
-    #     id = account.id
-    #     if not id:
-    #         return -1
-
-    #     acc = AccountsRepo.getByID(id)
-    #     if not acc:
-    #         return None
-
-    #     if (account.email and AccountsRepo.getByEmail(account.email)) and (acc.email != account.email):
-    #         return None
-
-    #     acc.email = account.email or acc.email
-    #     acc.password = account.password or acc.password 
-    #     acc.isActive = account.isActive or acc.isActive 
-    #     updated = AccountsRepo.update(acc)
-    #     return updated
-    
-    # def doDelete(id: str):
-    #     if not id:
-    #         return -1
-    #     deleted = AccountsRepo.delete(id)
-    #     if deleted:
-    #         return None
-    #     return deleted
+    def doDelete(self, request, context):
+        result = AccountsService.doDelete(uuid.UUID(request.id))
+        return authService_pb2.OperationResponse(success=result == 1)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
