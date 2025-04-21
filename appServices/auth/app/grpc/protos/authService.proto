@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package app.grpc.protos;
+
+import "google/protobuf/timestamp.proto";
+
+service AuthService {
+  rpc findByID(findByIDRequest) returns (accountResponse);
+  rpc findByUsername(findByUsernameRequest) returns (accountResponse);
+  rpc findByEmail(findByEmailRequest) returns (accountResponse);
+  rpc findByStatus(findByStatusRequest) returns (accountListResponse);
+  rpc findByDateCreated(findByDateCreatedRequest) returns (accountListResponse);
+
+  rpc doCreate(createAccountRequest) returns (accountResponse);
+  rpc doUpdate(updateAccountRequest) returns (accountResponse);
+  rpc doDelete(deleteAccountRequest) returns (accountResponse);
+}
+
+
+message findByIDRequest {
+  string id = 1;
+}
+
+message findByUsernameRequest {
+  string username = 1;
+}
+
+message findByEmailRequest {
+  string email = 1;
+}
+
+message findByStatusRequest {
+  bool status = 1;
+}
+
+message findByDateCreatedRequest {
+  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp end = 2;
+}
+
+message createAccountRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message updateAccountRequest {
+  string id = 1;
+  string email = 2;
+  string password = 3;
+  bool isActive = 4;
+}
+
+message deleteAccountRequest {
+  string id = 1;
+}
+
+message accountResponse {
+  string id = 1;
+  string username = 2;
+  string email = 3;
+  string password = 4;
+  bool isActive = 5;
+  google.protobuf.Timestamp createdAt = 6;
+  google.protobuf.Timestamp updatedAt = 7;
+  google.protobuf.Timestamp deletedAt = 8;
+}
+
+message accountListResponse {
+  int32 count = 1;
+  repeated accountResponse accounts = 2;
+}

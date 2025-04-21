@@ -16,12 +16,12 @@ class AuthService:
 
             # if not check_password(password, account.password):
             if not (password == account.password):
-                return None
+                return 0
 
             tokens = AuthService.createToken(account)
             return account, tokens
         except Exception as e:
-            return None
+            return -2
 
     @staticmethod
     def createToken(account):

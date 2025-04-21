@@ -53,7 +53,6 @@ class AccountsRepo:
             acc = Accounts.objects.get(id=account.id)
             acc.email = account.email
             acc.password = account.password
-            acc.isActive = account.isActive
             acc.updatedAt = now()
             acc.save()
             return acc
@@ -66,6 +65,7 @@ class AccountsRepo:
         try:
             account = Accounts.objects.get(id=id)
             account.deletedAt = now()
+            account.isActive = False
             account.save()
             return account
         except Exception:

@@ -29,9 +29,11 @@ class LoginController(View):
         
         result = AuthService.login(username, email, password)
         if result == -1:
-            return BaseResponse.notFound("Tài khoản chưa được đăng ký")
-        if not result:
-            return BaseResponse.unauthorized("Sai tài khoản hoặc mật khẩu")
+            return BaseResponse.notFound("Tài khoản chưa được đăng ký", {"failed": -1})
+        if result == -2:
+            return BaseResponse.internalError("Xảy ra lỗi trong quá trình đăng nhập", {"failed": -2})
+        if result == 0:
+            return BaseResponse.unauthorized("Sai tài khoản hoặc mật khẩu", {"failed": 0})
         
         account, token = result
         return BaseResponse.success("Đăng nhập thành công", {

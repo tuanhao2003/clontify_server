@@ -11,6 +11,8 @@ class BaseResponse:
                 "data": data,
             },
             status=200,
+            safe=False,
+            json_dumps_params={'ensure_ascii': False}
         )
 
     @staticmethod
@@ -22,6 +24,8 @@ class BaseResponse:
                 "data": data,
             },
             status=201,
+            safe=False,
+            json_dumps_params={'ensure_ascii': False}
         )
 
     @staticmethod
@@ -33,6 +37,8 @@ class BaseResponse:
                 "data": data,
             },
             status=400,
+            safe=False,
+            json_dumps_params={'ensure_ascii': False}
         )
 
     @staticmethod
@@ -44,6 +50,8 @@ class BaseResponse:
                 "data": data,
             },
             status=401,
+            safe=False,
+            json_dumps_params={'ensure_ascii': False}
         )
 
     @staticmethod
@@ -55,6 +63,8 @@ class BaseResponse:
                 "data": data,
             },
             status=403,
+            safe=False,
+            json_dumps_params={'ensure_ascii': False}
         )
 
     @staticmethod
@@ -66,6 +76,8 @@ class BaseResponse:
                 "data": data,
             },
             status=404,
+            safe=False,
+            json_dumps_params={'ensure_ascii': False}
         )
 
     @staticmethod
@@ -77,6 +89,8 @@ class BaseResponse:
                 "data": data,
             },
             status=409,
+            safe=False,
+            json_dumps_params={'ensure_ascii': False}
         )
 
     @staticmethod
@@ -88,4 +102,6 @@ class BaseResponse:
                 "data": data,
             },
             status=500,
+            safe=False,
+            json_dumps_params={'ensure_ascii': False}
         )

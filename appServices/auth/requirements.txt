@@ -7,3 +7,6 @@ grpcio-tools
 gunicorn
 uvicorn
 django-cors-headers
+grpcio 
+grpcio-tools
+protobuf
