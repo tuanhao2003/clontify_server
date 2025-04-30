@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package music;
+
+message Song {
+    string id = 1;
+    string title = 2;
+    string artistId = 3;
+    string genreId = 4;
+    string audioUrl = 5;
+    string backgroundImage = 6;
+    int32 duration = 7;
+    string releaseDate = 8;
+    bool isActive = 9;
+}
+
+message Album {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string backgroundImage = 4;
+    bool isActive = 5;
+}
+
+message Genre {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    bool isActive = 4;
+}
+
+message Playlist {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string ownerId = 4;
+    bool isActive = 5;
+}
+
+message AlbumSong {
+    string id = 1;
+    string albumId = 2;
+    string songId = 3;
+    int32 order = 4;
+    bool isActive = 5;
+}
+
+message PlaylistSong {
+    string id = 1;
+    string playlistId = 2;
+    string songId = 3;
+    int32 order = 4;
+    bool isActive = 5;
+}
+
+// Request/Response messages
+message IdRequest { string id = 1; }
+message NameRequest { string name = 1; }
+message OwnerIdRequest { string ownerId = 1; }
+message SongList { repeated Song songs = 1; }
+message AlbumList { repeated Album albums = 1; }
+message GenreList { repeated Genre genres = 1; }
+message PlaylistList { repeated Playlist playlists = 1; }
+message AlbumSongList { repeated AlbumSong albumSongs = 1; }
+message PlaylistSongList { repeated PlaylistSong playlistSongs = 1; }
+message Empty {}
+
+service MusicService {
+    // Song
+    rpc GetSongById(IdRequest) returns (Song);
+    rpc GetSongsByTitle(NameRequest) returns (SongList);
+    rpc CreateSong(Song) returns (Song);
+    rpc UpdateSong(Song) returns (Song);
+    rpc DeleteSong(IdRequest) returns (Empty);
+
+    // Album
+    rpc GetAlbumById(IdRequest) returns (Album);
+    rpc GetAlbumsByName(NameRequest) returns (AlbumList);
+    rpc CreateAlbum(Album) returns (Album);
+    rpc UpdateAlbum(Album) returns (Album);
+    rpc DeleteAlbum(IdRequest) returns (Empty);
+
+    // Genre
+    rpc GetGenreById(IdRequest) returns (Genre);
+    rpc GetGenresByName(NameRequest) returns (GenreList);
+    rpc CreateGenre(Genre) returns (Genre);
+    rpc UpdateGenre(Genre) returns (Genre);
+    rpc DeleteGenre(IdRequest) returns (Empty);
+
+    // Playlist
+    rpc GetPlaylistById(IdRequest) returns (Playlist);
+    rpc GetPlaylistsByName(NameRequest) returns (PlaylistList);
+    rpc GetPlaylistsByOwnerId(OwnerIdRequest) returns (PlaylistList);
+    rpc CreatePlaylist(Playlist) returns (Playlist);
+    rpc UpdatePlaylist(Playlist) returns (Playlist);
+    rpc DeletePlaylist(IdRequest) returns (Empty);
+
+    // AlbumSong
+    rpc GetAlbumSongById(IdRequest) returns (AlbumSong);
+    rpc GetAlbumSongsByAlbumId(IdRequest) returns (AlbumSongList);
+    rpc GetAlbumSongsBySongId(IdRequest) returns (AlbumSongList);
+    rpc CreateAlbumSong(AlbumSong) returns (AlbumSong);
+    rpc UpdateAlbumSong(AlbumSong) returns (AlbumSong);
+    rpc DeleteAlbumSong(IdRequest) returns (Empty);
+
+    // PlaylistSong
+    rpc GetPlaylistSongById(IdRequest) returns (PlaylistSong);
+    rpc GetPlaylistSongsByPlaylistId(IdRequest) returns (PlaylistSongList);
+    rpc GetPlaylistSongsBySongId(IdRequest) returns (PlaylistSongList);
+    rpc CreatePlaylistSong(PlaylistSong) returns (PlaylistSong);
+    rpc UpdatePlaylistSong(PlaylistSong) returns (PlaylistSong);
+    rpc DeletePlaylistSong(IdRequest) returns (Empty);
+} 

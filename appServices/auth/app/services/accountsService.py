@@ -2,102 +2,100 @@ from app.repositories.accountsRepo import AccountsRepo
 from datetime import datetime
 from app.entities.accounts import Accounts
 from django.contrib.auth.hashers import make_password
+from common.errorCodes import ErrorCodes
 
 
 class AccountsService:
     @staticmethod
-    def findByID(id: str):
+    def findById(id: str):
         if not id:
-            return -1
-        account = AccountsRepo.getByID(id)
+            return None, ErrorCodes.INVALID_INPUT
+        account = AccountsRepo.getById(id)
         if not account:
-            return None
-        return account
+            return None, ErrorCodes.NOT_FOUND
+        return account, None
 
     @staticmethod
     def findByUsername(username: str):
         if not username:
-            return -1
+            return None, ErrorCodes.INVALID_INPUT
         account = AccountsRepo.getByUsername(username)
         if not account:
-            return None
-        return account
+            return None, ErrorCodes.NOT_FOUND
+        return account, None
 
     @staticmethod
     def findByEmail(email: str):
         if not email:
-            return -1
+            return None, ErrorCodes.INVALID_INPUT
         account = AccountsRepo.getByEmail(email)
         if not account:
-            return None
-        return account
+            return None, ErrorCodes.NOT_FOUND
+        return account, None
 
     @staticmethod
     def findByStatus(status: bool):
-        if status is None:
-            return -1
+        if not status:
+            return None, ErrorCodes.INVALID_STATUS
         accounts = AccountsRepo.filterByStatus(status)
         if not accounts:
-            return None
-        return accounts
+            return None, ErrorCodes.NOT_FOUND
+        return accounts, None
 
     @staticmethod
     def findByDateCreated(start: datetime, end: datetime):
-
-        if not start or not end:
-            return -1
-        try:
-            startDate = datetime.fromisoformat(start)
-            endDate = datetime.fromisoformat(end)
-        except ValueError:
-            return -1
-
-        accounts = AccountsRepo.filterByDateCreated(startDate, endDate)
+        if (not start or not end) or (start > end):
+            return None, ErrorCodes.INVALID_INPUT
+        accounts = AccountsRepo.filterByDateCreated(start, end)
         if not accounts or len(accounts) == 0:
-            return None
-        return accounts
+            return None, ErrorCodes.NOT_FOUND
+        return accounts, None
 
     @staticmethod
-    def doCreate(username: str, email: str, password: str):
-        if not username or not email or not password:
-            return -1
-
-        if AccountsRepo.getByUsername(username) or AccountsRepo.getByEmail(email):
-            return None
-
+    def doCreate(username: str, email: str, password: str, roleId: str):
+        if not username or not email or not password or not roleId:
+            return None, ErrorCodes.INVALID_INPUT
+        if AccountsRepo.getByUsername(username):
+            return None, ErrorCodes.ALREADY_EXISTS
+        if AccountsRepo.getByEmail(email):
+            return None, ErrorCodes.ALREADY_EXISTS
         account = Accounts(
             username=username,
             email=email,
             password=make_password(password),
+            roleId=roleId,
             isActive=True,
         )
         created = AccountsRepo.create(account)
-        return created
+        if not created:
+            return None, ErrorCodes.CREATE_FAILED
+        return created, None
 
     @staticmethod
     def doUpdate(account: Accounts):
         id = account.id
         if not id:
-            return -1
+            return None, ErrorCodes.INVALID_INPUT
+        existingAccount = AccountsRepo.getById(id)
+        if not existingAccount:
+            return None, ErrorCodes.NOT_FOUND
+        if (account.email and AccountsRepo.getByEmail(account.email)) and (existingAccount.email != account.email):
+            return None, ErrorCodes.ALREADY_EXISTS
+        existingAccount.email = account.email or existingAccount.email
+        existingAccount.password = account.password or existingAccount.password
+        existingAccount.isActive = account.isActive if account.isActive is not None else existingAccount.isActive
+        if account.roleId:
+            existingAccount.roleId = account.roleId
+        updated = AccountsRepo.update(existingAccount)
+        if not updated:
+            return None, ErrorCodes.UPDATE_FAILED
+        return updated, None
 
-        acc = AccountsRepo.getByID(id)
-        if not acc:
-            return None
-
-        if (account.email and AccountsRepo.getByEmail(account.email)) and (acc.email != account.email):
-            return None
-
-        acc.email = account.email or acc.email
-        acc.password = account.password or acc.password 
-        acc.isActive = account.isActive or acc.isActive 
-        updated = AccountsRepo.update(acc)
-        return updated
-    
     @staticmethod
     def doDelete(id: str):
         if not id:
-            return -1
+            return None, ErrorCodes.INVALID_INPUT
         deleted = AccountsRepo.delete(id)
-        if deleted:
-            return None
-        return deleted
+        if not deleted:
+            return None, ErrorCodes.DELETE_FAILED
+        return deleted, None

@@ -2,9 +2,9 @@ from django.views import View
 from app.services.accountsService import AccountsService
 from app.serializers.accountSerializer import AccountSerializer
 from common.baseResponse import BaseResponse
+from common.errorCodes import ErrorCodes
 import json
 from datetime import datetime
-
 
 class GetAccount(View):
     def get(self, request):
@@ -16,45 +16,55 @@ class GetAccount(View):
         end = request.GET.get("end")
 
         if id:
-            result = AccountsService.findByID(id)
-            if result == -1:
+            result, error = AccountsService.findById(id)
+            if error == ErrorCodes.INVALID_INPUT:
                 return BaseResponse.badRequest("Thiếu ID")
-            if not result:
+            if error == ErrorCodes.NOT_FOUND:
                 return BaseResponse.notFound("Không tìm thấy tài khoản")
+            if error:
+                return BaseResponse.internalError("Lỗi hệ thống")
             return BaseResponse.success("Thành công", AccountSerializer(result).data)
 
         if username:
-            result = AccountsService.findByUsername(username)
-            if result == -1:
+            result, error = AccountsService.findByUsername(username)
+            if error == ErrorCodes.INVALID_INPUT:
                 return BaseResponse.badRequest("Thiếu username")
-            if not result:
+            if error == ErrorCodes.NOT_FOUND:
                 return BaseResponse.notFound("Không tìm thấy tài khoản")
+            if error:
+                return BaseResponse.internalError("Lỗi hệ thống")
             return BaseResponse.success("Thành công", AccountSerializer(result).data)
 
         if email:
-            result = AccountsService.findByEmail(email)
-            if result == -1:
+            result, error = AccountsService.findByEmail(email)
+            if error == ErrorCodes.INVALID_INPUT:
                 return BaseResponse.badRequest("Thiếu email")
-            if not result:
+            if error == ErrorCodes.NOT_FOUND:
                 return BaseResponse.notFound("Không tìm thấy tài khoản")
+            if error:
+                return BaseResponse.internalError("Lỗi hệ thống")
             return BaseResponse.success("Thành công", AccountSerializer(result).data)
 
         if status is not None:
-            result = AccountsService.findByStatus(status.lower() == "true")
-            if result == -1:
+            result, error = AccountsService.findByStatus(status.lower() == "true")
+            if error == ErrorCodes.INVALID_STATUS:
                 return BaseResponse.badRequest("Thiếu trạng thái")
-            if not result:
+            if error == ErrorCodes.NOT_FOUND:
                 return BaseResponse.notFound("Không tìm thấy tài khoản nào")
+            if error:
+                return BaseResponse.internalError("Lỗi hệ thống")
             return BaseResponse.success(
                 "Thành công", AccountSerializer(result, many=True).data
             )
 
         if start and end:
-            result = AccountsService.findByDateCreated(start, end)
-            if result == -1:
+            result, error = AccountsService.findByDateCreated(start, end)
+            if error == ErrorCodes.INVALID_INPUT:
                 return BaseResponse.badRequest("Ngày không hợp lệ")
-            if not result:
+            if error == ErrorCodes.NOT_FOUND:
                 return BaseResponse.notFound("Không tìm thấy tài khoản nào")
+            if error:
+                return BaseResponse.internalError("Lỗi hệ thống")
             return BaseResponse.success(
                 "Thành công", AccountSerializer(result, many=True).data
             )
@@ -70,12 +80,14 @@ class DeleteAccount(View):
             return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
         id = data.get("id")
-        result = AccountsService.doDelete(id)
-        if result == -1:
+        result, error = AccountsService.doDelete(id)
+        if error == ErrorCodes.INVALID_INPUT:
             return BaseResponse.badRequest("Thiếu ID")
-        if result is None:
-            return BaseResponse.success("Xoá thành công")
-        return BaseResponse.internalError("Không xoá được tài khoản")
+        if error == ErrorCodes.DELETE_FAILED:
+            return BaseResponse.internalError("Không xoá được tài khoản")
+        if error:
+            return BaseResponse.internalError("Lỗi hệ thống")
+        return BaseResponse.success("Xoá thành công")
 
 
 class UpdateAccount(View):
@@ -85,11 +97,17 @@ class UpdateAccount(View):
         except json.JSONDecodeError:
             return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-        result = AccountsService.doUpdate(AccountSerializer.deserialize(data))
-        if result == -1:
+        result, error = AccountsService.doUpdate(AccountSerializer.deserialize(data))
+        if error == ErrorCodes.INVALID_INPUT:
             return BaseResponse.badRequest("Thiếu ID")
-        if result is None:
-            return BaseResponse.notFound("Không tìm thấy hoặc email đã tồn tại")
+        if error == ErrorCodes.NOT_FOUND:
+            return BaseResponse.notFound("Không tìm thấy tài khoản")
+        if error == ErrorCodes.ALREADY_EXISTS:
+            return BaseResponse.badRequest("Email đã tồn tại")
+        if error == ErrorCodes.UPDATE_FAILED:
+            return BaseResponse.internalError("Không cập nhật được tài khoản")
+        if error:
+            return BaseResponse.internalError("Lỗi hệ thống")
         return BaseResponse.success(
             "Cập nhật thành công", AccountSerializer(result).data
         )

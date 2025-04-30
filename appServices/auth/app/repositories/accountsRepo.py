@@ -6,7 +6,7 @@ import uuid
 
 class AccountsRepo:
     @staticmethod
-    def getByID(id: uuid.uuid4):
+    def getById(id: uuid.UUID):
         try:
             return Accounts.objects.get(id=id)
         except Accounts.DoesNotExist:
@@ -20,9 +20,9 @@ class AccountsRepo:
             return None
 
     @staticmethod
-    def getByUsername(un: str):
+    def getByUsername(username: str):
         try:
-            return Accounts.objects.get(username=un)
+            return Accounts.objects.get(username=username)
         except Accounts.DoesNotExist:
             return None
 
@@ -36,14 +36,21 @@ class AccountsRepo:
     @staticmethod
     def filterByDateCreated(startDate: datetime, endDate: datetime):
         try:
-            return Accounts.objects.filter(createAt__range=(startDate, endDate))
+            return Accounts.objects.filter(createdAt__range=(startDate, endDate))
         except Exception:
             return None
 
     @staticmethod
     def create(account: Accounts):
         try:
-            return Accounts.objects.create(account)
+            return Accounts.objects.create(
+                id=account.id,
+                username=account.username,
+                email=account.email,
+                password=account.password,
+                roleId=account.roleId,
+                isActive=account.isActive
+            )
         except Exception:
             return None
 
@@ -53,15 +60,16 @@ class AccountsRepo:
             acc = Accounts.objects.get(id=account.id)
             acc.email = account.email
             acc.password = account.password
+            acc.roleId = account.roleId
+            acc.isActive = account.isActive
             acc.updatedAt = now()
             acc.save()
             return acc
         except Accounts.DoesNotExist:
             return None
 
-
     @staticmethod
-    def delete(id: uuid.uuid4):
+    def delete(id: uuid.UUID):
         try:
             account = Accounts.objects.get(id=id)
             account.deletedAt = now()

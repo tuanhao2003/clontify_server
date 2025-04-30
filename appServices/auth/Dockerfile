@@ -1,10 +1,21 @@
 FROM python:3.12
 
 WORKDIR /auth_service
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-CMD python -m grpc_tools.protoc ./app/grpc/protos/authService.proto --python_out=./app/grpc/protosParsed --grpc_python_out=./app/grpc/protosParsed --proto_path=./app/grpc/protos && \
-    python manage.py makemigrations app && \
+
+RUN python -m grpc_tools.protoc \
+    -I./app/grpc/protos \
+    --python_out=./app/grpc/protos \
+    --grpc_python_out=./app/grpc/protos \
+    ./app/grpc/protos/authService.proto \
+    ./app/grpc/protos/userService.proto && \
+    sed -i 's/^import \(.*_pb2\)/from . import \1/' ./app/grpc/protos/*_pb2_grpc.py && \
+    sed -i 's/^import \(.*_pb2\)/from . import \1/' ./app/grpc/protos/*_pb2*.py
+
+CMD python manage.py makemigrations app && \
     python manage.py migrate app && \
-    python manage.py runserver 0.0.0.0:8080
+    python manage.py runserver 0.0.0.0:8080 && \
+    python ./app/grpc/grpcServers/authGrpc.py

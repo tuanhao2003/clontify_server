@@ -1,11 +1,14 @@
 from django.views import View
 from app.services.authService import AuthService
+from app.services.accountsService import AccountsService
 import json
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.middleware.csrf import get_token
 from app.serializers.accountSerializer import AccountSerializer
 from common.baseResponse import BaseResponse
+from common.errorCodes import ErrorCodes
+
 class GetCsrfToken(View):
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
@@ -27,17 +30,89 @@ class LoginController(View):
         if (not email and not username) or (email == "" and username == ""):
             return BaseResponse.badRequest("Dữ liệu không hợp lệ")
         
-        result = AuthService.login(username, email, password)
-        if result == -1:
-            return BaseResponse.notFound("Tài khoản chưa được đăng ký", {"failed": -1})
-        if result == -2:
-            return BaseResponse.internalError("Xảy ra lỗi trong quá trình đăng nhập", {"failed": -2})
-        if result == 0:
-            return BaseResponse.unauthorized("Sai tài khoản hoặc mật khẩu", {"failed": 0})
-        
-        account, token = result
+        result, error = AuthService.login(username, email, password)
+        if error == ErrorCodes.NOT_FOUND:
+            return BaseResponse.notFound("Tài khoản chưa được đăng ký")
+        if error == ErrorCodes.INVALID_INPUT:
+            return BaseResponse.unauthorized("Sai tài khoản hoặc mật khẩu")
+        if error == ErrorCodes.OPERATION_FAILED:
+            return BaseResponse.internalError("Xảy ra lỗi trong quá trình đăng nhập")
+        if error:
+            return BaseResponse.internalError("Lỗi hệ thống")
+
+        account, tokens, _ = result
         return BaseResponse.success("Đăng nhập thành công", {
-            "access_token": token["access"],
-            "refresh_token": token["refresh"],
+            "access_token": tokens["access"],
+            "refresh_token": tokens["refresh"],
             "account": AccountSerializer(account).data
+        })
+    
+class RegisterController(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
+        username = data.get("username", "").strip()
+        email = data.get("email", "").strip()
+        password = data.get("password", "").strip()
+        fullName = data.get("fullName", "noname").strip()
+        avatarUrl = data.get("avatarUrl")
+        bio = data.get("bio")
+        dateOfBirth = data.get("dateOfBirth")
+        phoneNumber = data.get("phoneNumber")
+
+        if not username or not email or not password:
+            return BaseResponse.badRequest("Thiếu thông tin đăng ký")
+
+        result, error = AuthService.register(
+            username=username,
+            password=password,
+            email=email,
+            fullName=fullName,
+            avatarUrl=avatarUrl,
+            bio=bio,
+            dateOfBirth=dateOfBirth,
+            phoneNumber=phoneNumber
+        )
+
+        if error == ErrorCodes.ALREADY_EXISTS:
+            return BaseResponse.badRequest("Email hoặc tên người dùng đã tồn tại")
+        if error == ErrorCodes.CREATE_FAILED:
+            return BaseResponse.internalError("Xảy ra lỗi khi tạo tài khoản")
+        if error == ErrorCodes.OPERATION_FAILED:
+            return BaseResponse.internalError("Xảy ra lỗi trong quá trình đăng ký")
+        if error:
+            return BaseResponse.internalError("Lỗi hệ thống")
+
+        return BaseResponse.success("Tạo tài khoản thành công", {
+            "account": AccountSerializer(result["account"]).data,
+            "profile": result["profile"],
+            "tokens": result["tokens"]
+        })
+
+class RefreshToken(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
+        refreshToken = data.get("refreshToken")
+        if not refreshToken:
+            return BaseResponse.badRequest("Thiếu refresh token")
+
+        tokens, error = AuthService.refreshToken(refreshToken)
+        
+        if error == ErrorCodes.INVALID_INPUT:
+            return BaseResponse.unauthorized("Token không hợp lệ")
+        if error == ErrorCodes.OPERATION_FAILED:
+            return BaseResponse.internalError("Xảy ra lỗi khi làm mới token")
+        if error:
+            return BaseResponse.internalError("Lỗi hệ thống")
+
+        return BaseResponse.success("Làm mới token thành công", {
+            "accessToken": tokens["access"],
+            "refreshToken": tokens["refresh"]
         })

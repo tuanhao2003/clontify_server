@@ -44,7 +44,49 @@ services:
       - postgres
     ports:
       - "8080:8080"
+      - "50050:50050"
+
+  users:
+    build:
+      context: ./appServices/users
+      dockerfile: Dockerfile
+    container_name: users_service
+    restart: no
+    volumes:
+      - ./appServices/common:/users_service/common
+    environment:
+      - dbName=usersservice
+      - dbUser=admin
+      - dbPass=admin
+      - dbHost=postgres
+      - dbPort=5432
+      - PYTHONPATH=/users_service/common
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8081"
       - "50051:50051"
+
+  music:
+    build:
+      context: ./appServices/music
+      dockerfile: Dockerfile
+    container_name: music_service
+    restart: no
+    volumes:
+      - ./appServices/common:/music_service/common
+    environment:
+      - dbName=musicservice
+      - dbUser=admin
+      - dbPass=admin
+      - dbHost=postgres
+      - dbPort=5432
+      - PYTHONPATH=/music_service/common
+    depends_on:
+      - postgres
+    ports:
+      - "8082:8082"
+      - "50052:50052"
 
 volumes:
   postgres_data:
