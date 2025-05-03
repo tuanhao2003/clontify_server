@@ -2,16 +2,12 @@ import grpc
 from concurrent import futures
 import time
 import uuid
-from datetime import datetime, timedelta
 from google.protobuf.timestamp_pb2 import Timestamp
 from app.grpc.protos import userService_pb2, userService_pb2_grpc
 from app.services.profilesService import ProfilesService
-from app.serializers.profileSerializer import ProfileSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.exceptions import TokenError
 from common.errorCodes import ErrorCodes
 
-class AuthGrpc(userService_pb2_grpc.AuthServiceServicer):
+class AuthGrpc(userService_pb2_grpc.UserServiceServicer):
 
     def findByID(self, request, context):
         try:
@@ -226,7 +222,7 @@ class AuthGrpc(userService_pb2_grpc.AuthServiceServicer):
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    userService_pb2_grpc.add_AuthServiceServicer_to_server(AuthGrpc(), server)
+    userService_pb2_grpc.add_UserServiceServicer_to_server(AuthGrpc(), server)
     server.add_insecure_port("[::]:50051")
     server.start()
     try:

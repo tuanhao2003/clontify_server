@@ -154,6 +154,7 @@ SIMPLE_JWT = {
 }
 
 PUBLIC_ENDPOINTS = [
+    '/',
     '/login',
     '/register',
     '/refresh-token',
