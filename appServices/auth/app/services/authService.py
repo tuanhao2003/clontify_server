@@ -22,9 +22,9 @@ class AuthService:
                 return None, ErrorCodes.INVALID_INPUT
 
             tokens = AuthService.createToken(account)
-            return account, tokens, None
+            return {"account": account, "tokens": tokens}, None
         except Exception as e:
-            return None, None, ErrorCodes.OPERATION_FAILED
+            return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
     def createToken(account):
@@ -33,9 +33,9 @@ class AuthService:
             return {
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
-            }
+            }, None
         except Exception:
-            return None
+            return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
     def refreshToken(refreshToken):
@@ -75,14 +75,14 @@ class AuthService:
             account, error = AccountsService.doCreate(
                 username=username,
                 email=email,
-                password=password,
+                password=make_password(password),
                 roleId=str(role.id)
             )
             if error:
                 return None, error
 
-            tokens = AuthService.createToken(account)
-            if not tokens:
+            tokens, error = AuthService.createToken(account)
+            if error or not tokens:
                 return None, ErrorCodes.OPERATION_FAILED
 
             usersClient = UsersGrpcClient()
@@ -105,7 +105,6 @@ class AuthService:
             return {
                 "account": account,
                 "profile": profile,
-                "tokens": tokens
             }, None
 
         except Exception as e:

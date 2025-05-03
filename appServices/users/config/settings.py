@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 from datetime import timedelta
-from common.jwtConfig import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -139,15 +139,18 @@ PUBLIC_ENDPOINTS = [
     '/create-profile',
 ]
 
-# JWT settings
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': JWT_ACCESS_TOKEN_LIFETIME,
-    'REFRESH_TOKEN_LIFETIME': JWT_REFRESH_TOKEN_LIFETIME,
-    'ALGORITHM': JWT_ALGORITHM,
-    'SIGNING_KEY': JWT_SECRET_KEY,
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_TOKEN_LIFETIME", 30))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_TOKEN_LIFETIME", 7))),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': os.environ.get("JWT_ALGORITHM", ""),
+    'SIGNING_KEY': os.environ.get("JWT_SECRET_KEY", ""),
     'VERIFYING_KEY': None,
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'AUTH_TOKEN_CLASSES': ("rest_framework_simplejwt.tokens.AccessToken",),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
 
 REST_FRAMEWORK = {

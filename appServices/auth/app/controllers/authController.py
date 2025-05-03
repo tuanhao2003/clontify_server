@@ -1,6 +1,5 @@
 from django.views import View
 from app.services.authService import AuthService
-from app.services.accountsService import AccountsService
 import json
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
@@ -8,6 +7,10 @@ from django.middleware.csrf import get_token
 from app.serializers.accountSerializer import AccountSerializer
 from common.baseResponse import BaseResponse
 from common.errorCodes import ErrorCodes
+
+# log
+import logging
+log = logging.getLogger(__name__)
 
 class GetCsrfToken(View):
     @method_decorator(ensure_csrf_cookie)
@@ -38,13 +41,14 @@ class LoginController(View):
         if error == ErrorCodes.OPERATION_FAILED:
             return BaseResponse.internalError("Xảy ra lỗi trong quá trình đăng nhập")
         if error:
+            # log
+            log.error(f"lỗi hệ thống: {str(error)}")
             return BaseResponse.internalError("Lỗi hệ thống")
 
-        account, tokens, _ = result
         return BaseResponse.success("Đăng nhập thành công", {
-            "access_token": tokens["access"],
-            "refresh_token": tokens["refresh"],
-            "account": AccountSerializer(account).data
+            "access_token": result["tokens"]["access"],
+            "refresh_token": result["tokens"]["refresh"],
+            "account": AccountSerializer(result["account"]).data
         })
     
 class RegisterController(View):
@@ -89,7 +93,6 @@ class RegisterController(View):
         return BaseResponse.success("Tạo tài khoản thành công", {
             "account": AccountSerializer(result["account"]).data,
             "profile": result["profile"],
-            "tokens": result["tokens"]
         })
 
 class RefreshToken(View):

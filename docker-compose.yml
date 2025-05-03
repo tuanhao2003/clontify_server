@@ -12,6 +12,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database:/docker-entrypoint-initdb.d:ro
     command: ["postgres", "-c", "log_statement=all"]
+    networks:
+      - clontify-network
   
   pgadmin:
     image: dpage/pgadmin4
@@ -24,6 +26,8 @@ services:
       - "5050:80"
     depends_on:
       - postgres
+    networks:
+      - clontify-network
 
   auth:
     build:
@@ -33,18 +37,16 @@ services:
     restart: no
     volumes:
       - ./appServices/common:/auth_service/common
+    env_file:
+      - .env
     environment:
-      - dbName=authservice
-      - dbUser=admin
-      - dbPass=admin
-      - dbHost=postgres
-      - dbPort=5432
       - PYTHONPATH=/auth_service/common
     depends_on:
       - postgres
     ports:
       - "8080:8080"
-      - "50050:50050"
+    networks:
+      - clontify-network
 
   users:
     build:
@@ -54,18 +56,16 @@ services:
     restart: no
     volumes:
       - ./appServices/common:/users_service/common
+    env_file:
+      - .env
     environment:
-      - dbName=usersservice
-      - dbUser=admin
-      - dbPass=admin
-      - dbHost=postgres
-      - dbPort=5432
       - PYTHONPATH=/users_service/common
     depends_on:
       - postgres
     ports:
       - "8081:8081"
-      - "50051:50051"
+    networks:
+      - clontify-network
 
   music:
     build:
@@ -75,18 +75,22 @@ services:
     restart: no
     volumes:
       - ./appServices/common:/music_service/common
+    env_file:
+      - .env
     environment:
-      - dbName=musicservice
-      - dbUser=admin
-      - dbPass=admin
-      - dbHost=postgres
-      - dbPort=5432
       - PYTHONPATH=/music_service/common
     depends_on:
       - postgres
     ports:
       - "8082:8082"
-      - "50052:50052"
+    networks:
+      - clontify-network
+
 
 volumes:
   postgres_data:
+
+
+networks:
+  clontify-network:
+    driver: bridge

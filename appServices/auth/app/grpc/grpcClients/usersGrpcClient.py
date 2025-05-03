@@ -1,10 +1,7 @@
 import grpc
 from app.grpc.protos import userService_pb2, userService_pb2_grpc
 from common.errorCodes import ErrorCodes
-
-# log
-import logging
-log = logging.getLogger(__name__)
+from datetime import datetime
 
 class UsersGrpcClient:
     def __init__(self):
@@ -30,6 +27,12 @@ class UsersGrpcClient:
 
     def createProfile(self, accountID, fullName="noname", avatarUrl=None, bio=None, dateOfBirth=None, phoneNumber=None, token=None):
         try:
+            if dateOfBirth and isinstance(dateOfBirth, str):
+                try:
+                    dateOfBirth = datetime.strptime(dateOfBirth, "%Y-%m-%d")
+                except ValueError:
+                    return None, ErrorCodes.INVALID_INPUT
+                
             request = userService_pb2.CreateProfileRequest(
                 accountID=str(accountID),
                 fullName=fullName,
@@ -44,7 +47,6 @@ class UsersGrpcClient:
             response = self.stub.CreateProfile(request, metadata=metadata)
             return response.profile, None
         except grpc.RpcError as e:
-            log.error(str(e))
             if e.code() == grpc.StatusCode.INVALID_ARGUMENT:
                 return None, ErrorCodes.INVALID_INPUT
             if e.code() == grpc.StatusCode.ALREADY_EXISTS:

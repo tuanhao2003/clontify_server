@@ -11,30 +11,8 @@ from app.serializers.accountSerializer import AccountSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from common.errorCodes import ErrorCodes
-from rest_framework_simplejwt.authentication import JWTAuthentication
-
 
 class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
-    def _authenticate(self, context):
-        token = None
-        for key, value in context.invocation_metadata():
-            if key == 'authorization':
-                if value.startswith('Bearer '):
-                    token = value[7:]
-                else:
-                    token = value
-        if not token:
-            context.set_code(grpc.StatusCode.UNAUTHENTICATED)
-            context.set_details("Missing JWT token")
-            return None
-        try:
-            validated = JWTAuthentication().get_validated_token(token)
-            user = JWTAuthentication().get_user(validated)
-            return user
-        except Exception as e:
-            context.set_code(grpc.StatusCode.UNAUTHENTICATED)
-            context.set_details("Invalid JWT token: " + str(e))
-            return None
 
     def findByID(self, request, context):
         user = self._authenticate(context)
