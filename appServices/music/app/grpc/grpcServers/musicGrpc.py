@@ -9,8 +9,8 @@ from app.services.songsService import SongsService
 from app.services.albumsService import AlbumsService
 from app.services.genresService import GenresService
 from app.services.playlistsService import PlaylistsService
-from app.services.albumSongService import AlbumSongsService
-from app.services.playlistSongService import PlaylistSongsService
+from app.services.albumSongService import AlbumSongService
+from app.services.playlistSongService import PlaylistSongService
 from common.errorCodes import ErrorCodes
 
 class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
@@ -758,7 +758,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
     # AlbumSong
     def GetAlbumSongById(self, request, context):
         try:
-            albumSong, error = AlbumSongsService.findById(uuid.UUID(request.id))
+            albumSong, error = AlbumSongService.findById(uuid.UUID(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid ID")
@@ -787,7 +787,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
 
     def GetAlbumSongsByAlbumId(self, request, context):
         try:
-            albumSongs, error = AlbumSongsService.findByAlbumId(uuid.UUID(request.albumId))
+            albumSongs, error = AlbumSongService.findByAlbumId(uuid.UUID(request.albumId))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid album ID")
@@ -824,7 +824,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
 
     def GetAlbumSongsBySongId(self, request, context):
         try:
-            albumSongs, error = AlbumSongsService.findBySongId(uuid.UUID(request.songId))
+            albumSongs, error = AlbumSongService.findBySongId(uuid.UUID(request.songId))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid song ID")
@@ -861,7 +861,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
 
     def GetPlaylistSongsByPlaylistId(self, request, context):
         try:
-            playlistSongs, error = PlaylistSongsService.findByPlaylistId(uuid.UUID(request.playlistId))
+            playlistSongs, error = PlaylistSongService.findByPlaylistId(uuid.UUID(request.playlistId))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid playlist ID")
@@ -898,7 +898,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
 
     def GetPlaylistSongsBySongId(self, request, context):
         try:
-            playlistSongs, error = PlaylistSongsService.findBySongId(uuid.UUID(request.songId))
+            playlistSongs, error = PlaylistSongService.findBySongId(uuid.UUID(request.songId))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid song ID")
@@ -937,7 +937,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
         pass
     def UpdatePlaylistSong(self, request, context):
         try:
-            playlistSong, error = PlaylistSongsService.update(
+            playlistSong, error = PlaylistSongService.update(
                 id=uuid.UUID(request.id),
                 playlistId=uuid.UUID(request.playlistId),
                 songId=uuid.UUID(request.songId)
@@ -973,7 +973,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             return None
     def DeletePlaylistSong(self, request, context):
         try:
-            result, error = PlaylistSongsService.delete(uuid.UUID(request.id))
+            result, error = PlaylistSongService.delete(uuid.UUID(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid ID")
@@ -1002,7 +1002,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
 
     def CreateAlbumSong(self, request, context):
         try:
-            albumSong, error = AlbumSongsService.create(
+            albumSong, error = AlbumSongService.create(
                 albumId=uuid.UUID(request.albumId),
                 songId=uuid.UUID(request.songId)
             )
@@ -1034,7 +1034,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
 
     def UpdateAlbumSong(self, request, context):
         try:
-            albumSong, error = AlbumSongsService.update(
+            albumSong, error = AlbumSongService.update(
                 id=uuid.UUID(request.id),
                 albumId=uuid.UUID(request.albumId),
                 songId=uuid.UUID(request.songId)
@@ -1071,7 +1071,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
 
     def DeleteAlbumSong(self, request, context):
         try:
-            result, error = AlbumSongsService.delete(uuid.UUID(request.id))
+            result, error = AlbumSongService.delete(uuid.UUID(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid ID")

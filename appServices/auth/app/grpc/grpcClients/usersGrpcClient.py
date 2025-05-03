@@ -44,6 +44,7 @@ class UsersGrpcClient:
             response = self.stub.CreateProfile(request, metadata=metadata)
             return response.profile, None
         except grpc.RpcError as e:
+            log.error(str(e))
             if e.code() == grpc.StatusCode.INVALID_ARGUMENT:
                 return None, ErrorCodes.INVALID_INPUT
             if e.code() == grpc.StatusCode.ALREADY_EXISTS:
