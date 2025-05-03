@@ -4,13 +4,13 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from common.baseResponse import BaseResponse
 
 class JwtMiddleware:
-    def __init__(self, response):
-        self.response = response
+    def __init__(self, get_response):
+        self.get_response = get_response
         self.publicEndpoint = getattr(settings, 'PUBLIC_ENDPOINTS', [])
 
     def __call__(self, request):
         if any(request.path.startswith(path) for path in self.publicEndpoint):
-            return self.response(request)
+            return self.get_response(request)
 
         requestHeader = request.headers.get("Authorization")
         if not requestHeader or not requestHeader.startswith("Bearer "):
@@ -19,8 +19,11 @@ class JwtMiddleware:
         accessTokenSplit = requestHeader.split(" ")[1]
         try:
             token = AccessToken(accessTokenSplit)
-            request.user_id = token.get("user_id")
+            user_id = token.get("user_id")
+            if not user_id:
+                return BaseResponse.unauthorized("Token không chứa user_id")
+            request.user_id = user_id
         except (TokenError, InvalidToken):
             return BaseResponse.unauthorized("Token không hợp lệ")
 
-        return self.response(request)
+        return self.get_response(request)
