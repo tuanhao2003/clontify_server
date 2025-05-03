@@ -15,22 +15,19 @@ from common.errorCodes import ErrorCodes
 class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
 
     def findByID(self, request, context):
-        user = self._authenticate(context)
-        if not user:
-            return None
         try:
             account, error = AccountsService.findById(uuid.UUID(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Invalid ID")
+                context.set_details("ID không hợp lệ")
                 return None
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("Account not found")
+                context.set_details("Tài khoản không hợp lệ")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             return authService_pb2.AccountResponse(
@@ -49,22 +46,19 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             return None
 
     def findByUsername(self, request, context):
-        user = self._authenticate(context)
-        if not user:
-            return None
         try:
             account, error = AccountsService.findByUsername(request.username)
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Invalid username")
+                context.set_details("username không hợp lệ")
                 return None
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("Account not found")
+                context.set_details("Không tìm thấy tài khoản")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             return authService_pb2.AccountResponse(
@@ -83,22 +77,19 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             return None
 
     def findByEmail(self, request, context):
-        user = self._authenticate(context)
-        if not user:
-            return None
         try:
             account, error = AccountsService.findByEmail(request.email)
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Invalid email")
+                context.set_details("Email không hợp lệ")
                 return None
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("Account not found")
+                context.set_details("Không tìm thấy tài khoản")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             return authService_pb2.AccountResponse(
@@ -117,22 +108,19 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             return None
 
     def findByStatus(self, request, context):
-        user = self._authenticate(context)
-        if not user:
-            return None
         try:
             accounts, error = AccountsService.findByStatus(request.isActive)
             if error == ErrorCodes.INVALID_STATUS:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Invalid status")
+                context.set_details("Trạng thái không hợp lệ")
                 return None
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("No accounts found")
+                context.set_details("Không tìm được tài khoản nào")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             response = authService_pb2.AccountListResponse(
@@ -159,9 +147,6 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             return None
 
     def findByDateCreated(self, request, context):
-        user = self._authenticate(context)
-        if not user:
-            return None
         try:
             start = datetime.fromtimestamp(request.start.seconds)
             end = datetime.fromtimestamp(request.end.seconds)
@@ -169,15 +154,15 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Invalid date range")
+                context.set_details("Khoảng thời gian không hợp lệ")
                 return None
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("No accounts found")
+                context.set_details("Không tìm được tài khoản nào")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             response = authService_pb2.AccountListResponse(
@@ -204,9 +189,6 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             return None
 
     def doCreate(self, request, context):
-        user = self._authenticate(context)
-        if not user:
-            return None
         try:
             account, error = AccountsService.doCreate(
                 username=request.username,
@@ -216,19 +198,19 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             )
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Invalid input data")
+                context.set_details("Dữ liệu không hợp lệ")
                 return None
             if error == ErrorCodes.ALREADY_EXISTS:
                 context.set_code(grpc.StatusCode.ALREADY_EXISTS)
-                context.set_details("Username or email already exists")
+                context.set_details("Tài khoản đã tồn tại")
                 return None
             if error == ErrorCodes.CREATE_FAILED:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Failed to create account")
+                context.set_details("Lỗi khi tạo tài khoản")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             return authService_pb2.AccountResponse(
@@ -247,9 +229,6 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             return None
 
     def doUpdate(self, request, context):
-        user = self._authenticate(context)
-        if not user:
-            return None
         try:
             account, error = AccountsService.doUpdate(AccountSerializer.deserialize({
                 "id": request.id,
@@ -260,23 +239,23 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             }))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Invalid input data")
+                context.set_details("Thông tin không hợp lệ")
                 return None
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("Account not found")
+                context.set_details("Không tìm thấy tài khoản")
                 return None
             if error == ErrorCodes.ALREADY_EXISTS:
                 context.set_code(grpc.StatusCode.ALREADY_EXISTS)
-                context.set_details("Email already exists")
+                context.set_details("Email đã tồn tại")
                 return None
             if error == ErrorCodes.UPDATE_FAILED:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Failed to update account")
+                context.set_details("Lỗi khi cập nhật tài khoản")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             return authService_pb2.AccountResponse(
@@ -295,51 +274,48 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             return None
 
     def doDelete(self, request, context):
-        user = self._authenticate(context)
-        if not user:
-            return None
         try:
             result, error = AccountsService.doDelete(uuid.UUID(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Invalid ID")
+                context.set_details("ID không hợp lệ")
                 return None
             if error == ErrorCodes.DELETE_FAILED:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Failed to delete account")
+                context.set_details("Lỗi khi xóa tài khoản")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             return authService_pb2.DeleteAccountResponse(
                 success=True,
-                message="Account deleted successfully"
+                message="Tài khoản đã được xóa"
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return authService_pb2.DeleteAccountResponse(success=False, message=str(e))
 
-    def login(self, request, context):
+    def doLogin(self, request, context):
         try:
             result, error = AuthService.login(request.username, None, request.password)
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("Account not found")
+                context.set_details("Tài khoản chưa đăng ký")
                 return None
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.UNAUTHENTICATED)
-                context.set_details("Invalid password")
+                context.set_details("Mật khẩu không chính xác")
                 return None
             if error == ErrorCodes.OPERATION_FAILED:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             account, tokens, _ = result
@@ -370,19 +346,19 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             tokens, error = AuthService.refreshToken(request.refreshToken)
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.UNAUTHENTICATED)
-                context.set_details("Invalid refresh token")
+                context.set_details("Token không hợp lệ")
                 return None
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("Account not found")
+                context.set_details("Không tìm thấy tài khoản")
                 return None
             if error == ErrorCodes.OPERATION_FAILED:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Failed to create tokens")
+                context.set_details("Lỗi khi cấp token")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             expires_at = datetime.now() + timedelta(minutes=30)
@@ -405,11 +381,11 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             account, error = AccountsService.findById(accountId)
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
-                context.set_details("Account not found")
+                context.set_details("Không tìm thấy tài khoản")
                 return None
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details("Internal server error")
+                context.set_details("Lỗi hệ thống")
                 return None
 
             return authService_pb2.ValidateTokenResponse(

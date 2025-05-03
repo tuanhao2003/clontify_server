@@ -133,12 +133,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# Public endpoints that don't require authentication
-PUBLIC_ENDPOINTS = [
-    '/create-profile',
-]
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_TOKEN_LIFETIME", 30))),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_TOKEN_LIFETIME", 7))),

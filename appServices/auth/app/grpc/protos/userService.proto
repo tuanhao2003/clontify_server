@@ -2,6 +2,14 @@ syntax = "proto3";
 
 package app.grpc.protos;
 
+service UserService {
+    rpc GetProfileByID(GetProfileByIDRequest) returns (GetProfileResponse) {}
+    rpc CreateProfile(CreateProfileRequest) returns (CreateProfileResponse) {}
+    rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse) {}
+    rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse) {}
+    rpc GetProfileByAccountID(GetProfileByAccountIDRequest) returns (GetProfileByAccountIDResponse) {}
+} 
+
 message Profile {
     string id = 1;
     string accountID = 2;
@@ -16,7 +24,7 @@ message Profile {
     bool isActive = 11;
 }
 
-message GetProfileRequest {
+message GetProfileByIDRequest {
     string id = 1;
 }
 
@@ -65,11 +73,3 @@ message GetProfileByAccountIDRequest {
 message GetProfileByAccountIDResponse {
     Profile profile = 1;
 }
-
-service UserService {
-    rpc GetProfile(GetProfileRequest) returns (GetProfileResponse) {}
-    rpc CreateProfile(CreateProfileRequest) returns (CreateProfileResponse) {}
-    rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse) {}
-    rpc DeleteProfile(DeleteProfileRequest) returns (DeleteProfileResponse) {}
-    rpc GetProfileByAccountID(GetProfileByAccountIDRequest) returns (GetProfileByAccountIDResponse) {}
-} 
