@@ -2,6 +2,9 @@ import grpc
 from app.grpc.protos import userService_pb2, userService_pb2_grpc
 from common.errorCodes import ErrorCodes
 
+# log
+import logging
+log = logging.getLogger(__name__)
 
 class UsersGrpcClient:
     def __init__(self):

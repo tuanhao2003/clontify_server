@@ -17,5 +17,4 @@ RUN python -m grpc_tools.protoc \
 
 CMD python manage.py makemigrations app && \
     python manage.py migrate app && \
-    python manage.py runserver 0.0.0.0:8081 && \
-    python ./app/grpc/grpcServers/usersGrpc.py
+    python manage.py runserver 0.0.0.0:8081
