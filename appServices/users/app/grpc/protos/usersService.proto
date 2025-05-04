@@ -1,13 +1,14 @@
 syntax = "proto3";
 
 package app.grpc.protos;
+import "google/protobuf/timestamp.proto";
 
-service UserService {
-    rpc GetProfileByID(GetProfileByIDRequest) returns (ProfileResponse) {}
-    rpc CreateProfile(CreateProfileRequest) returns (ProfileResponse) {}
-    rpc UpdateProfile(UpdateProfileRequest) returns (ProfileResponse) {}
-    rpc DeleteProfile(DeleteProfileRequest) returns (ProfileResponse) {}
-    rpc GetProfileByAccountID(GetProfileByAccountIDRequest) returns (ProfileResponse) {}
+service UsersService {
+    rpc findByID(GetProfileByIDRequest) returns (ProfileResponse) {}
+    rpc doCreate(CreateProfileRequest) returns (ProfileResponse) {}
+    rpc doUpdate(UpdateProfileRequest) returns (ProfileResponse) {}
+    rpc doDelete(DeleteProfileRequest) returns (ProfileResponse) {}
+    rpc findByAccountID(GetProfileByAccountIDRequest) returns (ProfileResponse) {}
 } 
 
 message ProfileResponse {
@@ -16,11 +17,11 @@ message ProfileResponse {
     string fullName = 3;
     string avatarUrl = 4;
     string bio = 5;
-    string dateOfBirth = 6;
+    google.protobuf.Timestamp dateOfBirth = 6;
     string phoneNumber = 7;
-    string createdAt = 8;
-    string updatedAt = 9;
-    string deletedAt = 10;
+    google.protobuf.Timestamp createdAt = 8;
+    google.protobuf.Timestamp updatedAt = 9;
+    google.protobuf.Timestamp deletedAt = 10;
     bool isActive = 11;
 }
 
@@ -33,7 +34,7 @@ message CreateProfileRequest {
     string fullName = 2;
     string avatarUrl = 3;
     string bio = 4;
-    string dateOfBirth = 5;
+    google.protobuf.Timestamp dateOfBirth = 5;
     string phoneNumber = 6;
 }
 
@@ -42,7 +43,7 @@ message UpdateProfileRequest {
     string fullName = 2;
     string avatarUrl = 3;
     string bio = 4;
-    string dateOfBirth = 5;
+    google.protobuf.Timestamp dateOfBirth = 5;
     string phoneNumber = 6;
 }
 

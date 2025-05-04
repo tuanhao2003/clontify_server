@@ -57,8 +57,7 @@ class ProfilesService:
             return None, ErrorCodes.INVALID_INPUT
 
     @staticmethod
-    def doCreate(accountID: str, fullName: str, avatarUrl: str = None, 
-                 bio: str = None, dateOfBirth: datetime = None, phoneNumber: str = None):
+    def doCreate(accountID: str, fullName: str, avatarUrl: str = None, bio: str = None, dateOfBirth: datetime = None, phoneNumber: str = None):
         if not accountID or not fullName:
             return None, ErrorCodes.INVALID_INPUT
             
@@ -70,15 +69,7 @@ class ProfilesService:
         if ProfilesRepo.getByAccountID(accountId):
             return None, ErrorCodes.ALREADY_EXISTS
 
-        profile = Profiles(
-            accountID=accountId,
-            fullName=fullName,
-            avatarUrl=avatarUrl,
-            bio=bio,
-            dateOfBirth=dateOfBirth,
-            phoneNumber=phoneNumber
-        )
-        created = ProfilesRepo.create(profile)
+        created = ProfilesRepo.create(accountID, fullName, avatarUrl, bio, dateOfBirth, phoneNumber)
         if not created:
             return None, ErrorCodes.CREATE_FAILED
         return created, None

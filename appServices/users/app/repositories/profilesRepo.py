@@ -42,15 +42,15 @@ class ProfilesRepo:
             return None
 
     @staticmethod
-    def create(profile: Profiles):
+    def create(accountID: uuid.UUID, fullName: str, avatarUrl: str, bio: str, dateOfBirth: datetime, phoneNumber: str):
         try:
             return Profiles.objects.create(
-                accountID=profile.accountID,
-                fullName=profile.fullName,
-                avatarUrl=profile.avatarUrl,
-                bio=profile.bio,
-                dateOfBirth=profile.dateOfBirth,
-                phoneNumber=profile.phoneNumber
+                accountID=accountID,
+                fullName=fullName,
+                avatarUrl=avatarUrl,
+                bio=bio,
+                dateOfBirth=dateOfBirth,
+                phoneNumber=phoneNumber
             )
         except Exception:
             return None
