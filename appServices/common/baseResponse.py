@@ -1,31 +1,22 @@
 from django.http import JsonResponse
 
-
 class BaseResponse:
     @staticmethod
     def success(message="Thành công", data=None):
         return JsonResponse(
-            {
-                "success": True,
-                "message": message,
-                "data": data,
-            },
+            {"success": True, "message": message, "data": data},
             status=200,
             safe=False,
-            json_dumps_params={'ensure_ascii': False}
+            json_dumps_params={"ensure_ascii": False},
         )
 
     @staticmethod
     def created(message="Tạo thành công", data=None):
         return JsonResponse(
-            {
-                "success": True,
-                "message": message,
-                "data": data,
-            },
+            {"success": True, "message": message, "data": data},
             status=201,
             safe=False,
-            json_dumps_params={'ensure_ascii': False}
+            json_dumps_params={"ensure_ascii": False},
         )
 
     @staticmethod
@@ -38,7 +29,7 @@ class BaseResponse:
             },
             status=400,
             safe=False,
-            json_dumps_params={'ensure_ascii': False}
+            json_dumps_params={"ensure_ascii": False},
         )
 
     @staticmethod
@@ -51,7 +42,20 @@ class BaseResponse:
             },
             status=401,
             safe=False,
-            json_dumps_params={'ensure_ascii': False}
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def paymentRequired(message="Yêu cầu thanh toán", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=402,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
         )
 
     @staticmethod
@@ -64,7 +68,7 @@ class BaseResponse:
             },
             status=403,
             safe=False,
-            json_dumps_params={'ensure_ascii': False}
+            json_dumps_params={"ensure_ascii": False},
         )
 
     @staticmethod
@@ -77,7 +81,20 @@ class BaseResponse:
             },
             status=404,
             safe=False,
-            json_dumps_params={'ensure_ascii': False}
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def methodNotAllowed(message="Phương thức không được phép", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=405,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
         )
 
     @staticmethod
@@ -90,7 +107,33 @@ class BaseResponse:
             },
             status=409,
             safe=False,
-            json_dumps_params={'ensure_ascii': False}
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def alreadyExists(message="Dữ liệu đã tồn tại", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=409,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def tooManyRequests(message="Quá nhiều yêu cầu", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=429,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
         )
 
     @staticmethod
@@ -103,5 +146,96 @@ class BaseResponse:
             },
             status=500,
             safe=False,
-            json_dumps_params={'ensure_ascii': False}
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def createFailed(message="Tạo dữ liệu thất bại", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=550,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def updateFailed(message="Cập nhật dữ liệu thất bại", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=551,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def deleteFailed(message="Xóa dữ liệu thất bại", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=552,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def tokenExpired(message="Token đã hết hạn", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=700,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
+    
+        )
+    @staticmethod
+    def invalidToken(message="Token không hợp lệ", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=701,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def insufficientPermissions(message="Không đủ quyền thực hiện", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=702,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
+        )
+
+    @staticmethod
+    def externalServiceError(message="Lỗi dịch vụ bên ngoài", data=None):
+        return JsonResponse(
+            {
+                "success": False,
+                "message": message,
+                "data": data,
+            },
+            status=900,
+            safe=False,
+            json_dumps_params={"ensure_ascii": False},
         )

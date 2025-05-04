@@ -22,7 +22,10 @@ class AuthService:
             if not check_password(password, account.password):
                 return None, ErrorCodes.UNAUTHORIZED
 
-            tokens = AuthService.createToken(account)
+            tokens, error = AuthService.createToken(account)
+            if(error):
+                return None, ErrorCodes.OPERATION_FAILED
+            
             return {"account": account, "tokens": tokens}, None
         except Exception as e:
             return None, ErrorCodes.OPERATION_FAILED
