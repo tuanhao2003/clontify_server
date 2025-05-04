@@ -1,98 +1,113 @@
 import grpc
-from app.grpc.protos import userService_pb2, userService_pb2_grpc
-from common.errorCodes import ErrorCodes
+from django.conf import settings
+from google.protobuf.timestamp_pb2 import Timestamp
 from datetime import datetime
+from app.grpc.protos import usersService_pb2, usersService_pb2_grpc
+from common.errorCodes import ErrorCodes
 
 class UsersGrpcClient:
     def __init__(self):
-        self.channel = grpc.insecure_channel('localhost:50051')
-        self.stub = userService_pb2_grpc.UserServiceStub(self.channel)
-
-    def getProfileByAccountID(self, accountID, token=None):
-        try:
-            request = userService_pb2.GetProfileByAccountIDRequest(
-                accountID=str(accountID)
-            )
-            metadata = []
-            if token:
-                metadata.append(('authorization', f'Bearer {token}'))
-            response = self.stub.GetProfileByAccountID(request, metadata=metadata)
-            return response.profile, None
-        except grpc.RpcError as e:
-            if e.code() == grpc.StatusCode.INVALID_ARGUMENT:
-                return None, ErrorCodes.INVALID_INPUT
-            if e.code() == grpc.StatusCode.NOT_FOUND:
-                return None, ErrorCodes.NOT_FOUND
-            return None, ErrorCodes.OPERATION_FAILED
-
-    def createProfile(self, accountID, fullName="noname", avatarUrl=None, bio=None, dateOfBirth=None, phoneNumber=None, token=None):
-        try:
-            if dateOfBirth and isinstance(dateOfBirth, str):
-                try:
-                    dateOfBirth = datetime.strptime(dateOfBirth, "%Y-%m-%d")
-                except ValueError:
-                    return None, ErrorCodes.INVALID_INPUT
-                
-            request = userService_pb2.CreateProfileRequest(
-                accountID=str(accountID),
-                fullName=fullName,
-                avatarUrl=avatarUrl if avatarUrl else "",
-                bio=bio if bio else "",
-                dateOfBirth=dateOfBirth.isoformat() if dateOfBirth else "",
-                phoneNumber=phoneNumber if phoneNumber else ""
-            )
-            metadata = []
-            if token:
-                metadata.append(('authorization', f'Bearer {token}'))
-            response = self.stub.CreateProfile(request, metadata=metadata)
-            return response.profile, None
-        except grpc.RpcError as e:
-            if e.code() == grpc.StatusCode.INVALID_ARGUMENT:
-                return None, ErrorCodes.INVALID_INPUT
-            if e.code() == grpc.StatusCode.ALREADY_EXISTS:
-                return None, ErrorCodes.ALREADY_EXISTS
-            return None, ErrorCodes.CREATE_FAILED
-
-    def updateProfile(self, id, fullName=None, avatarUrl=None, bio=None, dateOfBirth=None, phoneNumber=None, token=None):
-        try:
-            request = userService_pb2.UpdateProfileRequest(
-                id=str(id),
-                fullName=fullName if fullName else "",
-                avatarUrl=avatarUrl if avatarUrl else "",
-                bio=bio if bio else "",
-                dateOfBirth=dateOfBirth.isoformat() if dateOfBirth else "",
-                phoneNumber=phoneNumber if phoneNumber else ""
-            )
-            metadata = []
-            if token:
-                metadata.append(('authorization', f'Bearer {token}'))
-            response = self.stub.UpdateProfile(request, metadata=metadata)
-            return response.profile, None
-        except grpc.RpcError as e:
-            if e.code() == grpc.StatusCode.INVALID_ARGUMENT:
-                return None, ErrorCodes.INVALID_INPUT
-            if e.code() == grpc.StatusCode.NOT_FOUND:
-                return None, ErrorCodes.NOT_FOUND
-            return None, ErrorCodes.UPDATE_FAILED
-
-    def deleteProfile(self, id, token=None):
-        try:
-            request = userService_pb2.DeleteProfileRequest(
-                id=str(id)
-            )
-            metadata = []
-            if token:
-                metadata.append(('authorization', f'Bearer {token}'))
-            response = self.stub.DeleteProfile(request, metadata=metadata)
-            if not response.success:
-                return None, ErrorCodes.DELETE_FAILED
-            return response, None
-        except grpc.RpcError as e:
-            if e.code() == grpc.StatusCode.INVALID_ARGUMENT:
-                return None, ErrorCodes.INVALID_INPUT
-            if e.code() == grpc.StatusCode.NOT_FOUND:
-                return None, ErrorCodes.NOT_FOUND
-            return None, ErrorCodes.DELETE_FAILED
-
+        self.host = getattr(settings, 'USERS_GRPC_HOST', 'users_service')
+        self.port = getattr(settings, 'USERS_GRPC_PORT', '50051')
+        self.channel = grpc.insecure_channel(f'{self.host}:{self.port}')
+        self.stub = usersService_pb2_grpc.UsersServiceStub(self.channel)
+    
     def close(self):
-        self.channel.close() 
+        if self.channel:
+            self.channel.close()
+            self.channel = None
+            self.stub = None
+    
+    def _parseTimestamp(self, dt):
+        if not dt or not isinstance(dt, datetime):
+            return None
+        timestamp = Timestamp()
+        timestamp.FromDatetime(dt)
+        return timestamp
+    
+    def _parseDatetime(self, timestamp):
+        if not timestamp or not isinstance(timestamp, Timestamp):
+            return None
+        return timestamp.ToDatetime()
+    
+    def _profileSerializer(self, profile):
+        return {
+            'id': profile.id,
+            'accountID': profile.accountID,
+            'fullName': profile.fullName,
+            'avatarUrl': profile.avatarUrl,
+            'bio': profile.bio,
+            'dateOfBirth': self._parseDatetime(profile.dateOfBirth),
+            'phoneNumber': profile.phoneNumber,
+            'createdAt': self._parseDatetime(profile.createdAt),
+            'updatedAt': self._parseDatetime(profile.updatedAt),
+            'deletedAt': self._parseDatetime(profile.deletedAt),
+            'isActive': profile.isActive
+        }
+    
+    def findById(self, id):
+        request = usersService_pb2.GetProfileByIDRequest(id=id)
+        try:
+            response = self.stub.findByID(request)
+            return self._profileSerializer(response)
+        except grpc.RpcError as e:
+            statusCode = e.code()
+            details = e.details()
+            raise Exception(f"gRPC error: {statusCode} - {details}")
+    
+    def findByAccountID(self, accountID):
+        request = usersService_pb2.GetProfileByAccountIDRequest(accountID=accountID)
+        try:
+            response = self.stub.findByAccountID(request)
+            return self._profileSerializer(response), None
+        except grpc.RpcError as e:
+            statusCode = e.code()
+            details = e.details()
+            raise Exception(f"gRPC error: {statusCode} - {details}")
+    
+    def doCreate(self, accountID, fullName, avatarUrl=None, bio=None, dateOfBirth=None, phoneNumber=None):
+        dobTimestamp = self._parseTimestamp(dateOfBirth) if dateOfBirth else None
+        request = usersService_pb2.CreateProfileRequest(
+            accountID=accountID,
+            fullName=fullName,
+            avatarUrl=avatarUrl or "",
+            bio=bio or "",
+            dateOfBirth=dobTimestamp,
+            phoneNumber=phoneNumber or ""
+        )
+        
+        try:
+            response = self.stub.doCreate(request)
+            return self._profileSerializer(response), None
+        except grpc.RpcError as e:
+            return None, ErrorCodes.OPERATION_FAILED
+    
+    def doUpdate(self, id, fullName=None, avatarUrl=None, bio=None, dateOfBirth=None, phoneNumber=None):
+        dobTimestamp = self._parseTimestamp(dateOfBirth) if dateOfBirth else None
+        
+        request = usersService_pb2.UpdateProfileRequest(
+            id=id,
+            fullName=fullName or "",
+            avatarUrl=avatarUrl or "",
+            bio=bio or "",
+            dateOfBirth=dobTimestamp,
+            phoneNumber=phoneNumber or ""
+        )
+        
+        try:
+            response = self.stub.doUpdate(request)
+            return self._profileSerializer(response)
+        except grpc.RpcError as e:
+            statusCode = e.code()
+            details = e.details()
+            raise Exception(f"gRPC error: {statusCode} - {details}")
+    
+    def doDelete(self, id):
+        request = usersService_pb2.DeleteProfileRequest(id=id)
+        try:
+            response = self.stub.doDelete(request)
+            return self._profileSerializer(response)
+        except grpc.RpcError as e:
+            statusCode = e.code()
+            details = e.details()
+            raise Exception(f"gRPC error: {statusCode} - {details}")

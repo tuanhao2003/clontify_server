@@ -1,7 +1,6 @@
 from app.repositories.accountsRepo import AccountsRepo
 from datetime import datetime
 from app.entities.accounts import Accounts
-from django.contrib.auth.hashers import make_password
 from common.errorCodes import ErrorCodes
 
 
@@ -62,7 +61,7 @@ class AccountsService:
         account = Accounts(
             username=username,
             email=email,
-            password=make_password(password),
+            password=password,
             roleId=roleId,
             isActive=True,
         )

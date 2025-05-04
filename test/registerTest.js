@@ -13,6 +13,7 @@ async function testRegister() {
     try {
         const response = await fetch('http://localhost:8080/register', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': await getCsrfToken()
