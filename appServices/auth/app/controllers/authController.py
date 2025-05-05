@@ -8,10 +8,6 @@ from app.serializers.accountSerializer import AccountSerializer
 from common.baseResponse import BaseResponse
 from common.errorCodes import ErrorCodes
 
-# log
-import logging
-log = logging.getLogger(__name__)
-
 class GetCsrfToken(View):
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
@@ -41,7 +37,6 @@ class LoginController(View):
         if error == ErrorCodes.OPERATION_FAILED:
             return BaseResponse.internalError("Xảy ra lỗi trong quá trình đăng nhập")
         if error:
-            log.error(f"Hệ thống lỗi: {str(error)}")
             return BaseResponse.internalError("Lỗi hệ thống")
 
         return BaseResponse.success("Đăng nhập thành công", {
@@ -52,13 +47,9 @@ class LoginController(View):
     
 class RegisterController(View):
     def post(self, request):
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info("[Register] Nhận yêu cầu đăng ký mới")
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            logger.warning("[Register] JSON không hợp lệ")
             return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
         username = data.get("username", "").strip()
@@ -71,10 +62,7 @@ class RegisterController(View):
         phoneNumber = data.get("phoneNumber")
 
         if not username or not email or not password:
-            logger.warning("[Register] Thiếu thông tin cần thiết - username/email/password")
             return BaseResponse.badRequest("Thiếu thông tin đăng ký")
-
-        logger.info(f"[Register] Đang xử lý đăng ký cho username: {username}, email: {email}")
 
         result, error = AuthService.register(
             username=username,
@@ -88,19 +76,14 @@ class RegisterController(View):
         )
 
         if error == ErrorCodes.ALREADY_EXISTS:
-            logger.warning(f"[Register] Tài khoản đã tồn tại - username: {username}, email: {email}")
             return BaseResponse.badRequest("Email hoặc tên người dùng đã tồn tại")
         if error == ErrorCodes.CREATE_FAILED:
-            logger.error(f"[Register] Lỗi khi tạo tài khoản - username: {username}")
             return BaseResponse.internalError("Xảy ra lỗi khi tạo tài khoản")
         if error == ErrorCodes.OPERATION_FAILED:
-            logger.error(f"[Register] Lỗi trong quá trình đăng ký - username: {username}")
             return BaseResponse.internalError("Xảy ra lỗi trong quá trình đăng ký")
         if error:
-            logger.critical(f"[Register] Lỗi hệ thống không xác định - username: {username}")
             return BaseResponse.internalError("Lỗi hệ thống")
 
-        logger.info(f"[Register] Tạo tài khoản thành công - username: {username}")
         return BaseResponse.success("Tạo tài khoản thành công", {
             "account": AccountSerializer(result["account"]).data,
             "profile": result["profile"],

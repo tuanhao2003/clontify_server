@@ -1,32 +1,58 @@
+import grpc
+
 class ErrorCodes:
-    INVALID_INPUT = 400          # Bad Request
-    UNAUTHORIZED = 401           # Unauthorized
-    PAYMENT_REQUIRED = 402       # Payment Required
-    FORBIDDEN = 403              # Forbidden
-    NOT_FOUND = 404              # Not Found
-    METHOD_NOT_ALLOWED = 405     # Method Not Allowed
-    NOT_ACCEPTABLE = 406         # Not Acceptable
-    REQUEST_TIMEOUT = 408        # Request Timeout
-    CONFLICT = 409               # Conflict
-    ALREADY_EXISTS = 409         # Alias for CONFLICT
-    UNSUPPORTED_MEDIA = 415      # Unsupported Media Type
-    RANGE_NOT_SATISFIABLE = 416  # Range Not Satisfiable
-    TOO_MANY_REQUESTS = 429      # Too Many Requests
-    OPERATION_FAILED = 500       # Internal Server Error
-    NOT_IMPLEMENTED = 501        # Not Implemented
-    BAD_GATEWAY = 502            # Bad Gateway
-    SERVICE_UNAVAILABLE = 503    # Service Unavailable
-    GATEWAY_TIMEOUT = 504        # Gateway Timeout
-    CREATE_FAILED = 550          # creation failure
-    UPDATE_FAILED = 551          # update failure
-    DELETE_FAILED = 552          # deletion failure
-    QUERY_FAILED = 553           # query failure
-    INVALID_STATUS = 600         # invalid status
-    VALIDATION_ERROR = 601       # validation error
-    INVALID_FORMAT = 602         # invalid format
-    INVALID_PARAMETER = 603      # invalid parameter
-    TOKEN_EXPIRED = 700          # expired token
-    INVALID_TOKEN = 701          # invalid token
-    INSUFFICIENT_PERMISSIONS = 702  # insufficient permissions
-    ACCOUNT_LOCKED = 802          # locked account
-    LIMIT_EXCEEDED = 803          # exceeded limits
+    INVALID_INPUT = 400
+    UNAUTHORIZED = 401
+    PAYMENT_REQUIRED = 402
+    FORBIDDEN = 403
+    NOT_FOUND = 404
+    METHOD_NOT_ALLOWED = 405
+    NOT_ACCEPTABLE = 406
+    REQUEST_TIMEOUT = 408
+    CONFLICT = 409
+    ALREADY_EXISTS = 409
+    UNSUPPORTED_MEDIA = 415
+    RANGE_NOT_SATISFIABLE = 416
+    TOO_MANY_REQUESTS = 429
+    OPERATION_FAILED = 500
+    NOT_IMPLEMENTED = 501
+    BAD_GATEWAY = 502
+    SERVICE_UNAVAILABLE = 503
+    GATEWAY_TIMEOUT = 504
+    CREATE_FAILED = 550
+    UPDATE_FAILED = 551
+    DELETE_FAILED = 552
+    QUERY_FAILED = 553
+    INVALID_STATUS = 600
+    VALIDATION_ERROR = 601
+    INVALID_FORMAT = 602
+    INVALID_PARAMETER = 603
+    TOKEN_EXPIRED = 700
+    INVALID_TOKEN = 701
+    INSUFFICIENT_PERMISSIONS = 702
+    ACCOUNT_LOCKED = 802
+    LIMIT_EXCEEDED = 803
+
+    @staticmethod
+    def grpcStatusMapping(e: grpc.RpcError):
+        grpcCode = e.code()
+        return grpcToErrorCodes.get(grpcCode, ErrorCodes.OPERATION_FAILED)
+    
+grpcToErrorCodes = {
+    grpc.StatusCode.INVALID_ARGUMENT: ErrorCodes.INVALID_INPUT,
+    grpc.StatusCode.UNAUTHENTICATED: ErrorCodes.UNAUTHORIZED,
+    grpc.StatusCode.PERMISSION_DENIED: ErrorCodes.FORBIDDEN,
+    grpc.StatusCode.NOT_FOUND: ErrorCodes.NOT_FOUND,
+    grpc.StatusCode.ALREADY_EXISTS: ErrorCodes.ALREADY_EXISTS,
+    grpc.StatusCode.FAILED_PRECONDITION: ErrorCodes.INVALID_STATUS,
+    grpc.StatusCode.ABORTED: ErrorCodes.CONFLICT,
+    grpc.StatusCode.RESOURCE_EXHAUSTED: ErrorCodes.TOO_MANY_REQUESTS,
+    grpc.StatusCode.UNIMPLEMENTED: ErrorCodes.NOT_IMPLEMENTED,
+    grpc.StatusCode.INTERNAL: ErrorCodes.OPERATION_FAILED,
+    grpc.StatusCode.UNAVAILABLE: ErrorCodes.SERVICE_UNAVAILABLE,
+    grpc.StatusCode.DEADLINE_EXCEEDED: ErrorCodes.REQUEST_TIMEOUT,
+    grpc.StatusCode.CANCELLED: ErrorCodes.GATEWAY_TIMEOUT,
+    grpc.StatusCode.UNKNOWN: ErrorCodes.OPERATION_FAILED,
+    grpc.StatusCode.DATA_LOSS: ErrorCodes.INVALID_FORMAT,
+    grpc.StatusCode.OUT_OF_RANGE: ErrorCodes.LIMIT_EXCEEDED,
+}

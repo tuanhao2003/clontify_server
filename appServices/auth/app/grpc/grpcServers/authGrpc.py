@@ -189,9 +189,6 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             return None
 
     def doCreate(self, request, context):
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f"[doCreate] Nhận yêu cầu tạo tài khoản - username: {request.username}, email: {request.email}, roleId: {request.roleId}")
         try:
             account, error = AccountsService.doCreate(
                 username=request.username,
@@ -201,30 +198,25 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             )
 
             if error == ErrorCodes.INVALID_INPUT:
-                logger.warning(f"[doCreate] Dữ liệu không hợp lệ cho username: {request.username}")
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Dữ liệu không hợp lệ")
                 return None
 
             if error == ErrorCodes.ALREADY_EXISTS:
-                logger.warning(f"[doCreate] Tài khoản đã tồn tại - username: {request.username}, email: {request.email}")
                 context.set_code(grpc.StatusCode.ALREADY_EXISTS)
                 context.set_details("Tài khoản đã tồn tại")
                 return None
 
             if error == ErrorCodes.CREATE_FAILED:
-                logger.error(f"[doCreate] Lỗi khi tạo tài khoản cho username: {request.username}")
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details("Lỗi khi tạo tài khoản")
                 return None
 
             if error:
-                logger.error(f"[doCreate] Lỗi hệ thống không xác định - username: {request.username}")
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details("Lỗi hệ thống")
                 return None
 
-            logger.info(f"[doCreate] Tạo tài khoản thành công - id: {account.id}, username: {account.username}")
             return authService_pb2.AccountResponse(
                 id=str(account.id),
                 roleId=str(account.roleId),
@@ -237,7 +229,6 @@ class AuthGrpc(authService_pb2_grpc.AuthServiceServicer):
             )
 
         except Exception as e:
-            logger.exception(f"[doCreate] Exception xảy ra khi tạo tài khoản - username: {request.username}")
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
