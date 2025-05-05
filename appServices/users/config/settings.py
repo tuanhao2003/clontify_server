@@ -178,3 +178,9 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_AGE = 900
+
+# nhớ xóa
+PUBLIC_ENDPOINTS = [
+    '/',
+    '/artist/<uuid:id>',
+]

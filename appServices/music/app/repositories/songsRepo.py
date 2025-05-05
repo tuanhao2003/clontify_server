@@ -31,24 +31,22 @@ class SongsRepo:
             return None
 
     @staticmethod
-    def create(song: Songs):
+    def create(id: str, title: str, description: str, artistId: str, audioUrl: str, backgroundImage: str, duration: int):
         try:
             return Songs.objects.create(
-                id=song.id,
-                title=song.title,
-                artistId=song.artistId,
-                genreId=song.genreId,
-                audioUrl=song.audioUrl,
-                backgroundImage=song.backgroundImage,
-                duration=song.duration,
-                releaseDate=song.releaseDate,
-                isActive=song.isActive
+                id = id,
+                title = title,
+                description = description,
+                artistId = artistId,
+                audioUrl = audioUrl,
+                backgroundImage = backgroundImage,
+                duration = duration,
             )
         except Exception:
             return None
 
     @staticmethod
-    def update(song: Songs):
+    def update(title: str, description: str, artistId: str, genreId: str, audioUrl: str, backgroundImage: str, duration: int):
         try:
             s = Songs.objects.get(id=song.id)
             s.title = song.title

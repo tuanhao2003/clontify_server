@@ -6,3 +6,5 @@ grpcio
 grpcio-tools
 django-cors-headers
 protobuf
+boto3 
+django-storages

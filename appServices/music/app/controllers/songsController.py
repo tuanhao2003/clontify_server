@@ -65,6 +65,7 @@ class SongsController(View):
         if action == "create":
             result, error = SongsService.doCreate(
                 data.get("title"),
+                data.get("description"),
                 data.get("artistId"),
                 data.get("genreId"),
                 data.get("audioUrl"),

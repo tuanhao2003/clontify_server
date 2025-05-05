@@ -188,3 +188,13 @@ USERS_GRPC_HOST = "users_service"
 USERS_GRPC_PORT = "50051"
 AUTH_GRPC_HOST = "auth_service"
 AUTH_GRPC_PORT = "50050"
+
+AWS_ACCESS_KEY_ID = 'your-access-key'
+AWS_SECRET_ACCESS_KEY = 'your-secret-key'
+AWS_STORAGE_BUCKET_NAME = 'your-bucket-name'
+AWS_S3_REGION_NAME = 'ap-southeast-1'
+AWS_DEFAULT_ACL = 'private'
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}

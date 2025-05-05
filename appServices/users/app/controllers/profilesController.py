@@ -20,15 +20,9 @@ class GetProfile(View):
                 accountID = token.get("user_id")
             except (TokenError, InvalidToken):
                 return BaseResponse.invalidToken("Token không hợp lệ")
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-        except json.JSONDecodeError:
-            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
-        fullName = data.get("email")
-        date = data.get("date")
-
+            
         if id is not None:
-            result, error = ProfilesService.findByID(id)
+            result, error = ProfilesService.findByID(str(id))
             if error == ErrorCodes.INVALID_INPUT:
                 return BaseResponse.badRequest("Thiếu ID")
             if error == ErrorCodes.NOT_FOUND:
@@ -36,12 +30,19 @@ class GetProfile(View):
             return BaseResponse.success("Thành công", ProfileSerializer(result).data)
 
         if accountID:
-            result, error = ProfilesService.findByAccountID(accountID)
+            result, error = ProfilesService.findByAccountID(str(accountID))
             if error == ErrorCodes.INVALID_INPUT:
                 return BaseResponse.badRequest("Thiếu ID tài khoản")
             if error == ErrorCodes.NOT_FOUND:
                 return BaseResponse.notFound("Không tìm thấy hồ sơ")
             return BaseResponse.success("Thành công", ProfileSerializer(result).data)
+        
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except json.JSONDecodeError:
+            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+        fullName = data.get("email")
+        date = data.get("date")
 
         if fullName:
             result, error = ProfilesService.findByFullName(fullName)

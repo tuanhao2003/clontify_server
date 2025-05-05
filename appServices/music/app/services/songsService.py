@@ -40,7 +40,7 @@ class SongsService:
         return songs, None
 
     @staticmethod
-    def doCreate(title, artistId, genreId, audioUrl, backgroundImage=None, duration=None, releaseDate=None):
+    def doCreate(title, artistId, genreId, audioUrl, backgroundImage=None, duration=None, description=None):
         if not title or not artistId or not genreId or not audioUrl:
             return None, ErrorCodes.INVALID_INPUT
         existing = SongsRepo.getByTitle(title)
@@ -48,6 +48,7 @@ class SongsService:
             return None, ErrorCodes.ALREADY_EXISTS
         song = Songs(
             title=title,
+            description=description,
             artistId=artistId,
             genreId=genreId,
             audioUrl=audioUrl,

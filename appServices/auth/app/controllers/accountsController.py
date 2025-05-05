@@ -5,6 +5,9 @@ from common.baseResponse import BaseResponse
 from common.errorCodes import ErrorCodes
 import json
 from datetime import datetime
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.tokens import AccessToken
+
 
 class GetAccount(View):
     def get(self, request):
@@ -97,7 +100,28 @@ class UpdateAccount(View):
         except json.JSONDecodeError:
             return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-        result, error = AccountsService.doUpdate(AccountSerializer.deserialize(data))
+        authHeader = request.headers.get("Authorization")
+        accountID = None
+        if authHeader and authHeader.startswith("Bearer "):
+            tokenStr = authHeader.split(" ")[1]
+            try:
+                token = AccessToken(tokenStr)
+                accountID = token.get("user_id")
+            except (TokenError, InvalidToken):
+                return BaseResponse.invalidToken("Token không hợp lệ")
+
+        currentAccount, error = AccountsService.findById(accountID)
+        if error:
+            return BaseResponse.notFound("Không tìm thấy tài khoản")
+
+        if data.get('password'):
+            currentAccount.password = data.get('password')
+        if data.get('email'):
+            currentAccount.email = data.get('email')
+        if data.get('roleId'):
+            currentAccount.roleId = data.get('roleId')
+
+        result, error = AccountsService.doUpdate(currentAccount)
         if error == ErrorCodes.INVALID_INPUT:
             return BaseResponse.badRequest("Thiếu ID")
         if error == ErrorCodes.NOT_FOUND:
