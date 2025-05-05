@@ -3,7 +3,6 @@ import uuid
 from common.baseEntity import Base
 
 class SongGenre(Base):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     songID = models.UUIDField()
     subArtistID = models.UUIDField()
     

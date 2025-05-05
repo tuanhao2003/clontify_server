@@ -1,73 +1,78 @@
 from django.utils.timezone import now
 from app.entities.songs import Songs
+from appServices.music.app.entities.genreSong import GenreSong
+from app.entities.songSubArtist import SongSubArtist
+from app.entities.albumSong import AlbumSong
+from django.core.paginator import Paginator
+from django.db import models
+import uuid
 
 class SongsRepo:
     @staticmethod
-    def getById(id):
+    def findAll(page: int = 1, pageSize: int = 10):
         try:
-            return Songs.objects.get(id=id, isActive=True, deletedAt=None)
+            result = Songs.objects.filter(isActive=True)
+            paginator = Paginator(result, pageSize)
+            return {
+                'result': paginator.get_page(page),
+                'total': paginator.count,
+                'totalPages': paginator.num_pages,
+                'currentPage': page
+            }
         except Exception:
             return None
 
     @staticmethod
-    def filterByTitle(title):
+    def getById(id: uuid.UUID):
         try:
-            return Songs.objects.filter(title__icontains=title, isActive=True, deletedAt=None)
+            return Songs.objects.get(id=id, isActive=True)
+        except Exception:
+            return None
+    
+    @staticmethod
+    def findByIds(ids: list[uuid.UUID]):
+        try:
+            return Songs.objects.filter(id__in=ids, isActive=True)
         except Exception:
             return None
 
     @staticmethod
-    def filterByArtistId(artistId):
+    def filterByTitle(title: str, page: int = 1, pageSize: int = 10):
         try:
-            return Songs.objects.filter(artistId=artistId, isActive=True, deletedAt=None)
+            result = Songs.objects.filter(title__icontains=title, isActive=True)
+            paginator = Paginator(result, pageSize)
+            return {
+                'result': paginator.get_page(page),
+                'total': paginator.count,
+                'totalPages': paginator.num_pages,
+                'currentPage': page
+            }
         except Exception:
             return None
 
     @staticmethod
-    def filterByGenreId(genreId):
+    def create(song: Songs):
         try:
-            return Songs.objects.filter(genreId=genreId, isActive=True, deletedAt=None)
+            song.save()
+            return song
         except Exception:
             return None
 
     @staticmethod
-    def create(id: str, title: str, description: str, artistId: str, audioUrl: str, backgroundImage: str, duration: int):
+    def update(song: Songs):
         try:
-            return Songs.objects.create(
-                id = id,
-                title = title,
-                description = description,
-                artistId = artistId,
-                audioUrl = audioUrl,
-                backgroundImage = backgroundImage,
-                duration = duration,
-            )
+            song.updatedAt = now()
+            song.save()
+            return song
         except Exception:
             return None
 
     @staticmethod
-    def update(title: str, description: str, artistId: str, genreId: str, audioUrl: str, backgroundImage: str, duration: int):
+    def delete(song: Songs):
         try:
-            s = Songs.objects.get(id=song.id)
-            s.title = song.title
-            s.artistId = song.artistId
-            s.genreId = song.genreId
-            s.audioUrl = song.audioUrl
-            s.backgroundImage = song.backgroundImage
-            s.duration = song.duration
-            s.isActive = song.isActive
-            s.updatedAt = now()
-            s.save()
-            return s
-        except Exception:
-            return None
-
-    @staticmethod
-    def delete(id):
-        try:
-            song = Songs.objects.get(id=id, isActive=True, deletedAt=None)
             song.isActive = False
             song.deletedAt = now()
             song.save()
+            return song
         except Exception:
-            return None 
+            return None

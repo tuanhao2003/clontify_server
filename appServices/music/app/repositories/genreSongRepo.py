@@ -1,13 +1,13 @@
 from django.utils.timezone import now
-from app.entities.albumSong import AlbumSong
+from app.entities.genreSong import GenreSong
 from django.core.paginator import Paginator
 import uuid
 
-class AlbumSongRepo:
+class GenreSongRepo:
     @staticmethod
     def getAll(page: int = 1, pageSize: int = 10):
         try:
-            result = AlbumSong.objects.filter(isActive=True)
+            result = GenreSong.objects.filter(isActive=True)
             paginator = Paginator(result, pageSize)
             return {
                 'result': paginator.get_page(page),
@@ -19,16 +19,16 @@ class AlbumSongRepo:
             return None
     
     @staticmethod
-    def getExactly(albumId: uuid.UUID, songId: uuid.UUID):
+    def getExactly(genreId: uuid.UUID, songId: uuid.UUID):
         try:
-            return AlbumSong.objects.get(albumId=albumId, songId=songId, isActive=True)
+            return GenreSong.objects.get(genreId=genreId, songId=songId, isActive=True)
         except Exception:
             return None
-    
+        
     @staticmethod
-    def filterByAlbumId(albumId: uuid.UUID, page: int = 1, pageSize: int = 10):
+    def filterByGenreId(genreId: uuid.UUID, page: int = 1, pageSize: int = 10):
         try:
-            result = AlbumSong.objects.filter(albumId=albumId, isActive=True)
+            result = GenreSong.objects.filter(genreId=genreId, isActive=True)
             paginator = Paginator(result, pageSize)
             return {
                 'result': paginator.get_page(page),
@@ -42,7 +42,7 @@ class AlbumSongRepo:
     @staticmethod
     def filterBySongId(songId: uuid.UUID, page: int = 1, pageSize: int = 10):
         try:
-            result = AlbumSong.objects.filter(songId=songId, isActive=True)
+            result = GenreSong.objects.filter(songId=songId, isActive=True)
             paginator = Paginator(result, pageSize)
             return {
                 'result': paginator.get_page(page),
@@ -54,29 +54,28 @@ class AlbumSongRepo:
             return None
     
     @staticmethod
-    def create(albumSong: AlbumSong):
+    def create(genreSong: GenreSong):
         try:
-            albumSong.save()
-            return albumSong
+            genreSong.save()
+            return genreSong
         except Exception:
             return None
         
     @staticmethod
-    def update(albumSong: AlbumSong):
+    def update(genreSong: GenreSong):
         try:
-            albumSong.updatedAt = now()
-            albumSong.save()
-            return albumSong
+            genreSong.updatedAt = now()
+            genreSong.save()
+            return genreSong
         except Exception:
             return None
 
-
     @staticmethod
-    def delete(albumSong: AlbumSong):
+    def delete(genreSong: GenreSong):
         try:
-            albumSong.isActive = False
-            albumSong.deletedAt = now()
-            albumSong.save()
-            return albumSong
+            genreSong.isActive = False
+            genreSong.deletedAt = now()
+            genreSong.save()
+            return genreSong
         except Exception:
             return None

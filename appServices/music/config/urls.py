@@ -1,22 +1,23 @@
-"""
-URL configuration for config project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
+from app.controllers.albumsController import *
+from app.controllers.songsController import *
+from app.controllers.genresController import *
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin', admin.site.urls),
+    path('albums', GetAlbums.as_view(), name='get_albums'),
+    path('albums/<uuid:id>', GetAlbums.as_view(), name='get_album_by_id'),
+    path('albums/create', CreateAlbum.as_view(), name='create_album'),
+    path('albums/update', UpdateAlbum.as_view(), name='update_album'),
+    path('albums/delete', DeleteAlbum.as_view(), name='delete_album'),
+    path('song/<uuid:id>', GetSongs.as_view(), name='get_albums_by_song_id'),
+    path('song/create', CreateSong.as_view(), name='create_song'),
+    path('song/update', UpdateSong.as_view(), name='update_song'),
+    path('song/delete', DeleteSong.as_view(), name='delete_song'),
+    path('genres', GetGenres.as_view(), name='get_genres'),
+    path('genres/<uuid:id>', GetGenres.as_view(), name='get_genre_by_id'),
+    path('genres/create', CreateGenre.as_view(), name='create_genre'),
+    path('genres/update', UpdateGenre.as_view(), name='update_genre'),
+    path('genres/delete', DeleteGenre.as_view(), name='delete_genre'),
 ]

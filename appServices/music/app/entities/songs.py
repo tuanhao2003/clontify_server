@@ -10,7 +10,6 @@ class Songs(Base):
     audioUrl = models.URLField()
     backgroundImage = models.URLField(blank=True, null=True)
     duration = models.PositiveIntegerField()
-    pending = models.BooleanField(default=True)
     
     def __str__(self):
         return self.id

@@ -157,7 +157,7 @@ class BaseResponse:
                 "message": message,
                 "data": data,
             },
-            status=550,
+            status=500,
             safe=False,
             json_dumps_params={"ensure_ascii": False},
         )
@@ -170,7 +170,7 @@ class BaseResponse:
                 "message": message,
                 "data": data,
             },
-            status=551,
+            status=500,
             safe=False,
             json_dumps_params={"ensure_ascii": False},
         )
@@ -183,7 +183,7 @@ class BaseResponse:
                 "message": message,
                 "data": data,
             },
-            status=552,
+            status=500,
             safe=False,
             json_dumps_params={"ensure_ascii": False},
         )
@@ -196,11 +196,11 @@ class BaseResponse:
                 "message": message,
                 "data": data,
             },
-            status=700,
+            status=401,
             safe=False,
             json_dumps_params={"ensure_ascii": False},
-    
         )
+
     @staticmethod
     def invalidToken(message="Token không hợp lệ", data=None):
         return JsonResponse(
@@ -209,7 +209,7 @@ class BaseResponse:
                 "message": message,
                 "data": data,
             },
-            status=701,
+            status=401,
             safe=False,
             json_dumps_params={"ensure_ascii": False},
         )
@@ -222,7 +222,7 @@ class BaseResponse:
                 "message": message,
                 "data": data,
             },
-            status=702,
+            status=403,
             safe=False,
             json_dumps_params={"ensure_ascii": False},
         )
@@ -235,7 +235,7 @@ class BaseResponse:
                 "message": message,
                 "data": data,
             },
-            status=900,
+            status=503,
             safe=False,
             json_dumps_params={"ensure_ascii": False},
         )
