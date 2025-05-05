@@ -49,11 +49,9 @@ class UsersGrpcClient:
         request = usersService_pb2.GetProfileByIDRequest(id=id)
         try:
             response = self.stub.findByID(request)
-            return self._profileSerializer(response)
+            return self._profileSerializer(response), None
         except grpc.RpcError as e:
-            statusCode = e.code()
-            details = e.details()
-            raise Exception(f"gRPC error: {statusCode} - {details}")
+            return None, ErrorCodes.grpcStatusMapping(e)
     
     def findByAccountID(self, accountID):
         request = usersService_pb2.GetProfileByAccountIDRequest(accountID=accountID)
@@ -61,9 +59,7 @@ class UsersGrpcClient:
             response = self.stub.findByAccountID(request)
             return self._profileSerializer(response), None
         except grpc.RpcError as e:
-            statusCode = e.code()
-            details = e.details()
-            raise Exception(f"gRPC error: {statusCode} - {details}")
+            return None, ErrorCodes.grpcStatusMapping(e)
     
     def doCreate(self, accountID, fullName, avatarUrl=None, bio=None, dateOfBirth=None, phoneNumber=None):
         dobTimestamp = self._parseTimestamp(dateOfBirth) if dateOfBirth else None
@@ -80,7 +76,7 @@ class UsersGrpcClient:
             response = self.stub.doCreate(request)
             return self._profileSerializer(response), None
         except grpc.RpcError as e:
-            return None, ErrorCodes.OPERATION_FAILED
+            return None, ErrorCodes.grpcStatusMapping(e)
     
     def doUpdate(self, id, fullName=None, avatarUrl=None, bio=None, dateOfBirth=None, phoneNumber=None):
         dobTimestamp = self._parseTimestamp(dateOfBirth) if dateOfBirth else None
@@ -96,18 +92,14 @@ class UsersGrpcClient:
         
         try:
             response = self.stub.doUpdate(request)
-            return self._profileSerializer(response)
+            return self._profileSerializer(response), None
         except grpc.RpcError as e:
-            statusCode = e.code()
-            details = e.details()
-            raise Exception(f"gRPC error: {statusCode} - {details}")
+            return None, ErrorCodes.grpcStatusMapping(e)
     
     def doDelete(self, id):
         request = usersService_pb2.DeleteProfileRequest(id=id)
         try:
             response = self.stub.doDelete(request)
-            return self._profileSerializer(response)
+            return self._profileSerializer(response), None
         except grpc.RpcError as e:
-            statusCode = e.code()
-            details = e.details()
-            raise Exception(f"gRPC error: {statusCode} - {details}")
+            return None, ErrorCodes.grpcStatusMapping(e)

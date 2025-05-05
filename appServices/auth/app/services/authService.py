@@ -63,23 +63,17 @@ class AuthService:
 
     @staticmethod
     def register(username, password, email, fullName="noname", avatarUrl=None, bio=None, dateOfBirth=None, phoneNumber=None):
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f"[register] Bắt đầu đăng ký - username: {username}, email: {email}")
         try:
             existingAccount, error = AccountsService.findByUsername(username)
             if existingAccount:
-                logger.warning(f"[register] Username đã tồn tại: {username}")
                 return None, ErrorCodes.ALREADY_EXISTS
 
             existingAccount, error = AccountsService.findByEmail(email)
             if existingAccount:
-                logger.warning(f"[register] Email đã tồn tại: {email}")
                 return None, ErrorCodes.ALREADY_EXISTS
 
             role, error = RolesService.findByName("NORMAL")
             if error:
-                logger.error(f"[register] Không tìm thấy role NORMAL")
                 return None, error
 
             account, error = AccountsService.doCreate(
@@ -89,15 +83,11 @@ class AuthService:
                 roleId=str(role.id)
             )
             if error:
-                logger.error(f"[register] Tạo tài khoản thất bại - username: {username}")
                 return None, error
-            logger.info(f"[register] Đã tạo account - ID: {account.id}, username: {username}")
 
             tokens, error = AuthService.createToken(account)
             if error or not tokens:
-                logger.error(f"[register] Tạo token thất bại cho accountID: {account.id}")
                 return None, ErrorCodes.OPERATION_FAILED
-            logger.info(f"[register] Token tạo thành công cho accountID: {account.id}")
 
             usersClient = UsersGrpcClient()
             try:
@@ -105,7 +95,6 @@ class AuthService:
                     try:
                         dateOfBirth = datetime.strptime(dateOfBirth, "%Y-%m-%d")
                     except ValueError:
-                        logger.error(f"[register] Sai định dạng dateOfBirth - username: {username}, value: {dateOfBirth}")
                         return None, ErrorCodes.INVALID_INPUT
                     
                 profile, error = usersClient.doCreate(
@@ -117,20 +106,15 @@ class AuthService:
                     phoneNumber=phoneNumber
                 )
                 if error:
-                    logger.error(f"[register] Tạo profile thất bại - rollback accountID: {account.id}")
                     AccountsService.doDelete(account.id)
                     return None, error
-                logger.info(f"[register] Tạo profile thành công cho accountID: {account.id}")
             finally:
                 usersClient.close()
-                logger.debug(f"[register] Đã đóng kết nối usersClient")
 
-            logger.info(f"[register] Đăng ký thành công - accountID: {account.id}")
             return {
                 "account": account,
                 "profile": profile,
             }, None
 
         except Exception as e:
-            logger.exception(f"[register] Lỗi không xác định - username: {username}")
             return None, ErrorCodes.OPERATION_FAILED

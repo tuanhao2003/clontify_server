@@ -159,10 +159,7 @@ SIMPLE_JWT = {
 }
 
 PUBLIC_ENDPOINTS = [
-    '/login',
-    '/register',
-    '/refresh-token',
-    '/csrf',
+
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -171,14 +168,14 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "http://localhost:8081",
-    "http://localhost:50051",
+    "http://localhost:8080",
+    "http://localhost:50050",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
-    "http://localhost:8081",
-    "http://localhost:50051",
+    "http://localhost:8080",
+    "http://localhost:50050",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -186,3 +183,8 @@ CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_AGE = 900
+
+USERS_GRPC_HOST = "users_service"
+USERS_GRPC_PORT = "50051"
+AUTH_GRPC_HOST = "auth_service"
+AUTH_GRPC_PORT = "50050"
