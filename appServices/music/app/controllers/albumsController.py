@@ -6,74 +6,85 @@ from common.baseResponse import BaseResponse
 from common.errorCodes import ErrorCodes
 import json
 
-class AlbumsController(View):
-    def get(self, request):
-        id = request.GET.get("id")
-        name = request.GET.get("name")
+class GetAlbums(View):
+    def get(self, request, id=None):
+        try:
+            page = int(request.GET.get("page", "1"))
+            pageSize = int(request.GET.get("pageSize", "10"))
 
-        if id:
-            result, error = AlbumsService.findById(id)
-            if error == ErrorCodes.INVALID_INPUT:
-                return BaseResponse.badRequest("Thiếu ID")
-            if error == ErrorCodes.NOT_FOUND:
-                return BaseResponse.notFound("Không tìm thấy album")
-            if error:
-                return BaseResponse.internalError("Lỗi hệ thống")
-            return BaseResponse.success("Thành công", AlbumsSerializer(result).data)
+            if id:
+                result, error = AlbumsService.findById(id)
+                if error:
+                    return BaseResponse.notFound("Album không tồn tại", str(error))
+                return BaseResponse.success("Thành công", AlbumsSerializer(result).data)
+            else:
+                if not page or not pageSize:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-        if name:
-            result, error = AlbumsService.findByName(name)
-            if error == ErrorCodes.INVALID_INPUT:
-                return BaseResponse.badRequest("Thiếu tên album")
-            if error == ErrorCodes.NOT_FOUND:
-                return BaseResponse.notFound("Không tìm thấy album")
+            result, error = AlbumsService.findAll(page, pageSize)
             if error:
-                return BaseResponse.internalError("Lỗi hệ thống")
+                return BaseResponse.notFound("Không tìm thấy album", str(error))
             return BaseResponse.success("Thành công", AlbumsSerializer(result, many=True).data)
-
-        return BaseResponse.badRequest("Không có tham số nào hợp lệ")
-
+        except Exception as e:
+            return BaseResponse.internalError("Lỗi hệ thống", str(e))
+    
     def post(self, request):
         try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+            data = json.loads(request.body.decode('utf-8'))
+            name = data.get("name")
+            description = data.get("description")
+            backgroundImage = data.get("backgroundImage")
+            
+        except Exception as e:
 
-        action = data.get("action")
-        if action == "create":
-            result, error = AlbumsService.doCreate(
-                data.get("name"),
-                data.get("description"),
-                data.get("backgroundImage"),
-            )
-            if error == ErrorCodes.INVALID_INPUT:
-                return BaseResponse.badRequest("Thiếu trường bắt buộc")
-            if error == ErrorCodes.ALREADY_EXISTS:
-                return BaseResponse.badRequest("Album đã tồn tại")
-            if error == ErrorCodes.CREATE_FAILED:
-                return BaseResponse.internalError("Không tạo được album")
+class CreateAlbum(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            name = data.get("name")
+            description = data.get("description")
+            backgroundImage = data.get("backgroundImage")
+
+            if not name or not description or not backgroundImage:
+                return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
+            album, error = AlbumsService.doCreate(name, description, backgroundImage)
             if error:
-                return BaseResponse.internalError("Lỗi hệ thống")
-            return BaseResponse.success("Tạo thành công", AlbumsSerializer(result).data)
+                return BaseResponse.internalError("Tạo album thất bại", str(error))
+            return BaseResponse.success("Thành công", AlbumsSerializer(album).data)
+        except Exception as e:
+            return BaseResponse.internalError("Lỗi hệ thống", str(e))
 
-        if action == "update":
-            result, error = AlbumsService.doUpdate(Albums(**data))
-            if error == ErrorCodes.INVALID_INPUT:
-                return BaseResponse.badRequest("Thiếu ID")
-            if error == ErrorCodes.UPDATE_FAILED:
-                return BaseResponse.internalError("Không cập nhật được album")
+class UpdateAlbum(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            id = data.get("id")
+            name = data.get("name")
+            description = data.get("description")
+            backgroundImage = data.get("backgroundImage")
+
+            if not id or not name or not description or not backgroundImage:
+                return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
+            album, error = AlbumsService.doUpdate(id, name, description, backgroundImage)
             if error:
-                return BaseResponse.internalError("Lỗi hệ thống")
-            return BaseResponse.success("Cập nhật thành công", AlbumsSerializer(result).data)
+                return BaseResponse.internalError("Cập nhật album thất bại", str(error))
+            return BaseResponse.success("Thành công", AlbumsSerializer(album).data)
+        except Exception as e:
+            return BaseResponse.internalError("Lỗi hệ thống", str(e))
 
-        if action == "delete":
-            result, error = AlbumsService.doDelete(data.get("id"))
-            if error == ErrorCodes.INVALID_INPUT:
-                return BaseResponse.badRequest("Thiếu ID")
-            if error == ErrorCodes.DELETE_FAILED:
-                return BaseResponse.internalError("Không xóa được album")
+class DeleteAlbum(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            id = data.get("id")
+            if not id:
+                return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
+            album, error = AlbumsService.doDelete(id)
             if error:
-                return BaseResponse.internalError("Lỗi hệ thống")
-            return BaseResponse.success("Xóa thành công")
-
-        return BaseResponse.badRequest("Hành động không hợp lệ") 
+                return BaseResponse.internalError("Xóa album thất bại", str(error))
+            return BaseResponse.success("Thành công", AlbumsSerializer(album).data)
+        except Exception as e:
+            return BaseResponse.internalError("Lỗi hệ thống", str(e))

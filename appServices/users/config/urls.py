@@ -17,10 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from app.controllers.profilesController import *
+import uuid
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('artist/<UUID:id>', GetProfile.as_view(), name="findArtist"),
+    path('artist/<uuid:id>', GetProfile.as_view(), name="findArtist"),
     path('profiles', GetProfile.as_view(), name="filterByNameOrBirthDate"),
     path('profile', GetProfile.as_view(), name="viewProfile"),
     path('profile/update', UpdateProfile.as_view(), name="updateProfile"),

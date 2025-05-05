@@ -1,13 +1,13 @@
-from app.repositories.albumSongRepo import AlbumSongRepo
-from app.entities.albumSong import AlbumSong
+from app.repositories.genreSongRepo import GenreSongRepo
+from app.entities.genreSong import GenreSong
 from common.errorCodes import ErrorCodes
 import uuid
 
-class AlbumSongService:
+class GenreSongService:
     @staticmethod
     def findAll(page: int = 1, pageSize: int = 10):
         try:
-            result = AlbumSongRepo.getAll(page, pageSize)
+            result = GenreSongRepo.getAll(page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -15,9 +15,9 @@ class AlbumSongService:
             return None, ErrorCodes.OPERATION_FAILED
         
     @staticmethod
-    def findExactly(albumId: str, songId: str):
+    def findExactly(genreId: str, songId: str):
         try:
-            result = AlbumSongRepo.getExactly(uuid.UUID(albumId), uuid.UUID(songId))
+            result = GenreSongRepo.getExactly(uuid.UUID(genreId), uuid.UUID(songId))
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -25,9 +25,9 @@ class AlbumSongService:
             return None, ErrorCodes.OPERATION_FAILED
         
     @staticmethod
-    def findByAlbumId(albumId: str, page: int = 1, pageSize: int = 10):
+    def findByGenreId(genreId: str, page: int = 1, pageSize: int = 10):
         try:
-            result = AlbumSongRepo.filterByAlbumId(uuid.UUID(albumId), page, pageSize)
+            result = GenreSongRepo.filterByGenreId(uuid.UUID(genreId), page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -37,7 +37,7 @@ class AlbumSongService:
     @staticmethod
     def findBySongId(songId: str, page: int = 1, pageSize: int = 10):
         try:
-            result = AlbumSongRepo.filterBySongId(uuid.UUID(songId), page, pageSize)
+            result = GenreSongRepo.filterBySongId(uuid.UUID(songId), page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -45,12 +45,12 @@ class AlbumSongService:
             return None, ErrorCodes.OPERATION_FAILED
         
     @staticmethod
-    def doCreate(albumId: str, songId: str):
+    def doCreate(genreId: str, songId: str):
         try:
-            albumId = uuid.UUID(albumId)
+            genreId = uuid.UUID(genreId)
             songId = uuid.UUID(songId)
-            albumSong = AlbumSong(albumId=albumId, songId=songId)
-            result = AlbumSongRepo.create(albumSong)
+            genreSong = GenreSong(genreId=genreId, songId=songId)
+            result = GenreSongRepo.create(genreSong)
             if not result:
                 return None, ErrorCodes.CREATE_FAILED
             return result, None
@@ -58,13 +58,12 @@ class AlbumSongService:
             return None, ErrorCodes.OPERATION_FAILED
         
     @staticmethod
-    def doUpdate(albumId: str, songId: str, order: int):
+    def doUpdate(genreId: str, songId: str):
         try:
-            albumId = uuid.UUID(albumId)
+            genreId = uuid.UUID(genreId)
             songId = uuid.UUID(songId)
-            albumSong = AlbumSong(albumId, songId)
-            albumSong.order = order
-            result = AlbumSongRepo.update(albumSong)
+            genreSong =  GenreSong(genreId=genreId, songId=songId)
+            result = GenreSongRepo.update(genreSong)
             if not result:
                 return None, ErrorCodes.UPDATE_FAILED
             return result, None
@@ -73,12 +72,12 @@ class AlbumSongService:
 
 
     @staticmethod
-    def doDelete(albumId: str, songId: str):
+    def doDelete(genreId: str, songId: str):
         try:
-            albumId = uuid.UUID(albumId)
+            genreId = uuid.UUID(genreId)
             songId = uuid.UUID(songId)
-            albumSong = AlbumSong(albumId, songId)
-            result = AlbumSongRepo.delete(albumSong)
+            genreSong =  GenreSong(genreId=genreId, songId=songId)
+            result = GenreSongRepo.delete(genreSong)
             if not result:
                 return None, ErrorCodes.DELETE_FAILED
             return result, None

@@ -2,7 +2,7 @@ from app.repositories.accountsRepo import AccountsRepo
 from datetime import datetime
 from app.entities.accounts import Accounts
 from common.errorCodes import ErrorCodes
-
+from django.contrib.auth.hashers import make_password
 
 class AccountsService:
     @staticmethod
@@ -81,8 +81,7 @@ class AccountsService:
         if (account.email and AccountsRepo.getByEmail(account.email)) and (existingAccount.email != account.email):
             return None, ErrorCodes.ALREADY_EXISTS
         existingAccount.email = account.email or existingAccount.email
-        existingAccount.password = account.password or existingAccount.password
-        existingAccount.isActive = account.isActive if account.isActive is not None else existingAccount.isActive
+        existingAccount.password = make_password(account.password) or existingAccount.password
         if account.roleId:
             existingAccount.roleId = account.roleId
         updated = AccountsRepo.update(existingAccount)
