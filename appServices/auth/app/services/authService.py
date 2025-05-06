@@ -27,7 +27,7 @@ class AuthService:
                 return None, ErrorCodes.OPERATION_FAILED
             
             return {"account": account, "tokens": tokens}, None
-        except Exception as e:
+        except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
@@ -58,7 +58,7 @@ class AuthService:
             return tokens, None
         except TokenError:
             return None, ErrorCodes.INVALID_INPUT
-        except Exception as e:
+        except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
@@ -116,5 +116,5 @@ class AuthService:
                 "profile": profile,
             }, None
 
-        except Exception as e:
+        except Exception:
             return None, ErrorCodes.OPERATION_FAILED

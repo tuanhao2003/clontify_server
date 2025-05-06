@@ -159,24 +159,27 @@ REST_FRAMEWORK = {
 
 ROOT_URLCONF = "config.urls"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "fe-spotify.vercel.app"]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:8080",
+    "https://fe-spotify.vercel.app",
     "http://localhost:50050",
+    "http://localhost:50052",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
-    "http://localhost:8080",
+    "https://fe-spotify.vercel.app",
     "http://localhost:50050",
+    "http://localhost:50052",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+# local
+# CSRF_COOKIE_SAMESITE = 'Lax'
+# CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_AGE = 900
 
 # nhớ xóa

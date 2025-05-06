@@ -12,6 +12,7 @@ class GetCsrfToken(View):
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
         token = get_token(request)
+        request.META["CSRF_COOKIE_EXPIRES"] = 60 * 60 * 24 * 7
         return BaseResponse.success(message="Thành công", data={"token": token})
 
 class LoginController(View):

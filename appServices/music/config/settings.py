@@ -164,17 +164,17 @@ PUBLIC_ENDPOINTS = [
 
 ROOT_URLCONF = "config.urls"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "fe-spotify.vercel.app"]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:8080",
+    "https://fe-spotify.vercel.app",
+    "http://localhost:50051",
     "http://localhost:50050",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
-    "http://localhost:8080",
+    "https://fe-spotify.vercel.app",
+    "http://localhost:50051",
     "http://localhost:50050",
 ]
 

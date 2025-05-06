@@ -1,6 +1,6 @@
 from django.utils.timezone import now
 from app.entities.songs import Songs
-from appServices.music.app.entities.genreSong import GenreSong
+from app.entities.genreSong import GenreSong
 from app.entities.songSubArtist import SongSubArtist
 from app.entities.albumSong import AlbumSong
 from django.core.paginator import Paginator

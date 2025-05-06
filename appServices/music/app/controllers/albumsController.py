@@ -36,6 +36,7 @@ class GetAlbums(View):
             backgroundImage = data.get("backgroundImage")
             
         except Exception as e:
+            return BaseResponse.internalError("Lỗi hệ thống", str(e))
 
 class CreateAlbum(View):
     def post(self, request):
