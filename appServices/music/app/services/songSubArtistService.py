@@ -1,11 +1,12 @@
 from app.repositories.songSubArtistRepo import SongSubArtistRepo
+from app.repositories.songsRepo import SongsRepo
 from app.grpc.grpcClients.usersGrpcClient import UsersGrpcClient
-from app.services.songsService import SongsService
-from app.entities.songSubArtist import SongSubArtist
 from common.errorCodes import ErrorCodes
 import uuid
 
 class SongSubArtistService:
+
+
     @staticmethod
     def findAllPaginated(page: int = 1, pageSize: int = 10):
         try:
@@ -82,9 +83,9 @@ class SongSubArtistService:
             subArtistId = uuid.UUID(subArtistId)
             songId = uuid.UUID(songId)
 
-            _, error = SongsService.findById(songId)
-            if error:
-                return None, error
+            song = SongsRepo.getById(songId)
+            if not song:
+                return None, ErrorCodes.NOT_FOUND
             
             client = UsersGrpcClient()
             _, error = client.findById(subArtistId)
@@ -106,9 +107,9 @@ class SongSubArtistService:
             subArtistId = uuid.UUID(subArtistId)
             songId = uuid.UUID(songId)
 
-            _, error = SongsService.findById(songId)
-            if error:
-                return None, error
+            song = SongsRepo.getById(songId)
+            if not song:
+                return None, ErrorCodes.NOT_FOUND
             
             client = UsersGrpcClient()
             _, error = client.findById(subArtistId)

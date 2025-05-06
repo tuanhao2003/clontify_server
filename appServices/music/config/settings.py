@@ -14,6 +14,10 @@ from pathlib import Path
 import os
 from datetime import timedelta
 
+
+def parseBoolean(value):
+    return str(value).lower() in ('true', '1', 't', 'yes', 'y')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -144,57 +148,61 @@ REST_FRAMEWORK = {
     ),
 }
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_TOKEN_LIFETIME", 30))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_TOKEN_LIFETIME", 7))),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': os.environ.get("JWT_ALGORITHM", ""),
-    'SIGNING_KEY': os.environ.get("JWT_SECRET_KEY", ""),
-    'VERIFYING_KEY': None,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ("rest_framework_simplejwt.tokens.AccessToken",),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
-}
-
 PUBLIC_ENDPOINTS = [
 
 ]
 
 ROOT_URLCONF = "config.urls"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "fe-spotify.vercel.app"]
-
 CORS_ALLOWED_ORIGINS = [
     "https://fe-spotify.vercel.app",
-    "http://localhost:50051",
     "http://localhost:50050",
+    "http://localhost:8080",
+    "http://localhost:50051",
+    "http://localhost:8081",
+    "http://localhost:5173",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://fe-spotify.vercel.app",
-    "http://localhost:50051",
     "http://localhost:50050",
+    "http://localhost:8080",
+    "http://localhost:50051",
+    "http://localhost:8081",
+    "http://localhost:5173",
 ]
 
-CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_AGE = 900
-
-USERS_GRPC_HOST = "users_service"
-USERS_GRPC_PORT = "50051"
-AUTH_GRPC_HOST = "auth_service"
-AUTH_GRPC_PORT = "50050"
-
-AWS_ACCESS_KEY_ID = 'your-access-key'
-AWS_SECRET_ACCESS_KEY = 'your-secret-key'
-AWS_STORAGE_BUCKET_NAME = 'your-bucket-name'
-AWS_S3_REGION_NAME = 'ap-southeast-1'
-AWS_DEFAULT_ACL = 'private'
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_TOKEN_LIFETIME", 30))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_TOKEN_LIFETIME", 7))),
+    'ROTATE_REFRESH_TOKENS': parseBoolean(os.environ.get("JWT_ROTATE_REFRESH_TOKENS", "True")),
+    'BLACKLIST_AFTER_ROTATION': parseBoolean(os.environ.get("JWT_BLACKLIST_AFTER_ROTATION", "True")),
+    'ALGORITHM': os.environ.get("JWT_ALGORITHM", ""),
+    'SIGNING_KEY': os.environ.get("JWT_SECRET_KEY", ""),
+    'VERIFYING_KEY': os.environ.get("JWT_VERIFYING_KEY", None),
+    'AUTH_HEADER_TYPES': os.environ.get("JWT_AUTH_HEADER_TYPES", ("Bearer",)),
+    'AUTH_TOKEN_CLASSES': os.environ.get("JWT_AUTH_TOKEN_CLASSES", ("rest_framework_simplejwt.tokens.AccessToken",)),
+    'USER_ID_FIELD': os.environ.get("JWT_USER_ID_FIELD", "id"),
+    'USER_ID_CLAIM': os.environ.get("JWT_USER_ID_CLAIM", "user_id"),
 }
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+
+CORS_ALLOW_CREDENTIALS = parseBoolean(os.environ.get("CORS_ALLOW_CREDENTIALS", "True"))
+CSRF_COOKIE_HTTPONLY = parseBoolean(os.environ.get("CSRF_COOKIE_HTTPONLY", "False"))
+CSRF_COOKIE_SAMESITE = os.environ.get("CSRF_COOKIE_SAMESITE", "Lax")
+CSRF_COOKIE_SECURE = parseBoolean(os.environ.get("CSRF_COOKIE_SECURE", "False"))
+CSRF_COOKIE_AGE = int(os.environ.get("CSRF_COOKIE_AGE", "604800"))
+
+USERS_GRPC_HOST = os.environ.get("USERS_GRPC_HOST", "users_service")
+USERS_GRPC_PORT = os.environ.get("USERS_GRPC_PORT", "50051")
+AUTH_GRPC_HOST = os.environ.get("AUTH_GRPC_HOST", "auth_service")
+AUTH_GRPC_PORT = os.environ.get("AUTH_GRPC_PORT", "50050")
+
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "")
+AWS_DEFAULT_ACL = os.environ.get("AWS_DEFAULT_ACL", "")
+AWS_S3_CUSTOM_DOMAIN = os.environ.get("AWS_S3_CUSTOM_DOMAIN", "")
+AWS_S3_OBJECT_PARAMETERS = os.environ.get("AWS_S3_OBJECT_PARAMETERS", "")

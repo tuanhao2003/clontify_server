@@ -81,15 +81,6 @@ class AlbumSongRepo:
             return albumSong
         except Exception:
             return None
-        
-    @staticmethod
-    def update(albumSong: AlbumSong):
-        try:
-            albumSong.updatedAt = now()
-            albumSong.save()
-            return albumSong
-        except Exception:
-            return None
 
     @staticmethod
     def delete(albumSong: AlbumSong):

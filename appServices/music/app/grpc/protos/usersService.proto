@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package app.grpc.protos;
+package app.grpc.protos.users;
 import "google/protobuf/timestamp.proto";
 
 service UsersService {

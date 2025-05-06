@@ -81,15 +81,6 @@ class GenreSongRepo:
             return genreSong
         except Exception:
             return None
-        
-    @staticmethod
-    def update(genreSong: GenreSong):
-        try:
-            genreSong.updatedAt = now()
-            genreSong.save()
-            return genreSong
-        except Exception:
-            return None
 
     @staticmethod
     def delete(genreSong: GenreSong):

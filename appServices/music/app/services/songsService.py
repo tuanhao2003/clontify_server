@@ -1,11 +1,14 @@
 from app.repositories.songsRepo import SongsRepo
+from app.repositories.songSubArtistRepo import SongSubArtistRepo
 from app.entities.songs import Songs
 from common.errorCodes import ErrorCodes
 import uuid
 from app.services.genreSongService import GenreSongService
 from app.services.albumSongService import AlbumSongService
-from app.services.songSubArtistService import SongSubArtistService
+
 class SongsService:
+
+
     @staticmethod
     def findAllPaginated(page: int = 1, pageSize: int = 10):
         try:
@@ -267,14 +270,10 @@ class SongsService:
                     if error:
                         return None, error
                     
-            songSubArtists, error = SongSubArtistService.findBySongId(id)
-            if error:
-                return None, error
+            songSubArtists = SongSubArtistRepo.filterBySongId(uuid.UUID(id))
             if songSubArtists:
                 for songSubArtist in songSubArtists:
-                    _, error = SongSubArtistService.doDelete(str(songSubArtist.songId), str(songSubArtist.subArtistId))
-                    if error:
-                        return None, error
+                    SongSubArtistRepo.delete(songSubArtist)
 
             deleted = SongsRepo.delete(currentSong)
             if not deleted:

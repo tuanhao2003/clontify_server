@@ -3,69 +3,20 @@ syntax = "proto3";
 package app.grpc.protos.music;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 message Song {
     string id = 1;
     string title = 2;
-    string artistId = 3;
+    string description = 3;
+    string artistId = 4;
     string audioUrl = 5;
     string backgroundImage = 6;
     int32 duration = 7;
-    string description = 8;
-    google.protobuf.Timestamp createdAt = 9;
-    google.protobuf.Timestamp updatedAt = 10;
-    google.protobuf.Timestamp deletedAt = 11;
-}
-
-message Album {
-    string id = 1;
-    string name = 2;
-    string description = 3;
-    string backgroundImage = 4;
-    google.protobuf.Timestamp createdAt = 5;
-    google.protobuf.Timestamp updatedAt = 6;
-    google.protobuf.Timestamp deletedAt = 7;
-}
-
-message Genre {
-    string id = 1;
-    string name = 2;
-    string description = 3;
-    google.protobuf.Timestamp createdAt = 4;
-    google.protobuf.Timestamp updatedAt = 5;
-    google.protobuf.Timestamp deletedAt = 6;
-}
-
-message Playlist {
-    string id = 1;
-    string name = 2;
-    string description = 3;
-    string ownerId = 4;
-    bool isActive = 5;
-}
-
-message AlbumSong {
-    string id = 1;
-    string albumId = 2;
-    string songId = 3;
-    int32 order = 4;
-    bool isActive = 5;
-}
-
-message PlaylistSong {
-    string id = 1;
-    string playlistId = 2;
-    string songId = 3;
-    int32 order = 4;
-    bool isActive = 5;
-}
-
-message IdRequest { 
-    string id = 1; 
-}
-
-message NameRequest { 
-    string name = 1; 
+    google.protobuf.Timestamp createdAt = 8;
+    google.protobuf.Timestamp updatedAt = 9;
+    google.protobuf.Timestamp deletedAt = 10;
+    bool isActive = 11;
 }
 
 message CreateSongRequest {
@@ -88,44 +39,54 @@ message UpdateSongRequest {
     string description = 5;
 }
 
+message SongResponse {
+    Song song = 1;
+    string error = 2;
+}
+
+message SongListResponse {
+    repeated Song songs = 1;
+    string error = 2;
+}
+
+message Album {
+    string id = 1;
+    string title = 2;
+    string description = 3;
+    string artistId = 4;
+    string backgroundImage = 5;
+    google.protobuf.Timestamp createdAt = 6;
+    google.protobuf.Timestamp updatedAt = 7;
+    google.protobuf.Timestamp deletedAt = 8;
+    bool isActive = 9;
+}
+
 message CreateAlbumRequest {
-    string name = 1;
-    string description = 2;
+    string title = 1;
+    string artistId = 2;
     string backgroundImage = 3;
+    string description = 4;
+    repeated string songIds = 5;
 }
 
 message UpdateAlbumRequest {
     string id = 1;
-    string name = 2;
-    string description = 3;
-    string backgroundImage = 4;
-}
-
-message CreateGenreRequest {
-    string name = 1;
-    string description = 2;
-}
-
-message UpdateGenreRequest {
-    string id = 1;
-    string name = 2;
-    string description = 3;
-}
-
-message SongResponse {
-    string id = 1;
     string title = 2;
-    string artistId = 3;
-    string audioUrl = 4;
-    string backgroundImage = 5;
-    int32 duration = 6;
-    string description = 7;
-    google.protobuf.Timestamp createdAt = 8;
-    google.protobuf.Timestamp updatedAt = 9;
-    google.protobuf.Timestamp deletedAt = 10;
+    string backgroundImage = 3;
+    string description = 4;
 }
 
 message AlbumResponse {
+    Album album = 1;
+    string error = 2;
+}
+
+message AlbumListResponse {
+    repeated Album albums = 1;
+    string error = 2;
+}
+
+message Genre {
     string id = 1;
     string name = 2;
     string description = 3;
@@ -133,85 +94,154 @@ message AlbumResponse {
     google.protobuf.Timestamp createdAt = 5;
     google.protobuf.Timestamp updatedAt = 6;
     google.protobuf.Timestamp deletedAt = 7;
+    bool isActive = 8;
 }
 
-message GenreResponse {
+message CreateGenreRequest {
+    string name = 1;
+    string description = 2;
+    string backgroundImage = 3;
+    repeated string songIds = 4;
+}
+
+message UpdateGenreRequest {
     string id = 1;
     string name = 2;
     string description = 3;
-    google.protobuf.Timestamp createdAt = 4;
-    google.protobuf.Timestamp updatedAt = 5;
-    google.protobuf.Timestamp deletedAt = 6;
+    string backgroundImage = 4;
 }
 
-message SongListResponse {
-    repeated SongResponse songs = 1;
-}
-
-message AlbumListResponse {
-    repeated AlbumResponse albums = 1;
+message GenreResponse {
+    Genre genre = 1;
+    string error = 2;
 }
 
 message GenreListResponse {
-    repeated GenreResponse genres = 1;
+    repeated Genre genres = 1;
+    string error = 2;
 }
 
-message DeleteResponse {
-    bool success = 1;
-    string message = 2;
+message AlbumSong {
+    string albumId = 1;
+    string songId = 2;
+    google.protobuf.Timestamp createdAt = 3;
+    google.protobuf.Timestamp updatedAt = 4;
+    google.protobuf.Timestamp deletedAt = 5;
+    bool isActive = 6;
+}
+
+message CreateAlbumSongRequest {
+    string albumId = 1;
+    string songId = 2;
+}
+
+message AlbumSongResponse {
+    AlbumSong albumSong = 1;
+    string error = 2;
+}
+
+message AlbumSongListResponse {
+    repeated AlbumSong albumSongs = 1;
+    string error = 2;
+}
+
+message GenreSong {
+    string genreId = 1;
+    string songId = 2;
+    google.protobuf.Timestamp createdAt = 3;
+    google.protobuf.Timestamp updatedAt = 4;
+    google.protobuf.Timestamp deletedAt = 5;
+    bool isActive = 6;
+}
+
+message CreateGenreSongRequest {
+    string genreId = 1;
+    string songId = 2;
+}
+
+message GenreSongResponse {
+    GenreSong genreSong = 1;
+    string error = 2;
+}
+
+message GenreSongListResponse {
+    repeated GenreSong genreSongs = 1;
+    string error = 2;
+}
+
+message SongSubArtist {
+    string songId = 1;
+    string subArtistId = 2;
+    google.protobuf.Timestamp createdAt = 3;
+    google.protobuf.Timestamp updatedAt = 4;
+    google.protobuf.Timestamp deletedAt = 5;
+    bool isActive = 6;
+}
+
+message CreateSongSubArtistRequest {
+    string songId = 1;
+    string subArtistId = 2;
+}
+
+message SongSubArtistResponse {
+    SongSubArtist songSubArtist = 1;
+    string error = 2;
+}
+
+message SongSubArtistListResponse {
+    repeated SongSubArtist songSubArtists = 1;
+    string error = 2;
+}
+
+message StringRequest {
+    string value = 1;
 }
 
 service MusicService {
-    // Song operations
-    rpc getSongById(IdRequest) returns (SongResponse);
-    rpc getSongsByTitle(NameRequest) returns (SongListResponse);
-    rpc getSongsByGenreId(IdRequest) returns (SongListResponse);
-    rpc getSongsByAlbumId(IdRequest) returns (SongListResponse);
-    rpc getSongsByArtistId(IdRequest) returns (SongListResponse);
-    rpc getAllSongs(Empty) returns (SongListResponse);
+    rpc findAllSongs(google.protobuf.Empty) returns (SongListResponse);
+    rpc findSongById(StringRequest) returns (SongResponse);
+    rpc findSongsByIds(StringRequest) returns (SongListResponse);
+    rpc findSongsByTitle(StringRequest) returns (SongListResponse);
+    rpc findSongsByArtistId(StringRequest) returns (SongListResponse);
     rpc createSong(CreateSongRequest) returns (SongResponse);
     rpc updateSong(UpdateSongRequest) returns (SongResponse);
-    rpc deleteSong(IdRequest) returns (DeleteResponse);
+    rpc deleteSong(StringRequest) returns (SongResponse);
 
-    // Album operations
-    rpc getAlbumById(IdRequest) returns (AlbumResponse);
-    rpc getAlbumsByName(NameRequest) returns (AlbumListResponse);
-    rpc getAllAlbums(Empty) returns (AlbumListResponse);
+    rpc findAllAlbums(google.protobuf.Empty) returns (AlbumListResponse);
+    rpc findAlbumById(StringRequest) returns (AlbumResponse);
+    rpc findAlbumsByIds(StringRequest) returns (AlbumListResponse);
+    rpc findAlbumsByTitle(StringRequest) returns (AlbumListResponse);
+    rpc findAlbumsByArtistId(StringRequest) returns (AlbumListResponse);
     rpc createAlbum(CreateAlbumRequest) returns (AlbumResponse);
     rpc updateAlbum(UpdateAlbumRequest) returns (AlbumResponse);
-    rpc deleteAlbum(IdRequest) returns (DeleteResponse);
+    rpc deleteAlbum(StringRequest) returns (AlbumResponse);
 
-    // Genre operations
-    rpc getGenreById(IdRequest) returns (GenreResponse);
-    rpc getGenresByName(NameRequest) returns (GenreListResponse);
-    rpc getAllGenres(Empty) returns (GenreListResponse);
+    rpc findAllGenres(google.protobuf.Empty) returns (GenreListResponse);
+    rpc findGenreById(StringRequest) returns (GenreResponse);
+    rpc findGenresByIds(StringRequest) returns (GenreListResponse);
+    rpc findGenresByName(StringRequest) returns (GenreListResponse);
     rpc createGenre(CreateGenreRequest) returns (GenreResponse);
     rpc updateGenre(UpdateGenreRequest) returns (GenreResponse);
-    rpc deleteGenre(IdRequest) returns (DeleteResponse);
+    rpc deleteGenre(StringRequest) returns (GenreResponse);
 
-    // Playlist
-    rpc GetPlaylistById(IdRequest) returns (Playlist);
-    rpc GetPlaylistsByName(NameRequest) returns (PlaylistList);
-    rpc GetPlaylistsByOwnerId(OwnerIdRequest) returns (PlaylistList);
-    rpc CreatePlaylist(Playlist) returns (Playlist);
-    rpc UpdatePlaylist(Playlist) returns (Playlist);
-    rpc DeletePlaylist(IdRequest) returns (Empty);
+    rpc findAllAlbumSongs(google.protobuf.Empty) returns (AlbumSongListResponse);
+    rpc findAlbumSongByIds(CreateAlbumSongRequest) returns (AlbumSongResponse);
+    rpc findAlbumSongsByAlbumId(StringRequest) returns (AlbumSongListResponse);
+    rpc findAlbumSongsBySongId(StringRequest) returns (AlbumSongListResponse);
+    rpc createAlbumSong(CreateAlbumSongRequest) returns (AlbumSongResponse);
+    rpc deleteAlbumSong(CreateAlbumSongRequest) returns (AlbumSongResponse);
 
-    // AlbumSong
-    rpc GetAlbumSongById(IdRequest) returns (AlbumSong);
-    rpc GetAlbumSongsByAlbumId(IdRequest) returns (AlbumSongList);
-    rpc GetAlbumSongsBySongId(IdRequest) returns (AlbumSongList);
-    rpc CreateAlbumSong(AlbumSong) returns (AlbumSong);
-    rpc UpdateAlbumSong(AlbumSong) returns (AlbumSong);
-    rpc DeleteAlbumSong(IdRequest) returns (Empty);
+    rpc findAllGenreSongs(google.protobuf.Empty) returns (GenreSongListResponse);
+    rpc findGenreSongByIds(CreateGenreSongRequest) returns (GenreSongResponse);
+    rpc findGenreSongsByGenreId(StringRequest) returns (GenreSongListResponse);
+    rpc findGenreSongsBySongId(StringRequest) returns (GenreSongListResponse);
+    rpc createGenreSong(CreateGenreSongRequest) returns (GenreSongResponse);
+    rpc deleteGenreSong(CreateGenreSongRequest) returns (GenreSongResponse);
 
-    // PlaylistSong
-    rpc GetPlaylistSongById(IdRequest) returns (PlaylistSong);
-    rpc GetPlaylistSongsByPlaylistId(IdRequest) returns (PlaylistSongList);
-    rpc GetPlaylistSongsBySongId(IdRequest) returns (PlaylistSongList);
-    rpc CreatePlaylistSong(PlaylistSong) returns (PlaylistSong);
-    rpc UpdatePlaylistSong(PlaylistSong) returns (PlaylistSong);
-    rpc DeletePlaylistSong(IdRequest) returns (Empty);
+    rpc findAllSongSubArtists(google.protobuf.Empty) returns (SongSubArtistListResponse);
+    rpc findSongSubArtistByIds(CreateSongSubArtistRequest) returns (SongSubArtistResponse);
+    rpc findSongSubArtistsBySongId(StringRequest) returns (SongSubArtistListResponse);
+    rpc findSongSubArtistsBySubArtistId(StringRequest) returns (SongSubArtistListResponse);
+    rpc createSongSubArtist(CreateSongSubArtistRequest) returns (SongSubArtistResponse);
+    rpc deleteSongSubArtist(CreateSongSubArtistRequest) returns (SongSubArtistResponse);
 }
-
-message Empty {} 

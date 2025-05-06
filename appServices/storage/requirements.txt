@@ -1,0 +1,11 @@
+Django==5.0.2
+djangorestframework==3.14.0
+psycopg2-binary
+djangorestframework-simplejwt
+grpcio==1.62.1
+grpcio-tools==1.62.1
+django-cors-headers==4.3.1
+protobuf==4.25.3
+boto3==1.34.69
+django-storages==1.14.2
+python-dotenv==1.0.1

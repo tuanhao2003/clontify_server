@@ -86,27 +86,13 @@ class AlbumSongService:
             return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
-        
-    @staticmethod
-    def doUpdate(albumId: str, songId: str, order: int):
-        try:
-            albumId = uuid.UUID(albumId)
-            songId = uuid.UUID(songId)
-            albumSong = AlbumSong(albumId, songId)
-            albumSong.order = order
-            result = AlbumSongRepo.update(albumSong)
-            if not result:
-                return None, ErrorCodes.UPDATE_FAILED
-            return result, None
-        except Exception:
-            return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
     def doDelete(albumId: str, songId: str):
         try:
             albumId = uuid.UUID(albumId)
             songId = uuid.UUID(songId)
-            albumSong = AlbumSong(albumId, songId)
+            albumSong = AlbumSongRepo.getExactly(albumId, songId)
             result = AlbumSongRepo.delete(albumSong)
             if not result:
                 return None, ErrorCodes.DELETE_FAILED

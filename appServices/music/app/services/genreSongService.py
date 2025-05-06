@@ -86,26 +86,13 @@ class GenreSongService:
             return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
-        
-    @staticmethod
-    def doUpdate(genreId: str, songId: str):
-        try:
-            genreId = uuid.UUID(genreId)
-            songId = uuid.UUID(songId)
-            genreSong =  GenreSong(genreId=genreId, songId=songId)
-            result = GenreSongRepo.update(genreSong)
-            if not result:
-                return None, ErrorCodes.UPDATE_FAILED
-            return result, None
-        except Exception:
-            return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
     def doDelete(genreId: str, songId: str):
         try:
             genreId = uuid.UUID(genreId)
             songId = uuid.UUID(songId)
-            genreSong =  GenreSong(genreId=genreId, songId=songId)
+            genreSong = GenreSongRepo.getExactly(genreId, songId)
             result = GenreSongRepo.delete(genreSong)
             if not result:
                 return None, ErrorCodes.DELETE_FAILED

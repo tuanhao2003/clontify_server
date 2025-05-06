@@ -134,20 +134,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_TOKEN_LIFETIME", 30))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_TOKEN_LIFETIME", 7))),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': os.environ.get("JWT_ALGORITHM", ""),
-    'SIGNING_KEY': os.environ.get("JWT_SECRET_KEY", ""),
-    'VERIFYING_KEY': None,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ("rest_framework_simplejwt.tokens.AccessToken",),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
-}
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -157,33 +143,54 @@ REST_FRAMEWORK = {
     ),
 }
 
-ROOT_URLCONF = "config.urls"
+PUBLIC_ENDPOINTS = [
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "fe-spotify.vercel.app"]
+]
+
+ROOT_URLCONF = "config.urls"
 
 CORS_ALLOWED_ORIGINS = [
     "https://fe-spotify.vercel.app",
     "http://localhost:50050",
+    "http://localhost:8080",
     "http://localhost:50052",
+    "http://localhost:8082",
+    "http://localhost:5173",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://fe-spotify.vercel.app",
     "http://localhost:50050",
+    "http://localhost:8080",
     "http://localhost:50052",
+    "http://localhost:8082",
+    "http://localhost:5173",
 ]
 
-CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = True
-# local
-# CSRF_COOKIE_SAMESITE = 'Lax'
-# CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_AGE = 900
+def parseBoolean(value):
+    return str(value).lower() in ('true', '1', 't', 'yes', 'y')
 
-# nhớ xóa
-PUBLIC_ENDPOINTS = [
-    '/',
-    '/artist/<uuid:id>',
-]
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_TOKEN_LIFETIME", 30))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_TOKEN_LIFETIME", 7))),
+    'ROTATE_REFRESH_TOKENS': parseBoolean(os.environ.get("JWT_ROTATE_REFRESH_TOKENS", "True")),
+    'BLACKLIST_AFTER_ROTATION': parseBoolean(os.environ.get("JWT_BLACKLIST_AFTER_ROTATION", "True")),
+    'ALGORITHM': os.environ.get("JWT_ALGORITHM", ""),
+    'SIGNING_KEY': os.environ.get("JWT_SECRET_KEY", ""),
+    'VERIFYING_KEY': os.environ.get("JWT_VERIFYING_KEY", None),
+    'AUTH_HEADER_TYPES': os.environ.get("JWT_AUTH_HEADER_TYPES", ("Bearer",)),
+    'AUTH_TOKEN_CLASSES': os.environ.get("JWT_AUTH_TOKEN_CLASSES", ("rest_framework_simplejwt.tokens.AccessToken",)),
+    'USER_ID_FIELD': os.environ.get("JWT_USER_ID_FIELD", "id"),
+    'USER_ID_CLAIM': os.environ.get("JWT_USER_ID_CLAIM", "user_id"),
+}
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+
+CORS_ALLOW_CREDENTIALS = parseBoolean(os.environ.get("CORS_ALLOW_CREDENTIALS", "True"))
+CSRF_COOKIE_HTTPONLY = parseBoolean(os.environ.get("CSRF_COOKIE_HTTPONLY", "False"))
+CSRF_COOKIE_SAMESITE = os.environ.get("CSRF_COOKIE_SAMESITE", "Lax")
+CSRF_COOKIE_SECURE = parseBoolean(os.environ.get("CSRF_COOKIE_SECURE", "False"))
+CSRF_COOKIE_AGE = int(os.environ.get("CSRF_COOKIE_AGE", "604800"))
+
+AUTH_GRPC_HOST = os.environ.get("AUTH_GRPC_HOST", "auth_service")
+AUTH_GRPC_PORT = os.environ.get("AUTH_GRPC_PORT", "50050")
