@@ -6,13 +6,23 @@ from app.services.genreSongService import GenreSongService
 from app.services.albumSongService import AlbumSongService
 class SongsService:
     @staticmethod
-    def findAll(page: int = 1, pageSize: int = 10):
+    def findAllPaginated(page: int = 1, pageSize: int = 10):
         try:
             if not page or not pageSize:
                 return None, ErrorCodes.INVALID_INPUT
-            result = SongsRepo.findAll(page, pageSize)
+            result = SongsRepo.findAllPaginated(page, pageSize)
             if not result:
-                    return None, ErrorCodes.NOT_FOUND
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findAll():
+        try:
+            result = SongsRepo.findAll()
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
             return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
@@ -31,58 +41,66 @@ class SongsService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def findByTitle(title: str, page: int = 1, pageSize: int = 10):
+    def findByIds(ids: list[str]):
+        try:
+            if not ids:
+                return None, ErrorCodes.INVALID_INPUT
+            uuids = [uuid.UUID(id) for id in ids]
+            songs = SongsRepo.getByIds(uuids)
+            if not songs:
+                return None, ErrorCodes.NOT_FOUND
+            return songs, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findByTitlePaginated(title: str, page: int = 1, pageSize: int = 10):
         try:
             if not title or title == "":
                 return None, ErrorCodes.INVALID_INPUT
-            result = SongsRepo.filterByTitle(title, page, pageSize)
+            result = SongsRepo.filterByTitlePaginated(title, page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
-# grpc
-    # @staticmethod
-    # def findByArtistId(artistId: str):
-    #     try:
-    #         if not artistId or artistId == "":
-    #             return None, ErrorCodes.INVALID_INPUT
-    #         songIds = ArtistSongService.getByArtistId(artistId)
-    #         if not songIds:
-    #             return None, ErrorCodes.NOT_FOUND
-    #         songs = SongsRepo.getByIds(songIds)
-    #         if not songs:
-    #             return None, ErrorCodes.NOT_FOUND
-    #         return songs, None
-    #     except Exception:
-    #         return None, ErrorCodes.OPERATION_FAILED
+    @staticmethod
+    def findByTitle(title: str):
+        try:
+            if not title or title == "":
+                return None, ErrorCodes.INVALID_INPUT
+            result = SongsRepo.filterByTitle(title)
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
     def findByGenreId(genreId: str):
         try:
             if not genreId or genreId == "":
                 return None, ErrorCodes.INVALID_INPUT
-            songIds = GenreSongService.getByGenreId(genreId)
+            songIds = GenreSongService.findByGenreId(genreId)
             if not songIds:
                 return None, ErrorCodes.NOT_FOUND
-            songs = SongsRepo.getByIds(songIds)
+            songs = SongsRepo.findByIds(songIds)
             if not songs:
                 return None, ErrorCodes.NOT_FOUND
             return songs, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
                 
-
     @staticmethod
     def findByAlbumId(albumId: str):
         try:
             if not albumId or albumId == "":
                 return None, ErrorCodes.INVALID_INPUT
-            songIds = AlbumSongService.getByAlbumId(albumId)
+            songIds = AlbumSongService.findByAlbumId(albumId)
             if not songIds:
                 return None, ErrorCodes.NOT_FOUND
-            songs = SongsRepo.getByIds(songIds)
+            songs = SongsRepo.findByIds(songIds)
             if not songs:
                 return None, ErrorCodes.NOT_FOUND
             return songs, None
@@ -90,11 +108,23 @@ class SongsService:
             return None, ErrorCodes.OPERATION_FAILED
     
     @staticmethod
-    def findByArtistId(artistId: str, page: int = 1, pageSize: int = 10):
+    def findByArtistIdPaginated(artistId: str, page: int = 1, pageSize: int = 10):
         try:
             if not artistId or artistId == "":
                 return None, ErrorCodes.INVALID_INPUT
-            result = SongsRepo.filterByArtistId(uuid.UUID(artistId), page, pageSize)
+            result = SongsRepo.filterByArtistIdPaginated(uuid.UUID(artistId), page, pageSize)
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findByArtistId(artistId: str):
+        try:
+            if not artistId or artistId == "":
+                return None, ErrorCodes.INVALID_INPUT
+            result = SongsRepo.filterByArtistId(uuid.UUID(artistId))
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -118,12 +148,11 @@ class SongsService:
             if not songId:
                 return None, ErrorCodes.CREATE_FAILED
             for id in albumIds:
-                AlbumSongService.create(uuid.UUID(id), songId)
+                AlbumSongService.doCreate(uuid.UUID(id), songId)
             if genreIds:
                 for id in genreIds:
-                    GenreSongService.create(uuid.UUID(id), songId)
+                    GenreSongService.doCreate(uuid.UUID(id), songId)
 
-            # ArtistSongService.create(artistId, songId) grpc
             return songId, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
@@ -162,15 +191,24 @@ class SongsService:
             currentSong = SongsRepo.getById(uuid.UUID(id))
             if not currentSong:
                 return None, ErrorCodes.NOT_FOUND
+
             albumSongs, error = AlbumSongService.findBySongId(id)
-            if albumSongs and albumSongs['result']:
-                for albumSong in albumSongs['result']:
-                    AlbumSongService.doDelete(str(albumSong.albumId), str(albumSong.songId))
+            if error:
+                return None, error
+            if albumSongs:
+                for albumSong in albumSongs:
+                    _, error = AlbumSongService.doDelete(str(albumSong.albumId), str(albumSong.songId))
+                    if error:
+                        return None, error
 
             genreSongs, error = GenreSongService.findBySongId(id)
-            if genreSongs and genreSongs['result']:
-                for genreSong in genreSongs['result']:
-                    GenreSongService.doDelete(str(genreSong.genreId), str(genreSong.songId))
+            if error:
+                return None, error
+            if genreSongs:
+                for genreSong in genreSongs:
+                    _, error = GenreSongService.doDelete(str(genreSong.genreId), str(genreSong.songId))
+                    if error:
+                        return None, error
 
             deleted = SongsRepo.delete(currentSong)
             if not deleted:

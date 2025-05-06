@@ -6,11 +6,21 @@ from app.services.genreSongService import GenreSongService
 
 class GenresService:
     @staticmethod
-    def findAll(page: int = 1, pageSize: int = 10):
+    def findAllPaginated(page: int = 1, pageSize: int = 10):
         try:
             if not page or not pageSize:
                 return None, ErrorCodes.INVALID_INPUT
-            result = GenresRepo.findAll(page, pageSize)
+            result = GenresRepo.findAllPaginated(page, pageSize)
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findAll():
+        try:
+            result = GenresRepo.findAll()
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -30,11 +40,36 @@ class GenresService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def findByName(name: str, page: int = 1, pageSize: int = 10):
+    def findByIds(ids: list[str]):
+        try:
+            if not ids:
+                return None, ErrorCodes.INVALID_INPUT
+            uuids = [uuid.UUID(id) for id in ids]
+            genres = GenresRepo.getByIds(uuids)
+            if not genres:
+                return None, ErrorCodes.NOT_FOUND
+            return genres, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findByNamePaginated(name: str, page: int = 1, pageSize: int = 10):
         try:
             if not name:
                 return None, ErrorCodes.INVALID_INPUT
-            genres = GenresRepo.getByName(name, page, pageSize)
+            genres = GenresRepo.filterByNamePaginated(name, page, pageSize)
+            if not genres:
+                return None, ErrorCodes.NOT_FOUND
+            return genres, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findByName(name: str):
+        try:
+            if not name:
+                return None, ErrorCodes.INVALID_INPUT
+            genres = GenresRepo.filterByName(name)
             if not genres:
                 return None, ErrorCodes.NOT_FOUND
             return genres, None
@@ -46,10 +81,10 @@ class GenresService:
         try:
             if not songId:
                 return None, ErrorCodes.INVALID_INPUT
-            genreIds = GenreSongService.getBySongId(songId)
+            genreIds = GenreSongService.findBySongId(songId)
             if not genreIds:
                 return None, ErrorCodes.NOT_FOUND
-            genres = GenresRepo.getByIds(genreIds)
+            genres = GenresRepo.findByIds(genreIds)
             if not genres:
                 return None, ErrorCodes.NOT_FOUND
             return genres, None
@@ -61,7 +96,7 @@ class GenresService:
         try:
             if not name:
                 return None, ErrorCodes.INVALID_INPUT
-            existing = GenresRepo.getByName(name)
+            existing = GenresRepo.filterByName(name)
             if existing and existing.exists():
                 return None, ErrorCodes.ALREADY_EXISTS
             genre = Genres(
@@ -99,9 +134,21 @@ class GenresService:
         try:
             if not id:
                 return None, ErrorCodes.INVALID_INPUT
+            
             currentGenre = GenresRepo.getById(uuid.UUID(id))
             if not currentGenre:
                 return None, ErrorCodes.NOT_FOUND
+
+            genreSongs, error = GenreSongService.findByGenreId(id)
+            if error:
+                return None, error
+
+            if genreSongs:
+                for genreSong in genreSongs:
+                    _, error = GenreSongService.doDelete(id, str(genreSong.songId))
+                    if error:
+                        return None, error
+
             deleted = GenresRepo.delete(currentGenre)
             if not deleted:
                 return None, ErrorCodes.DELETE_FAILED

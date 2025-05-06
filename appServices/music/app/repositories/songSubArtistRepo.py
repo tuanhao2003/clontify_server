@@ -1,13 +1,13 @@
 from django.utils.timezone import now
-from app.entities.albumSong import AlbumSong
+from app.entities.songSubArtist import SongSubArtist
 from django.core.paginator import Paginator
 import uuid
 
-class AlbumSongRepo:
+class SongSubArtistRepo:
     @staticmethod
     def getAllPaginated(page: int = 1, pageSize: int = 10):
         try:
-            result = AlbumSong.objects.filter(isActive=True)
+            result = SongSubArtist.objects.filter(isActive=True)
             paginator = Paginator(result, pageSize)
             return {
                 'result': paginator.get_page(page),
@@ -21,42 +21,21 @@ class AlbumSongRepo:
     @staticmethod
     def getAll():
         try:
-            return AlbumSong.objects.filter(isActive=True)
+            return SongSubArtist.objects.filter(isActive=True)
         except Exception:
             return None
     
     @staticmethod
-    def getExactly(albumId: uuid.UUID, songId: uuid.UUID):
+    def getExactly(songId: uuid.UUID, artistId: uuid.UUID):
         try:
-            return AlbumSong.objects.get(albumId=albumId, songId=songId, isActive=True)
+            return SongSubArtist.objects.get(songId=songId, artistId=artistId, isActive=True)
         except Exception:
             return None
     
-    @staticmethod
-    def filterByAlbumIdPaginated(albumId: uuid.UUID, page: int = 1, pageSize: int = 10):
-        try:
-            result = AlbumSong.objects.filter(albumId=albumId, isActive=True)
-            paginator = Paginator(result, pageSize)
-            return {
-                'result': paginator.get_page(page),
-                'total': paginator.count,
-                'totalPages': paginator.num_pages,
-                'currentPage': page
-            }
-        except Exception:
-            return None
-
-    @staticmethod
-    def filterByAlbumId(albumId: uuid.UUID):
-        try:
-            return AlbumSong.objects.filter(albumId=albumId, isActive=True)
-        except Exception:
-            return None
-        
     @staticmethod
     def filterBySongIdPaginated(songId: uuid.UUID, page: int = 1, pageSize: int = 10):
         try:
-            result = AlbumSong.objects.filter(songId=songId, isActive=True)
+            result = SongSubArtist.objects.filter(songId=songId, isActive=True)
             paginator = Paginator(result, pageSize)
             return {
                 'result': paginator.get_page(page),
@@ -70,33 +49,45 @@ class AlbumSongRepo:
     @staticmethod
     def filterBySongId(songId: uuid.UUID):
         try:
-            return AlbumSong.objects.filter(songId=songId, isActive=True)
-        except Exception:
-            return None
-    
-    @staticmethod
-    def create(albumSong: AlbumSong):
-        try:
-            albumSong.save()
-            return albumSong
+            return SongSubArtist.objects.filter(songId=songId, isActive=True)
         except Exception:
             return None
         
     @staticmethod
-    def update(albumSong: AlbumSong):
+    def filterByArtistIdPaginated(artistId: uuid.UUID, page: int = 1, pageSize: int = 10):
         try:
-            albumSong.updatedAt = now()
-            albumSong.save()
-            return albumSong
+            result = SongSubArtist.objects.filter(artistId=artistId, isActive=True)
+            paginator = Paginator(result, pageSize)
+            return {
+                'result': paginator.get_page(page),
+                'total': paginator.count,
+                'totalPages': paginator.num_pages,
+                'currentPage': page
+            }
         except Exception:
             return None
 
     @staticmethod
-    def delete(albumSong: AlbumSong):
+    def filterByArtistId(artistId: uuid.UUID):
         try:
-            albumSong.isActive = False
-            albumSong.deletedAt = now()
-            albumSong.save()
-            return albumSong
+            return SongSubArtist.objects.filter(artistId=artistId, isActive=True)
         except Exception:
             return None
+    
+    @staticmethod
+    def create(songSubArtist: SongSubArtist):
+        try:
+            songSubArtist.save()
+            return songSubArtist
+        except Exception:
+            return None
+        
+    @staticmethod
+    def delete(songSubArtist: SongSubArtist):
+        try:
+            songSubArtist.isActive = False
+            songSubArtist.deletedAt = now()
+            songSubArtist.save()
+            return songSubArtist
+        except Exception:
+            return None 

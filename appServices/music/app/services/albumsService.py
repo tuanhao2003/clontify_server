@@ -5,11 +5,21 @@ from app.services.albumSongService import AlbumSongService
 import uuid
 class AlbumsService:
     @staticmethod
-    def findAll(page: int = 1, pageSize: int = 10):
+    def findAllPaginated(page: int = 1, pageSize: int = 10):
         try:
             if not page or not pageSize:
                 return None, ErrorCodes.INVALID_INPUT
-            result = AlbumsRepo.findAll(page, pageSize)
+            result = AlbumsRepo.findAllPaginated(page, pageSize)
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findAll():
+        try:
+            result = AlbumsRepo.findAll()
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -29,11 +39,36 @@ class AlbumsService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def findByName(name: str, page: int = 1, pageSize: int = 10):
+    def findByIds(ids: list[str]):
+        try:
+            if not ids:
+                return None, ErrorCodes.INVALID_INPUT
+            uuids = [uuid.UUID(id) for id in ids]
+            albums = AlbumsRepo.getByIds(uuids)
+            if not albums:
+                return None, ErrorCodes.NOT_FOUND
+            return albums, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findByNamePaginated(name: str, page: int = 1, pageSize: int = 10):
         try:
             if not name:
                 return None, ErrorCodes.INVALID_INPUT
-            albums = AlbumsRepo.filterByName(name, page, pageSize)
+            albums = AlbumsRepo.filterByNamePaginated(name, page, pageSize)
+            if not albums:
+                return None, ErrorCodes.NOT_FOUND
+            return albums, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findByName(name: str):
+        try:
+            if not name:
+                return None, ErrorCodes.INVALID_INPUT
+            albums = AlbumsRepo.filterByName(name)
             if not albums:
                 return None, ErrorCodes.NOT_FOUND
             return albums, None

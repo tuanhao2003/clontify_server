@@ -5,7 +5,7 @@ import uuid
 
 class GenreSongRepo:
     @staticmethod
-    def getAll(page: int = 1, pageSize: int = 10):
+    def getAllPaginated(page: int = 1, pageSize: int = 10):
         try:
             result = GenreSong.objects.filter(isActive=True)
             paginator = Paginator(result, pageSize)
@@ -17,6 +17,13 @@ class GenreSongRepo:
             }
         except Exception:
             return None
+
+    @staticmethod
+    def getAll():
+        try:
+            return GenreSong.objects.filter(isActive=True)
+        except Exception:
+            return None
     
     @staticmethod
     def getExactly(genreId: uuid.UUID, songId: uuid.UUID):
@@ -26,7 +33,7 @@ class GenreSongRepo:
             return None
         
     @staticmethod
-    def filterByGenreId(genreId: uuid.UUID, page: int = 1, pageSize: int = 10):
+    def filterByGenreIdPaginated(genreId: uuid.UUID, page: int = 1, pageSize: int = 10):
         try:
             result = GenreSong.objects.filter(genreId=genreId, isActive=True)
             paginator = Paginator(result, pageSize)
@@ -38,9 +45,16 @@ class GenreSongRepo:
             }
         except Exception:
             return None
+
+    @staticmethod
+    def filterByGenreId(genreId: uuid.UUID):
+        try:
+            return GenreSong.objects.filter(genreId=genreId, isActive=True)
+        except Exception:
+            return None
         
     @staticmethod
-    def filterBySongId(songId: uuid.UUID, page: int = 1, pageSize: int = 10):
+    def filterBySongIdPaginated(songId: uuid.UUID, page: int = 1, pageSize: int = 10):
         try:
             result = GenreSong.objects.filter(songId=songId, isActive=True)
             paginator = Paginator(result, pageSize)
@@ -50,6 +64,13 @@ class GenreSongRepo:
                 'totalPages': paginator.num_pages,
                 'currentPage': page
             }
+        except Exception:
+            return None
+
+    @staticmethod
+    def filterBySongId(songId: uuid.UUID):
+        try:
+            return GenreSong.objects.filter(songId=songId, isActive=True)
         except Exception:
             return None
     

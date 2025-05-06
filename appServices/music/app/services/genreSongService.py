@@ -5,9 +5,19 @@ import uuid
 
 class GenreSongService:
     @staticmethod
-    def findAll(page: int = 1, pageSize: int = 10):
+    def findAllPaginated(page: int = 1, pageSize: int = 10):
         try:
-            result = GenreSongRepo.getAll(page, pageSize)
+            result = GenreSongRepo.getAllPaginated(page, pageSize)
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findAll():
+        try:
+            result = GenreSongRepo.getAll()
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -25,9 +35,19 @@ class GenreSongService:
             return None, ErrorCodes.OPERATION_FAILED
         
     @staticmethod
-    def findByGenreId(genreId: str, page: int = 1, pageSize: int = 10):
+    def findByGenreIdPaginated(genreId: str, page: int = 1, pageSize: int = 10):
         try:
-            result = GenreSongRepo.filterByGenreId(uuid.UUID(genreId), page, pageSize)
+            result = GenreSongRepo.filterByGenreIdPaginated(uuid.UUID(genreId), page, pageSize)
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findByGenreId(genreId: str):
+        try:
+            result = GenreSongRepo.filterByGenreId(uuid.UUID(genreId))
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -35,9 +55,19 @@ class GenreSongService:
             return None, ErrorCodes.OPERATION_FAILED
         
     @staticmethod
-    def findBySongId(songId: str, page: int = 1, pageSize: int = 10):
+    def findBySongIdPaginated(songId: str, page: int = 1, pageSize: int = 10):
         try:
-            result = GenreSongRepo.filterBySongId(uuid.UUID(songId), page, pageSize)
+            result = GenreSongRepo.filterBySongIdPaginated(uuid.UUID(songId), page, pageSize)
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findBySongId(songId: str):
+        try:
+            result = GenreSongRepo.filterBySongId(uuid.UUID(songId))
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -69,7 +99,6 @@ class GenreSongService:
             return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
-
 
     @staticmethod
     def doDelete(genreId: str, songId: str):

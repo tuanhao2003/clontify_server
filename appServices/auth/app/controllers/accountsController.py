@@ -10,13 +10,18 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 
 class GetAccount(View):
-    def get(self, request):
-        id = request.GET.get("id")
-        username = request.GET.get("username")
-        email = request.GET.get("email")
-        status = request.GET.get("status")
-        start = request.GET.get("start")
-        end = request.GET.get("end")
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
+        id = data.get("id")
+        username = data.get("username")
+        email = data.get("email")
+        isActive = data.get("isActive")
+        start = data.get("start")
+        end = data.get("end")
 
         if id:
             result, error = AccountsService.findById(id)
@@ -48,8 +53,8 @@ class GetAccount(View):
                 return BaseResponse.internalError("Lỗi hệ thống")
             return BaseResponse.success("Thành công", AccountSerializer(result).data)
 
-        if status is not None:
-            result, error = AccountsService.findByStatus(status.lower() == "true")
+        if isActive is not None:
+            result, error = AccountsService.findByStatus(isActive.lower() == "true")
             if error == ErrorCodes.INVALID_STATUS:
                 return BaseResponse.badRequest("Thiếu trạng thái")
             if error == ErrorCodes.NOT_FOUND:
@@ -83,7 +88,7 @@ class DeleteAccount(View):
             return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
         id = data.get("id")
-        result, error = AccountsService.doDelete(id)
+        _, error = AccountsService.doDelete(id)
         if error == ErrorCodes.INVALID_INPUT:
             return BaseResponse.badRequest("Thiếu ID")
         if error == ErrorCodes.DELETE_FAILED:
