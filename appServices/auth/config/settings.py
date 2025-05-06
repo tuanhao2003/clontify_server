@@ -159,6 +159,8 @@ PUBLIC_ENDPOINTS = [
     '/register',
     '/refresh-token',
     '/csrf',
+    '/password-reset/request',
+    '/password-reset/verify',
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -185,3 +187,12 @@ CSRF_COOKIE_AGE = 900
 
 USERS_GRPC_HOST = "users_service"
 USERS_GRPC_PORT = "50051"
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'matauhu174@gmail.com'
+EMAIL_HOST_PASSWORD = 'lddfqkalxuizaxfg'
+
+PASSWORD_RESET_TOKEN_LIFETIME = timedelta(minutes=15)
