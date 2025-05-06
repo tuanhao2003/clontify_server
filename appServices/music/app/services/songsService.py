@@ -4,6 +4,7 @@ from common.errorCodes import ErrorCodes
 import uuid
 from app.services.genreSongService import GenreSongService
 from app.services.albumSongService import AlbumSongService
+from app.services.songSubArtistService import SongSubArtistService
 class SongsService:
     @staticmethod
     def findAllPaginated(page: int = 1, pageSize: int = 10):
@@ -93,6 +94,34 @@ class SongsService:
             return None, ErrorCodes.OPERATION_FAILED
                 
     @staticmethod
+    def findByGenreIdPaginated(genreId: str, page: int = 1, pageSize: int = 10):
+        try:
+            if not genreId or genreId == "":
+                return None, ErrorCodes.INVALID_INPUT
+            if not page or not pageSize:
+                return None, ErrorCodes.INVALID_INPUT
+                
+            genreSongs, error = GenreSongService.findByGenreIdPaginated(genreId, page, pageSize)
+            if error:
+                return None, error
+            if not genreSongs:
+                return None, ErrorCodes.NOT_FOUND
+                
+            songIds = [str(genreSong.songId) for genreSong in genreSongs['result']]
+            songs = SongsRepo.findByIds(songIds)
+            if not songs:
+                return None, ErrorCodes.NOT_FOUND
+                
+            return {
+                'result': songs,
+                'total': genreSongs['total'],
+                'totalPages': genreSongs['totalPages'],
+                'currentPage': genreSongs['currentPage']
+            }, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+                
+    @staticmethod
     def findByAlbumId(albumId: str):
         try:
             if not albumId or albumId == "":
@@ -104,6 +133,34 @@ class SongsService:
             if not songs:
                 return None, ErrorCodes.NOT_FOUND
             return songs, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+            
+    @staticmethod
+    def findByAlbumIdPaginated(albumId: str, page: int = 1, pageSize: int = 10):
+        try:
+            if not albumId or albumId == "":
+                return None, ErrorCodes.INVALID_INPUT
+            if not page or not pageSize:
+                return None, ErrorCodes.INVALID_INPUT
+                
+            albumSongs, error = AlbumSongService.findByAlbumIdPaginated(albumId, page, pageSize)
+            if error:
+                return None, error
+            if not albumSongs:
+                return None, ErrorCodes.NOT_FOUND
+                
+            songIds = [str(albumSong.songId) for albumSong in albumSongs['result']]
+            songs = SongsRepo.findByIds(songIds)
+            if not songs:
+                return None, ErrorCodes.NOT_FOUND
+                
+            return {
+                'result': songs,
+                'total': albumSongs['total'],
+                'totalPages': albumSongs['totalPages'],
+                'currentPage': albumSongs['currentPage']
+            }, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
     
@@ -207,6 +264,15 @@ class SongsService:
             if genreSongs:
                 for genreSong in genreSongs:
                     _, error = GenreSongService.doDelete(str(genreSong.genreId), str(genreSong.songId))
+                    if error:
+                        return None, error
+                    
+            songSubArtists, error = SongSubArtistService.findBySongId(id)
+            if error:
+                return None, error
+            if songSubArtists:
+                for songSubArtist in songSubArtists:
+                    _, error = SongSubArtistService.doDelete(str(songSubArtist.songId), str(songSubArtist.subArtistId))
                     if error:
                         return None, error
 

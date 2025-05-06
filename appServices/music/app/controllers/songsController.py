@@ -14,15 +14,28 @@ class GetSongs(View):
             if id:
                 result, error = SongsService.findById(id)
                 if error:
-                    return BaseResponse.notFound("Bài hát không tồn tại", str(error))
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Bài hát không tồn tại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
                 return BaseResponse.success("Thành công", SongsSerializer(result).data)
             
             if not page or not pageSize:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
-            result, error = SongsService.findAll(page, pageSize)
+            result, error = SongsService.findAllPaginated(page, pageSize)
             if error:
-                return BaseResponse.notFound("Chưa có bài hát nào", str(error))
-            return BaseResponse.success("Thành công", SongsSerializer(result, many=True).data)
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Chưa có bài hát nào")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
+            return BaseResponse.success("Thành công", {
+                'result': SongsSerializer(result['result'], many=True).data,
+                'total': result['total'],
+                'totalPages': result['totalPages'],
+                'currentPage': result['currentPage']
+            })
             
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -37,37 +50,82 @@ class GetSongs(View):
             page = int(data.get("page", "1"))
             pageSize = int(data.get("pageSize", "10"))
 
+            if not page or not pageSize:
+                return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
             if title:
-                result, error = SongsService.findByTitle(title, page, pageSize)
+                result, error = SongsService.findByTitlePaginated(title, page, pageSize)
                 if error:
-                    return BaseResponse.notFound("Chưa có bài hát nào", str(error))
-                return BaseResponse.success("Thành công", SongsSerializer(result, many=True).data)
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Chưa có bài hát nào")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", {
+                    'result': SongsSerializer(result['result'], many=True).data,
+                    'total': result['total'],
+                    'totalPages': result['totalPages'],
+                    'currentPage': result['currentPage']
+                })
                 
-            # if artistId:
-            #     result, error = SongsService.findByArtistId(artistId, page, pageSize)
-            #     if error:
-            #         return BaseResponse.notFound("Chưa có bài hát nào", str(error))
-            #     return BaseResponse.success("Thành công", SongsSerializer(result, many=True).data)
+            if artistId:
+                result, error = SongsService.findByArtistIdPaginated(artistId, page, pageSize)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Chưa có bài hát nào")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", {
+                    'result': SongsSerializer(result['result'], many=True).data,
+                    'total': result['total'],
+                    'totalPages': result['totalPages'],
+                    'currentPage': result['currentPage']
+                })
                 
             if genreId:
-                result, error = SongsService.findByGenreId(genreId)
+                result, error = SongsService.findByGenreIdPaginated(genreId, page, pageSize)
                 if error:
-                    return BaseResponse.notFound("Chưa có bài hát nào", str(error))
-                return BaseResponse.success("Thành công", SongsSerializer(result, many=True).data)
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Chưa có bài hát nào")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", {
+                    'result': SongsSerializer(result['result'], many=True).data,
+                    'total': result['total'],
+                    'totalPages': result['totalPages'],
+                    'currentPage': result['currentPage']
+                })
                 
             if albumId:
-                result, error = SongsService.findByAlbumId(albumId)
+                result, error = SongsService.findByAlbumIdPaginated(albumId, page, pageSize)
                 if error:
-                    return BaseResponse.notFound("Chưa có bài hát nào", str(error))
-                return BaseResponse.success("Thành công", SongsSerializer(result, many=True).data)
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Chưa có bài hát nào")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", {
+                    'result': SongsSerializer(result['result'], many=True).data,
+                    'total': result['total'],
+                    'totalPages': result['totalPages'],
+                    'currentPage': result['currentPage']
+                })
 
-            else:
-                if not page or not pageSize:
+            result, error = SongsService.findAllPaginated(page, pageSize)
+            if error:
+                if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
-                result, error = SongsService.findAll(page, pageSize)
-                if error:
-                    return BaseResponse.notFound("Chưa có bài hát nào", str(error))
-                return BaseResponse.success("Thành công", SongsSerializer(result, many=True).data)
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Chưa có bài hát nào")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
+            return BaseResponse.success("Thành công", {
+                'result': SongsSerializer(result['result'], many=True).data,
+                'total': result['total'],
+                'totalPages': result['totalPages'],
+                'currentPage': result['currentPage']
+            })
             
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -91,7 +149,13 @@ class CreateSong(View):
 
             song, error = SongsService.doCreate(title, artistId, audioUrl, albumIds, genreIds, backgroundImage, duration, description, subArtistIds)
             if error:
-                return BaseResponse.internalError("Tạo bài hát thất bại", str(error))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.ALREADY_EXISTS:
+                    return BaseResponse.badRequest("Bài hát đã tồn tại")
+                elif error == ErrorCodes.CREATE_FAILED:
+                    return BaseResponse.internalError("Tạo bài hát thất bại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", SongsSerializer(song).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -111,7 +175,13 @@ class UpdateSong(View):
 
             song, error = SongsService.doUpdate(id, title, backgroundImage, duration, description)
             if error:
-                return BaseResponse.internalError("Cập nhật bài hát thất bại", str(error))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Bài hát không tồn tại")
+                elif error == ErrorCodes.UPDATE_FAILED:
+                    return BaseResponse.internalError("Cập nhật bài hát thất bại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", SongsSerializer(song).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -126,7 +196,13 @@ class DeleteSong(View):
             
             song, error = SongsService.doDelete(id)
             if error:
-                return BaseResponse.internalError("Xóa bài hát thất bại", str(error))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Bài hát không tồn tại")
+                elif error == ErrorCodes.DELETE_FAILED:
+                    return BaseResponse.internalError("Xóa bài hát thất bại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", SongsSerializer(song).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))

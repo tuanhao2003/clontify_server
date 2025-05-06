@@ -63,6 +63,34 @@ class SongsRepo:
             return Songs.objects.filter(title__icontains=title, isActive=True)
         except Exception:
             return None
+        
+    @staticmethod
+    def findByArtistId(artistId: uuid.UUID):
+        try:
+            ownedSongs = Songs.objects.filter(artistId=artistId, isActive=True)
+            participatedSongIds = SongSubArtist.objects.filter(subArtistID=artistId).values_list('songID', flat=True)
+            participatedSongs = Songs.objects.filter(id__in=participatedSongIds, isActive=True)
+            result = (ownedSongs | participatedSongs).distinct()
+            return result
+        except Exception:
+            return None
+
+    @staticmethod
+    def findByArtistIdPaginated(artistId: uuid.UUID, page: int = 1, pageSize: int = 10):
+        try:
+            ownedSongs = Songs.objects.filter(artistId=artistId, isActive=True)
+            participatedSongIds = SongSubArtist.objects.filter(subArtistID=artistId).values_list('songID', flat=True)
+            participatedSongs = Songs.objects.filter(id__in=participatedSongIds, isActive=True)
+            result = (ownedSongs | participatedSongs).distinct()
+            paginator = Paginator(result, pageSize)
+            return {
+                'result': paginator.get_page(page),
+                'total': paginator.count,
+                'totalPages': paginator.num_pages,
+                'currentPage': page
+            }
+        except Exception:
+            return None
 
     @staticmethod
     def create(song: Songs):

@@ -1,20 +1,30 @@
 import grpc
 from concurrent import futures
 import time
-import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from google.protobuf.timestamp_pb2 import Timestamp
 from app.grpc.protos import musicService_pb2, musicService_pb2_grpc
 from app.services.songsService import SongsService
 from app.services.albumsService import AlbumsService
 from app.services.genresService import GenresService
-from app.services.albumSongService import AlbumSongService
 from common.errorCodes import ErrorCodes
 
 class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
-    def GetSongById(self, request, context):
+    def _parseTimestamp(self, dt):
+        if not dt or not isinstance(dt, datetime):
+            return None
+        timestamp = Timestamp()
+        timestamp.FromDatetime(dt)
+        return timestamp
+    
+    def _parseDatetime(self, timestamp):
+        if not timestamp or not isinstance(timestamp, Timestamp):
+            return None
+        return timestamp.ToDatetime()
+
+    def getSongById(self, request, context):
         try:
-            song, error = SongsService.findById(uuid.UUID(request.id))
+            song, error = SongsService.findById(str(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid ID")
@@ -32,21 +42,20 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 id=str(song.id),
                 title=song.title,
                 artistId=str(song.artistId),
-                genreId=str(song.genreId),
                 audioUrl=song.audioUrl,
                 backgroundImage=song.backgroundImage,
                 duration=song.duration,
-                createdAt=Timestamp(seconds=int(song.createdAt.timestamp())),
-                updatedAt=Timestamp(seconds=int(song.updatedAt.timestamp())),
-                deletedAt=Timestamp(seconds=int(song.deletedAt.timestamp())) if song.deletedAt else None
+                description=song.description,
+                createdAt=self._parseTimestamp(song.createdAt),
+                updatedAt=self._parseTimestamp(song.updatedAt),
+                deletedAt=self._parseTimestamp(song.deletedAt)
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
 
-    # Song
-    def GetSongsByTitle(self, request, context):
+    def getSongsByTitle(self, request, context):
         try:
             songs, error = SongsService.findByTitle(request.title)
             if error == ErrorCodes.INVALID_INPUT:
@@ -62,24 +71,19 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 context.set_details("Internal server error")
                 return None
 
-            response = musicService_pb2.SongListResponse(
-                totalCount=len(songs),
-                page=request.pagination.page,
-                pageSize=request.pagination.pageSize
-            )
-            
+            response = musicService_pb2.SongListResponse()
             for song in songs:
-                song_proto = response.songs.add()
-                song_proto.id = str(song.id)
-                song_proto.title = song.title
-                song_proto.artistId = str(song.artistId)
-                song_proto.genreId = str(song.genreId)
-                song_proto.audioUrl = song.audioUrl
-                song_proto.backgroundImage = song.backgroundImage
-                song_proto.duration = song.duration
-                song_proto.createdAt = Timestamp(seconds=int(song.createdAt.timestamp()))
-                song_proto.updatedAt = Timestamp(seconds=int(song.updatedAt.timestamp()))
-                song_proto.deletedAt = Timestamp(seconds=int(song.deletedAt.timestamp())) if song.deletedAt else None
+                songToAdd = response.songs.add()
+                songToAdd.id = str(song.id)
+                songToAdd.title = song.title
+                songToAdd.artistId = str(song.artistId)
+                songToAdd.audioUrl = song.audioUrl
+                songToAdd.backgroundImage = song.backgroundImage
+                songToAdd.duration = song.duration
+                songToAdd.description = song.description
+                songToAdd.createdAt = self._parseTimestamp(song.createdAt)
+                songToAdd.updatedAt = self._parseTimestamp(song.updatedAt)
+                songToAdd.deletedAt = self._parseTimestamp(song.deletedAt)
             
             return response
         except Exception as e:
@@ -87,19 +91,166 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def CreateSong(self, request, context):
+    def getSongsByGenreId(self, request, context):
         try:
-            song, error = SongsService.create(
+            songs, error = SongsService.findByGenreId(str(request.genreId))
+            if error == ErrorCodes.INVALID_INPUT:
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("Invalid genre ID")
+                return None
+            if error == ErrorCodes.NOT_FOUND:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details("No songs found")
+                return None
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details("Internal server error")
+                return None
+
+            response = musicService_pb2.SongListResponse()
+            for song in songs:
+                songToAdd = response.songs.add()
+                songToAdd.id = str(song.id)
+                songToAdd.title = song.title
+                songToAdd.artistId = str(song.artistId)
+                songToAdd.audioUrl = song.audioUrl
+                songToAdd.backgroundImage = song.backgroundImage
+                songToAdd.duration = song.duration
+                songToAdd.description = song.description
+                songToAdd.createdAt = self._parseTimestamp(song.createdAt)
+                songToAdd.updatedAt = self._parseTimestamp(song.updatedAt)
+                songToAdd.deletedAt = self._parseTimestamp(song.deletedAt)
+            
+            return response
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+
+    def getSongsByAlbumId(self, request, context):
+        try:
+            songs, error = SongsService.findByAlbumId(str(request.albumId))
+            if error == ErrorCodes.INVALID_INPUT:
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("Invalid album ID")
+                return None
+            if error == ErrorCodes.NOT_FOUND:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details("No songs found")
+                return None
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details("Internal server error")
+                return None
+
+            response = musicService_pb2.SongListResponse()
+            for song in songs:
+                songToAdd = response.songs.add()
+                songToAdd.id = str(song.id)
+                songToAdd.title = song.title
+                songToAdd.artistId = str(song.artistId)
+                songToAdd.audioUrl = song.audioUrl
+                songToAdd.backgroundImage = song.backgroundImage
+                songToAdd.duration = song.duration
+                songToAdd.description = song.description
+                songToAdd.createdAt = self._parseTimestamp(song.createdAt)
+                songToAdd.updatedAt = self._parseTimestamp(song.updatedAt)
+                songToAdd.deletedAt = self._parseTimestamp(song.deletedAt)
+            
+            return response
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+
+    def getSongsByArtistId(self, request, context):
+        try:
+            songs, error = SongsService.findByArtistId(str(request.artistId))
+            if error == ErrorCodes.INVALID_INPUT:
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("Invalid artist ID")
+                return None
+            if error == ErrorCodes.NOT_FOUND:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details("No songs found")
+                return None
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details("Internal server error")
+                return None
+
+            response = musicService_pb2.SongListResponse()
+            for song in songs:
+                songToAdd = response.songs.add()
+                songToAdd.id = str(song.id)
+                songToAdd.title = song.title
+                songToAdd.artistId = str(song.artistId)
+                songToAdd.audioUrl = song.audioUrl
+                songToAdd.backgroundImage = song.backgroundImage
+                songToAdd.duration = song.duration
+                songToAdd.description = song.description
+                songToAdd.createdAt = self._parseTimestamp(song.createdAt)
+                songToAdd.updatedAt = self._parseTimestamp(song.updatedAt)
+                songToAdd.deletedAt = self._parseTimestamp(song.deletedAt)
+            
+            return response
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+
+    def getAllSongs(self, request, context):
+        try:
+            songs, error = SongsService.findAll()
+            if error == ErrorCodes.NOT_FOUND:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details("No songs found")
+                return None
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details("Internal server error")
+                return None
+
+            response = musicService_pb2.SongListResponse()
+            for song in songs:
+                songToAdd = response.songs.add()
+                songToAdd.id = str(song.id)
+                songToAdd.title = song.title
+                songToAdd.artistId = str(song.artistId)
+                songToAdd.audioUrl = song.audioUrl
+                songToAdd.backgroundImage = song.backgroundImage
+                songToAdd.duration = song.duration
+                songToAdd.description = song.description
+                songToAdd.createdAt = self._parseTimestamp(song.createdAt)
+                songToAdd.updatedAt = self._parseTimestamp(song.updatedAt)
+                songToAdd.deletedAt = self._parseTimestamp(song.deletedAt)
+            
+            return response
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+
+    def createSong(self, request, context):
+        try:
+            song, error = SongsService.doCreate(
                 title=request.title,
-                artistId=uuid.UUID(request.artistId),
-                genreId=uuid.UUID(request.genreId),
+                artistId=str(request.artistId),
                 audioUrl=request.audioUrl,
+                albumIds=request.albumIds,
+                genreIds=request.genreIds,
                 backgroundImage=request.backgroundImage,
-                duration=request.duration
+                duration=request.duration,
+                description=request.description,
+                subArtistIds=request.subArtistIds
             )
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid input data")
+                return None
+            if error == ErrorCodes.ALREADY_EXISTS:
+                context.set_code(grpc.StatusCode.ALREADY_EXISTS)
+                context.set_details("Song already exists")
                 return None
             if error == ErrorCodes.CREATE_FAILED:
                 context.set_code(grpc.StatusCode.INTERNAL)
@@ -114,29 +265,27 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 id=str(song.id),
                 title=song.title,
                 artistId=str(song.artistId),
-                genreId=str(song.genreId),
                 audioUrl=song.audioUrl,
                 backgroundImage=song.backgroundImage,
                 duration=song.duration,
-                createdAt=Timestamp(seconds=int(song.createdAt.timestamp())),
-                updatedAt=Timestamp(seconds=int(song.updatedAt.timestamp())),
-                deletedAt=Timestamp(seconds=int(song.deletedAt.timestamp())) if song.deletedAt else None
+                description=song.description,
+                createdAt=self._parseTimestamp(song.createdAt),
+                updatedAt=self._parseTimestamp(song.updatedAt),
+                deletedAt=self._parseTimestamp(song.deletedAt)
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
 
-    def UpdateSong(self, request, context):
+    def updateSong(self, request, context):
         try:
-            song, error = SongsService.update(
-                id=uuid.UUID(request.id),
+            song, error = SongsService.doUpdate(
+                id=str(request.id),
                 title=request.title,
-                artistId=uuid.UUID(request.artistId),
-                genreId=uuid.UUID(request.genreId),
-                audioUrl=request.audioUrl,
                 backgroundImage=request.backgroundImage,
-                duration=request.duration
+                duration=request.duration,
+                description=request.description
             )
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
@@ -159,22 +308,22 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 id=str(song.id),
                 title=song.title,
                 artistId=str(song.artistId),
-                genreId=str(song.genreId),
                 audioUrl=song.audioUrl,
                 backgroundImage=song.backgroundImage,
                 duration=song.duration,
-                createdAt=Timestamp(seconds=int(song.createdAt.timestamp())),
-                updatedAt=Timestamp(seconds=int(song.updatedAt.timestamp())),
-                deletedAt=Timestamp(seconds=int(song.deletedAt.timestamp())) if song.deletedAt else None
+                description=song.description,
+                createdAt=self._parseTimestamp(song.createdAt),
+                updatedAt=self._parseTimestamp(song.updatedAt),
+                deletedAt=self._parseTimestamp(song.deletedAt)
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
 
-    def DeleteSong(self, request, context):
+    def deleteSong(self, request, context):
         try:
-            result, error = SongsService.delete(uuid.UUID(request.id))
+            result, error = SongsService.doDelete(str(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid ID")
@@ -201,9 +350,9 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return musicService_pb2.DeleteSongResponse(success=False, message=str(e))
 
-    def GetAlbumById(self, request, context):
+    def getAlbumById(self, request, context):
         try:
-            album, error = AlbumsService.findById(uuid.UUID(request.id))
+            album, error = AlbumsService.findById(str(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid ID")
@@ -222,16 +371,16 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 name=album.name,
                 description=album.description,
                 backgroundImage=album.backgroundImage,
-                createdAt=Timestamp(seconds=int(album.createdAt.timestamp())),
-                updatedAt=Timestamp(seconds=int(album.updatedAt.timestamp())),
-                deletedAt=Timestamp(seconds=int(album.deletedAt.timestamp())) if album.deletedAt else None
+                createdAt=self._parseTimestamp(album.createdAt),
+                updatedAt=self._parseTimestamp(album.updatedAt),
+                deletedAt=self._parseTimestamp(album.deletedAt)
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
 
-    def GetAlbumsByName(self, request, context):
+    def getAlbumsByName(self, request, context):
         try:
             albums, error = AlbumsService.findByName(request.name)
             if error == ErrorCodes.INVALID_INPUT:
@@ -247,21 +396,16 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 context.set_details("Internal server error")
                 return None
 
-            response = musicService_pb2.AlbumListResponse(
-                totalCount=len(albums),
-                page=request.pagination.page,
-                pageSize=request.pagination.pageSize
-            )
-            
+            response = musicService_pb2.AlbumListResponse()
             for album in albums:
                 album_proto = response.albums.add()
                 album_proto.id = str(album.id)
                 album_proto.name = album.name
                 album_proto.description = album.description
                 album_proto.backgroundImage = album.backgroundImage
-                album_proto.createdAt = Timestamp(seconds=int(album.createdAt.timestamp()))
-                album_proto.updatedAt = Timestamp(seconds=int(album.updatedAt.timestamp()))
-                album_proto.deletedAt = Timestamp(seconds=int(album.deletedAt.timestamp())) if album.deletedAt else None
+                album_proto.createdAt = self._parseTimestamp(album.createdAt)
+                album_proto.updatedAt = self._parseTimestamp(album.updatedAt)
+                album_proto.deletedAt = self._parseTimestamp(album.deletedAt)
             
             return response
         except Exception as e:
@@ -269,9 +413,38 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def CreateAlbum(self, request, context):
+    def getAllAlbums(self, request, context):
         try:
-            album, error = AlbumsService.create(
+            albums, error = AlbumsService.findAll()
+            if error == ErrorCodes.NOT_FOUND:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details("No albums found")
+                return None
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details("Internal server error")
+                return None
+
+            response = musicService_pb2.AlbumListResponse()
+            for album in albums:
+                album_proto = response.albums.add()
+                album_proto.id = str(album.id)
+                album_proto.name = album.name
+                album_proto.description = album.description
+                album_proto.backgroundImage = album.backgroundImage
+                album_proto.createdAt = self._parseTimestamp(album.createdAt)
+                album_proto.updatedAt = self._parseTimestamp(album.updatedAt)
+                album_proto.deletedAt = self._parseTimestamp(album.deletedAt)
+            
+            return response
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+
+    def createAlbum(self, request, context):
+        try:
+            album, error = AlbumsService.doCreate(
                 name=request.name,
                 description=request.description,
                 backgroundImage=request.backgroundImage
@@ -279,6 +452,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid input data")
+                return None
+            if error == ErrorCodes.ALREADY_EXISTS:
+                context.set_code(grpc.StatusCode.ALREADY_EXISTS)
+                context.set_details("Album already exists")
                 return None
             if error == ErrorCodes.CREATE_FAILED:
                 context.set_code(grpc.StatusCode.INTERNAL)
@@ -294,19 +471,19 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 name=album.name,
                 description=album.description,
                 backgroundImage=album.backgroundImage,
-                createdAt=Timestamp(seconds=int(album.createdAt.timestamp())),
-                updatedAt=Timestamp(seconds=int(album.updatedAt.timestamp())),
-                deletedAt=Timestamp(seconds=int(album.deletedAt.timestamp())) if album.deletedAt else None
+                createdAt=self._parseTimestamp(album.createdAt),
+                updatedAt=self._parseTimestamp(album.updatedAt),
+                deletedAt=self._parseTimestamp(album.deletedAt)
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
 
-    def UpdateAlbum(self, request, context):
+    def updateAlbum(self, request, context):
         try:
-            album, error = AlbumsService.update(
-                id=uuid.UUID(request.id),
+            album, error = AlbumsService.doUpdate(
+                id=str(request.id),
                 name=request.name,
                 description=request.description,
                 backgroundImage=request.backgroundImage
@@ -333,18 +510,18 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 name=album.name,
                 description=album.description,
                 backgroundImage=album.backgroundImage,
-                createdAt=Timestamp(seconds=int(album.createdAt.timestamp())),
-                updatedAt=Timestamp(seconds=int(album.updatedAt.timestamp())),
-                deletedAt=Timestamp(seconds=int(album.deletedAt.timestamp())) if album.deletedAt else None
+                createdAt=self._parseTimestamp(album.createdAt),
+                updatedAt=self._parseTimestamp(album.updatedAt),
+                deletedAt=self._parseTimestamp(album.deletedAt)
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
 
-    def DeleteAlbum(self, request, context):
+    def deleteAlbum(self, request, context):
         try:
-            result, error = AlbumsService.delete(uuid.UUID(request.id))
+            result, error = AlbumsService.doDelete(str(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid ID")
@@ -371,9 +548,9 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return musicService_pb2.DeleteAlbumResponse(success=False, message=str(e))
 
-    def GetGenreById(self, request, context):
+    def getGenreById(self, request, context):
         try:
-            genre, error = GenresService.findById(uuid.UUID(request.id))
+            genre, error = GenresService.findById(str(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid ID")
@@ -391,16 +568,16 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 id=str(genre.id),
                 name=genre.name,
                 description=genre.description,
-                createdAt=Timestamp(seconds=int(genre.createdAt.timestamp())),
-                updatedAt=Timestamp(seconds=int(genre.updatedAt.timestamp())),
-                deletedAt=Timestamp(seconds=int(genre.deletedAt.timestamp())) if genre.deletedAt else None
+                createdAt=self._parseTimestamp(genre.createdAt),
+                updatedAt=self._parseTimestamp(genre.updatedAt),
+                deletedAt=self._parseTimestamp(genre.deletedAt)
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
 
-    def GetGenresByName(self, request, context):
+    def getGenresByName(self, request, context):
         try:
             genres, error = GenresService.findByName(request.name)
             if error == ErrorCodes.INVALID_INPUT:
@@ -416,20 +593,15 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 context.set_details("Internal server error")
                 return None
 
-            response = musicService_pb2.GenreListResponse(
-                totalCount=len(genres),
-                page=request.pagination.page,
-                pageSize=request.pagination.pageSize
-            )
-            
+            response = musicService_pb2.GenreListResponse()
             for genre in genres:
                 genre_proto = response.genres.add()
                 genre_proto.id = str(genre.id)
                 genre_proto.name = genre.name
                 genre_proto.description = genre.description
-                genre_proto.createdAt = Timestamp(seconds=int(genre.createdAt.timestamp()))
-                genre_proto.updatedAt = Timestamp(seconds=int(genre.updatedAt.timestamp()))
-                genre_proto.deletedAt = Timestamp(seconds=int(genre.deletedAt.timestamp())) if genre.deletedAt else None
+                genre_proto.createdAt = self._parseTimestamp(genre.createdAt)
+                genre_proto.updatedAt = self._parseTimestamp(genre.updatedAt)
+                genre_proto.deletedAt = self._parseTimestamp(genre.deletedAt)
             
             return response
         except Exception as e:
@@ -437,15 +609,47 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def CreateGenre(self, request, context):
+    def getAllGenres(self, request, context):
         try:
-            genre, error = GenresService.create(
+            genres, error = GenresService.findAll()
+            if error == ErrorCodes.NOT_FOUND:
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                context.set_details("No genres found")
+                return None
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details("Internal server error")
+                return None
+
+            response = musicService_pb2.GenreListResponse()
+            for genre in genres:
+                genre_proto = response.genres.add()
+                genre_proto.id = str(genre.id)
+                genre_proto.name = genre.name
+                genre_proto.description = genre.description
+                genre_proto.createdAt = self._parseTimestamp(genre.createdAt)
+                genre_proto.updatedAt = self._parseTimestamp(genre.updatedAt)
+                genre_proto.deletedAt = self._parseTimestamp(genre.deletedAt)
+            
+            return response
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+
+    def createGenre(self, request, context):
+        try:
+            genre, error = GenresService.doCreate(
                 name=request.name,
                 description=request.description
             )
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid input data")
+                return None
+            if error == ErrorCodes.ALREADY_EXISTS:
+                context.set_code(grpc.StatusCode.ALREADY_EXISTS)
+                context.set_details("Genre already exists")
                 return None
             if error == ErrorCodes.CREATE_FAILED:
                 context.set_code(grpc.StatusCode.INTERNAL)
@@ -460,19 +664,19 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 id=str(genre.id),
                 name=genre.name,
                 description=genre.description,
-                createdAt=Timestamp(seconds=int(genre.createdAt.timestamp())),
-                updatedAt=Timestamp(seconds=int(genre.updatedAt.timestamp())),
-                deletedAt=Timestamp(seconds=int(genre.deletedAt.timestamp())) if genre.deletedAt else None
+                createdAt=self._parseTimestamp(genre.createdAt),
+                updatedAt=self._parseTimestamp(genre.updatedAt),
+                deletedAt=self._parseTimestamp(genre.deletedAt)
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
 
-    def UpdateGenre(self, request, context):
+    def updateGenre(self, request, context):
         try:
-            genre, error = GenresService.update(
-                id=uuid.UUID(request.id),
+            genre, error = GenresService.doUpdate(
+                id=str(request.id),
                 name=request.name,
                 description=request.description
             )
@@ -497,18 +701,18 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 id=str(genre.id),
                 name=genre.name,
                 description=genre.description,
-                createdAt=Timestamp(seconds=int(genre.createdAt.timestamp())),
-                updatedAt=Timestamp(seconds=int(genre.updatedAt.timestamp())),
-                deletedAt=Timestamp(seconds=int(genre.deletedAt.timestamp())) if genre.deletedAt else None
+                createdAt=self._parseTimestamp(genre.createdAt),
+                updatedAt=self._parseTimestamp(genre.updatedAt),
+                deletedAt=self._parseTimestamp(genre.deletedAt)
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
 
-    def DeleteGenre(self, request, context):
+    def deleteGenre(self, request, context):
         try:
-            result, error = GenresService.delete(uuid.UUID(request.id))
+            result, error = GenresService.doDelete(str(request.id))
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("Invalid ID")

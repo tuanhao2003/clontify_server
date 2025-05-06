@@ -2,15 +2,19 @@ syntax = "proto3";
 
 package app.grpc.protos.music;
 
+import "google/protobuf/timestamp.proto";
+
 message Song {
     string id = 1;
     string title = 2;
     string artistId = 3;
-    string genreId = 4;
     string audioUrl = 5;
     string backgroundImage = 6;
     int32 duration = 7;
-    bool isActive = 9;
+    string description = 8;
+    google.protobuf.Timestamp createdAt = 9;
+    google.protobuf.Timestamp updatedAt = 10;
+    google.protobuf.Timestamp deletedAt = 11;
 }
 
 message Album {
@@ -18,14 +22,18 @@ message Album {
     string name = 2;
     string description = 3;
     string backgroundImage = 4;
-    bool isActive = 5;
+    google.protobuf.Timestamp createdAt = 5;
+    google.protobuf.Timestamp updatedAt = 6;
+    google.protobuf.Timestamp deletedAt = 7;
 }
 
 message Genre {
     string id = 1;
     string name = 2;
     string description = 3;
-    bool isActive = 4;
+    google.protobuf.Timestamp createdAt = 4;
+    google.protobuf.Timestamp updatedAt = 5;
+    google.protobuf.Timestamp deletedAt = 6;
 }
 
 message Playlist {
@@ -52,39 +60,134 @@ message PlaylistSong {
     bool isActive = 5;
 }
 
-// Request/Response messages
-message IdRequest { string id = 1; }
-message NameRequest { string name = 1; }
-message OwnerIdRequest { string ownerId = 1; }
-message SongList { repeated Song songs = 1; }
-message AlbumList { repeated Album albums = 1; }
-message GenreList { repeated Genre genres = 1; }
-message PlaylistList { repeated Playlist playlists = 1; }
-message AlbumSongList { repeated AlbumSong albumSongs = 1; }
-message PlaylistSongList { repeated PlaylistSong playlistSongs = 1; }
-message Empty {}
+message IdRequest { 
+    string id = 1; 
+}
+
+message NameRequest { 
+    string name = 1; 
+}
+
+message CreateSongRequest {
+    string title = 1;
+    string artistId = 2;
+    string audioUrl = 3;
+    repeated string albumIds = 4;
+    repeated string genreIds = 5;
+    string backgroundImage = 6;
+    int32 duration = 7;
+    string description = 8;
+    repeated string subArtistIds = 9;
+}
+
+message UpdateSongRequest {
+    string id = 1;
+    string title = 2;
+    string backgroundImage = 3;
+    int32 duration = 4;
+    string description = 5;
+}
+
+message CreateAlbumRequest {
+    string name = 1;
+    string description = 2;
+    string backgroundImage = 3;
+}
+
+message UpdateAlbumRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string backgroundImage = 4;
+}
+
+message CreateGenreRequest {
+    string name = 1;
+    string description = 2;
+}
+
+message UpdateGenreRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+}
+
+message SongResponse {
+    string id = 1;
+    string title = 2;
+    string artistId = 3;
+    string audioUrl = 4;
+    string backgroundImage = 5;
+    int32 duration = 6;
+    string description = 7;
+    google.protobuf.Timestamp createdAt = 8;
+    google.protobuf.Timestamp updatedAt = 9;
+    google.protobuf.Timestamp deletedAt = 10;
+}
+
+message AlbumResponse {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string backgroundImage = 4;
+    google.protobuf.Timestamp createdAt = 5;
+    google.protobuf.Timestamp updatedAt = 6;
+    google.protobuf.Timestamp deletedAt = 7;
+}
+
+message GenreResponse {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    google.protobuf.Timestamp createdAt = 4;
+    google.protobuf.Timestamp updatedAt = 5;
+    google.protobuf.Timestamp deletedAt = 6;
+}
+
+message SongListResponse {
+    repeated SongResponse songs = 1;
+}
+
+message AlbumListResponse {
+    repeated AlbumResponse albums = 1;
+}
+
+message GenreListResponse {
+    repeated GenreResponse genres = 1;
+}
+
+message DeleteResponse {
+    bool success = 1;
+    string message = 2;
+}
 
 service MusicService {
-    // Song
-    rpc GetSongById(IdRequest) returns (Song);
-    rpc GetSongsByTitle(NameRequest) returns (SongList);
-    rpc CreateSong(Song) returns (Song);
-    rpc UpdateSong(Song) returns (Song);
-    rpc DeleteSong(IdRequest) returns (Song);
+    // Song operations
+    rpc getSongById(IdRequest) returns (SongResponse);
+    rpc getSongsByTitle(NameRequest) returns (SongListResponse);
+    rpc getSongsByGenreId(IdRequest) returns (SongListResponse);
+    rpc getSongsByAlbumId(IdRequest) returns (SongListResponse);
+    rpc getSongsByArtistId(IdRequest) returns (SongListResponse);
+    rpc getAllSongs(Empty) returns (SongListResponse);
+    rpc createSong(CreateSongRequest) returns (SongResponse);
+    rpc updateSong(UpdateSongRequest) returns (SongResponse);
+    rpc deleteSong(IdRequest) returns (DeleteResponse);
 
-    // Album
-    rpc GetAlbumById(IdRequest) returns (Album);
-    rpc GetAlbumsByName(NameRequest) returns (AlbumList);
-    rpc CreateAlbum(Album) returns (Album);
-    rpc UpdateAlbum(Album) returns (Album);
-    rpc DeleteAlbum(IdRequest) returns (Empty);
+    // Album operations
+    rpc getAlbumById(IdRequest) returns (AlbumResponse);
+    rpc getAlbumsByName(NameRequest) returns (AlbumListResponse);
+    rpc getAllAlbums(Empty) returns (AlbumListResponse);
+    rpc createAlbum(CreateAlbumRequest) returns (AlbumResponse);
+    rpc updateAlbum(UpdateAlbumRequest) returns (AlbumResponse);
+    rpc deleteAlbum(IdRequest) returns (DeleteResponse);
 
-    // Genre
-    rpc GetGenreById(IdRequest) returns (Genre);
-    rpc GetGenresByName(NameRequest) returns (GenreList);
-    rpc CreateGenre(Genre) returns (Genre);
-    rpc UpdateGenre(Genre) returns (Genre);
-    rpc DeleteGenre(IdRequest) returns (Empty);
+    // Genre operations
+    rpc getGenreById(IdRequest) returns (GenreResponse);
+    rpc getGenresByName(NameRequest) returns (GenreListResponse);
+    rpc getAllGenres(Empty) returns (GenreListResponse);
+    rpc createGenre(CreateGenreRequest) returns (GenreResponse);
+    rpc updateGenre(UpdateGenreRequest) returns (GenreResponse);
+    rpc deleteGenre(IdRequest) returns (DeleteResponse);
 
     // Playlist
     rpc GetPlaylistById(IdRequest) returns (Playlist);
@@ -109,4 +212,6 @@ service MusicService {
     rpc CreatePlaylistSong(PlaylistSong) returns (PlaylistSong);
     rpc UpdatePlaylistSong(PlaylistSong) returns (PlaylistSong);
     rpc DeletePlaylistSong(IdRequest) returns (Empty);
-} 
+}
+
+message Empty {} 

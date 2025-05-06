@@ -15,16 +15,29 @@ class GetGenres(View):
             if id:
                 result, error = GenresService.findById(id)
                 if error:
-                    return BaseResponse.notFound("Thể loại không tồn tại", str(error))
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Thể loại không tồn tại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
                 return BaseResponse.success("Thành công", GenresSerializer(result).data)
             else:
                 if not page or not pageSize:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            result, error = GenresService.findAll(page, pageSize)
+            result, error = GenresService.findAllPaginated(page, pageSize)
             if error:
-                return BaseResponse.notFound("Không tìm thấy thể loại", str(error))
-            return BaseResponse.success("Thành công", GenresSerializer(result, many=True).data)
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Không tìm thấy thể loại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
+            return BaseResponse.success("Thành công", {
+                'result': GenresSerializer(result['result'], many=True).data,
+                'total': result['total'],
+                'totalPages': result['totalPages'],
+                'currentPage': result['currentPage']
+            })
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
 
@@ -36,26 +49,47 @@ class GetGenres(View):
             page = int(data.get("page", "1"))
             pageSize = int(data.get("pageSize", "10"))
 
+            if not page or not pageSize:
+                return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
             if name:
-                result, error = GenresService.findByName(name, page, pageSize)
+                result, error = GenresService.findByNamePaginated(name, page, pageSize)
                 if error:
-                    return BaseResponse.notFound("Không tìm thấy thể loại", str(error))
-                return BaseResponse.success("Thành công", GenresSerializer(result, many=True).data)
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Không tìm thấy thể loại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", {
+                    'result': GenresSerializer(result['result'], many=True).data,
+                    'total': result['total'],
+                    'totalPages': result['totalPages'],
+                    'currentPage': result['currentPage']
+                })
             
             if songId:
-                result, error = GenresService.findBySongId(songId, page, pageSize)
+                result, error = GenresService.findBySongId(songId)
                 if error:
-                    return BaseResponse.notFound("Không tìm thấy thể loại", str(error))
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Không tìm thấy thể loại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
                 return BaseResponse.success("Thành công", GenresSerializer(result, many=True).data)
             
-            else:
-                if not page or not pageSize:
-                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
-
-            result, error = GenresService.findAll(page, pageSize)
+            result, error = GenresService.findAllPaginated(page, pageSize)
             if error:
-                return BaseResponse.notFound("Không tìm thấy thể loại", str(error))
-            return BaseResponse.success("Thành công", GenresSerializer(result, many=True).data)
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Không tìm thấy thể loại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
+            return BaseResponse.success("Thành công", {
+                'result': GenresSerializer(result['result'], many=True).data,
+                'total': result['total'],
+                'totalPages': result['totalPages'],
+                'currentPage': result['currentPage']
+            })
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
 
@@ -71,7 +105,13 @@ class CreateGenre(View):
 
             genre, error = GenresService.doCreate(name, description)
             if error:
-                return BaseResponse.internalError("Tạo thể loại thất bại", str(error))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.ALREADY_EXISTS:
+                    return BaseResponse.badRequest("Thể loại đã tồn tại")
+                elif error == ErrorCodes.CREATE_FAILED:
+                    return BaseResponse.internalError("Tạo thể loại thất bại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", GenresSerializer(genre).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -89,7 +129,13 @@ class UpdateGenre(View):
 
             genre, error = GenresService.doUpdate(id, name, description)
             if error:
-                return BaseResponse.internalError("Cập nhật thể loại thất bại", str(error))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Thể loại không tồn tại")
+                elif error == ErrorCodes.UPDATE_FAILED:
+                    return BaseResponse.internalError("Cập nhật thể loại thất bại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", GenresSerializer(genre).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -104,7 +150,13 @@ class DeleteGenre(View):
 
             genre, error = GenresService.doDelete(id)
             if error:
-                return BaseResponse.internalError("Xóa thể loại thất bại", str(error))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Thể loại không tồn tại")
+                elif error == ErrorCodes.DELETE_FAILED:
+                    return BaseResponse.internalError("Xóa thể loại thất bại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", GenresSerializer(genre).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))

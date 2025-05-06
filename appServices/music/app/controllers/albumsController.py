@@ -15,16 +15,29 @@ class GetAlbums(View):
             if id:
                 result, error = AlbumsService.findById(id)
                 if error:
-                    return BaseResponse.notFound("Album không tồn tại", str(error))
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Album không tồn tại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
                 return BaseResponse.success("Thành công", AlbumsSerializer(result).data)
             else:
                 if not page or not pageSize:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            result, error = AlbumsService.findAll(page, pageSize)
+            result, error = AlbumsService.findAllPaginated(page, pageSize)
             if error:
-                return BaseResponse.notFound("Không tìm thấy album", str(error))
-            return BaseResponse.success("Thành công", AlbumsSerializer(result, many=True).data)
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Không tìm thấy album")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
+            return BaseResponse.success("Thành công", {
+                'result': AlbumsSerializer(result['result'], many=True).data,
+                'total': result['total'],
+                'totalPages': result['totalPages'],
+                'currentPage': result['currentPage']
+            })
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
     
@@ -32,9 +45,29 @@ class GetAlbums(View):
         try:
             data = json.loads(request.body.decode('utf-8'))
             name = data.get("name")
-            description = data.get("description")
-            backgroundImage = data.get("backgroundImage")
-            
+            page = int(data.get("page", "1"))
+            pageSize = int(data.get("pageSize", "10"))
+
+            if not name or name == "":
+                return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
+            if not page or not pageSize:
+                return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
+            result, error = AlbumsService.findByNamePaginated(name, page, pageSize)
+            if error:
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Không tìm thấy album")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
+            return BaseResponse.success("Thành công", {
+                'result': AlbumsSerializer(result['result'], many=True).data,
+                'total': result['total'],
+                'totalPages': result['totalPages'],
+                'currentPage': result['currentPage']
+            })
+
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
 
@@ -51,7 +84,13 @@ class CreateAlbum(View):
 
             album, error = AlbumsService.doCreate(name, description, backgroundImage)
             if error:
-                return BaseResponse.internalError("Tạo album thất bại", str(error))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.ALREADY_EXISTS:
+                    return BaseResponse.badRequest("Album đã tồn tại")
+                elif error == ErrorCodes.CREATE_FAILED:
+                    return BaseResponse.internalError("Tạo album thất bại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", AlbumsSerializer(album).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -70,7 +109,13 @@ class UpdateAlbum(View):
 
             album, error = AlbumsService.doUpdate(id, name, description, backgroundImage)
             if error:
-                return BaseResponse.internalError("Cập nhật album thất bại", str(error))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Album không tồn tại")
+                elif error == ErrorCodes.UPDATE_FAILED:
+                    return BaseResponse.internalError("Cập nhật album thất bại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", AlbumsSerializer(album).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -85,7 +130,13 @@ class DeleteAlbum(View):
 
             album, error = AlbumsService.doDelete(id)
             if error:
-                return BaseResponse.internalError("Xóa album thất bại", str(error))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                elif error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Album không tồn tại")
+                elif error == ErrorCodes.DELETE_FAILED:
+                    return BaseResponse.internalError("Xóa album thất bại")
+                return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", AlbumsSerializer(album).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
