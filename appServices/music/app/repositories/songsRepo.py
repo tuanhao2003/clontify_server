@@ -6,6 +6,7 @@ from app.entities.albumSong import AlbumSong
 from django.core.paginator import Paginator
 from django.db import models
 import uuid
+from app.enums.songTypes import SongTypes
 
 class SongsRepo:
     @staticmethod
@@ -116,5 +117,26 @@ class SongsRepo:
             song.deletedAt = now()
             song.save()
             return song
+        except Exception:
+            return None
+
+    @staticmethod
+    def filterBySongType(songType: SongTypes):
+        try:
+            return Songs.objects.filter(songType=songType, isActive=True)
+        except Exception:
+            return None
+
+    @staticmethod
+    def filterBySongTypePaginated(songType: SongTypes, page: int = 1, pageSize: int = 10):
+        try:
+            result = Songs.objects.filter(songType=songType, isActive=True)
+            paginator = Paginator(result, pageSize)
+            return {
+                'result': paginator.get_page(page),
+                'total': paginator.count,
+                'totalPages': paginator.num_pages,
+                'currentPage': page
+            }
         except Exception:
             return None

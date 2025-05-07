@@ -98,8 +98,8 @@ class AlbumsService:
             album = Albums(
                 name=name,
                 description=description,
-                storageImageId=storageImageId,
-                artistId=artistId
+                storageImageId=uuid.UUID(storageImageId) if storageImageId else None,
+                artistId=uuid.UUID(artistId)
             )
             created = AlbumsRepo.create(album)
             if not created:
@@ -121,9 +121,9 @@ class AlbumsService:
             if description is not None:
                 currentAlbum.description = description
             if storageImageId is not None:
-                currentAlbum.storageImageId = storageImageId
+                currentAlbum.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
             if artistId is not None:
-                currentAlbum.artistId = artistId
+                currentAlbum.artistId = uuid.UUID(artistId)
             updated = AlbumsRepo.update(currentAlbum)
             if not updated:
                 return None, ErrorCodes.UPDATE_FAILED

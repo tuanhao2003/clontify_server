@@ -11,6 +11,7 @@ class GetSongs(View):
         try:
             page = int(request.GET.get("page", "1"))
             pageSize = int(request.GET.get("pageSize", "10"))
+            
             if id:
                 result, error = SongsService.findById(id)
                 if error:
@@ -47,6 +48,7 @@ class GetSongs(View):
             artistId = data.get("artistId") 
             genreId = data.get("genreId")
             albumId = data.get("albumId")
+            songType = data.get("songType")
             page = int(data.get("page", "1"))
             pageSize = int(data.get("pageSize", "10"))
 
@@ -113,6 +115,21 @@ class GetSongs(View):
                     'currentPage': result['currentPage']
                 })
 
+            if songType:
+                result, error = SongsService.findBySongTypePaginated(songType, page, pageSize)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Chưa có bài hát nào")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", {
+                    'result': SongsSerializer(result['result'], many=True).data,
+                    'total': result['total'],
+                    'totalPages': result['totalPages'],
+                    'currentPage': result['currentPage']
+                })
+
             result, error = SongsService.findAllPaginated(page, pageSize)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
@@ -143,11 +160,12 @@ class CreateSong(View):
             description = data.get("description")
             albumIds = data.get("albumId")
             subArtistIds = data.get("subArtistId")
+            songType = data.get("songType")
 
-            if not title or not artistId or not albumIds or not storageId:
+            if not title or not artistId or not albumIds or not storageId or not songType:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            song, error = SongsService.doCreate(title, artistId, storageId, albumIds, genreIds, storageImageId, duration, description, subArtistIds)
+            song, error = SongsService.doCreate(title, artistId, storageId, albumIds, songType, genreIds, storageImageId, duration, description, subArtistIds)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
@@ -169,11 +187,12 @@ class UpdateSong(View):
             storageImageId = data.get("storageImageId")
             duration = data.get("duration")
             description = data.get("description")
+            songType = data.get("songType")
             
             if not id:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            song, error = SongsService.doUpdate(id, title, storageImageId, duration, description)
+            song, error = SongsService.doUpdate(id, title, storageImageId, duration, description, songType)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")

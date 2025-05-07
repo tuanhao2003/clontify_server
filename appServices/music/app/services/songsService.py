@@ -5,6 +5,7 @@ from common.errorCodes import ErrorCodes
 import uuid
 from app.services.genreSongService import GenreSongService
 from app.services.albumSongService import AlbumSongService
+from app.enums.songTypes import SongTypes
 
 class SongsService:
 
@@ -192,18 +193,19 @@ class SongsService:
             return None, ErrorCodes.OPERATION_FAILED
     
     @staticmethod
-    def doCreate(title: str, artistId: str, storageId: str, albumIds: list[str], genreIds: list[str] = None, storageImageId: str = None, duration: int = None, description: str = None, subArtistIds: list[str] = None):
+    def doCreate(title: str, artistId: str, storageId: str, albumIds: list[str], songType: str, genreIds: list[str] = None, storageImageId: str = None, duration: int = None, description: str = None, subArtistIds: list[str] = None):
         try:
-            if not title or not artistId or not albumIds or not storageId or title == "" or artistId == "" or albumIds == [] or storageId == "":
+            if not title or not artistId or not albumIds or not storageId or not songType or title == "" or artistId == "" or albumIds == [] or storageId == "" or songType == "":
                 return None, ErrorCodes.INVALID_INPUT
             
             song = Songs(
                 title=title,
-                artistId=artistId,
-                storageId=storageId,
-                storageImageId=storageImageId,
+                artistId=uuid.UUID(artistId),
+                storageId=uuid.UUID(storageId),
+                storageImageId=uuid.UUID(storageImageId) if storageImageId else None,
                 duration=duration,
-                description=description
+                description=description,
+                songType=SongTypes[songType]
             )
             songId = SongsRepo.create(song)
             if not songId:
@@ -219,7 +221,7 @@ class SongsService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doUpdate(id: str, title: str = None, storageImageId: str = None, duration: int = None, description: str = None):
+    def doUpdate(id: str, title: str = None, storageImageId: str = None, duration: int = None, description: str = None, songType: str = None):
         try:
             if not id or id == "":
                 return None, ErrorCodes.INVALID_INPUT
@@ -231,11 +233,13 @@ class SongsService:
             if title is not None:
                 currentSong.title = title
             if storageImageId is not None:
-                currentSong.storageImageId = storageImageId
+                currentSong.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
             if duration is not None:
                 currentSong.duration = duration
             if description is not None:
-                currentSong.description = description                
+                currentSong.description = description
+            if songType is not None:
+                currentSong.songType = SongTypes[songType]               
 
             updated = SongsRepo.update(currentSong)
             if not updated:
@@ -280,5 +284,31 @@ class SongsService:
             if not deleted:
                 return None, ErrorCodes.DELETE_FAILED
             return deleted, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findBySongType(songType: str):
+        try:
+            if not songType or songType == "":
+                return None, ErrorCodes.INVALID_INPUT
+            result = SongsRepo.filterBySongType(SongTypes[songType])
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def findBySongTypePaginated(songType: str, page: int = 1, pageSize: int = 10):
+        try:
+            if not songType or songType == "":
+                return None, ErrorCodes.INVALID_INPUT
+            if not page or not pageSize:
+                return None, ErrorCodes.INVALID_INPUT
+            result = SongsRepo.filterBySongTypePaginated(SongTypes[songType], page, pageSize)
+            if not result:
+                return None, ErrorCodes.NOT_FOUND
+            return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
