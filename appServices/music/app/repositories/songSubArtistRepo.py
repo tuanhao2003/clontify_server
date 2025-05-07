@@ -5,7 +5,7 @@ import uuid
 
 class SongSubArtistRepo:
     @staticmethod
-    def getAllPaginated(page: int = 1, pageSize: int = 10):
+    def filterAllPaginated(page: int = 1, pageSize: int = 10):
         try:
             result = SongSubArtist.objects.filter(isActive=True)
             paginator = Paginator(result, pageSize)
@@ -19,19 +19,26 @@ class SongSubArtistRepo:
             return None
 
     @staticmethod
-    def getAll():
+    def filterAll():
         try:
             return SongSubArtist.objects.filter(isActive=True)
         except Exception:
             return None
-    
+
     @staticmethod
     def getExactly(songId: uuid.UUID, artistId: uuid.UUID):
         try:
             return SongSubArtist.objects.get(songId=songId, artistId=artistId, isActive=True)
         except Exception:
             return None
-    
+
+    @staticmethod
+    def filterBySongId(songId: uuid.UUID):
+        try:
+            return SongSubArtist.objects.filter(songId=songId, isActive=True)
+        except Exception:
+            return None
+
     @staticmethod
     def filterBySongIdPaginated(songId: uuid.UUID, page: int = 1, pageSize: int = 10):
         try:
@@ -47,16 +54,16 @@ class SongSubArtistRepo:
             return None
 
     @staticmethod
-    def filterBySongId(songId: uuid.UUID):
+    def filterBySubArtistId(subArtistId: uuid.UUID):
         try:
-            return SongSubArtist.objects.filter(songId=songId, isActive=True)
+            return SongSubArtist.objects.filter(subArtistId=subArtistId, isActive=True)
         except Exception:
             return None
-        
+
     @staticmethod
-    def filterByArtistIdPaginated(artistId: uuid.UUID, page: int = 1, pageSize: int = 10):
+    def filterBySubArtistIdPaginated(subArtistId: uuid.UUID, page: int = 1, pageSize: int = 10):
         try:
-            result = SongSubArtist.objects.filter(artistId=artistId, isActive=True)
+            result = SongSubArtist.objects.filter(subArtistId=subArtistId, isActive=True)
             paginator = Paginator(result, pageSize)
             return {
                 'result': paginator.get_page(page),
@@ -68,20 +75,13 @@ class SongSubArtistRepo:
             return None
 
     @staticmethod
-    def filterByArtistId(artistId: uuid.UUID):
-        try:
-            return SongSubArtist.objects.filter(artistId=artistId, isActive=True)
-        except Exception:
-            return None
-    
-    @staticmethod
     def create(songSubArtist: SongSubArtist):
         try:
             songSubArtist.save()
             return songSubArtist
         except Exception:
             return None
-        
+
     @staticmethod
     def delete(songSubArtist: SongSubArtist):
         try:

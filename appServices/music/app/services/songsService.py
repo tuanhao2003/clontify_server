@@ -14,7 +14,7 @@ class SongsService:
         try:
             if not page or not pageSize:
                 return None, ErrorCodes.INVALID_INPUT
-            result = SongsRepo.findAllPaginated(page, pageSize)
+            result = SongsRepo.filterAllPaginated(page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -24,7 +24,7 @@ class SongsService:
     @staticmethod
     def findAll():
         try:
-            result = SongsRepo.findAll()
+            result = SongsRepo.filterAll()
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -89,7 +89,7 @@ class SongsService:
             songIds = GenreSongService.findByGenreId(genreId)
             if not songIds:
                 return None, ErrorCodes.NOT_FOUND
-            songs = SongsRepo.findByIds(songIds)
+            songs = SongsRepo.getByIds(songIds)
             if not songs:
                 return None, ErrorCodes.NOT_FOUND
             return songs, None
@@ -111,7 +111,7 @@ class SongsService:
                 return None, ErrorCodes.NOT_FOUND
                 
             songIds = [str(genreSong.songId) for genreSong in genreSongs['result']]
-            songs = SongsRepo.findByIds(songIds)
+            songs = SongsRepo.getByIds(songIds)
             if not songs:
                 return None, ErrorCodes.NOT_FOUND
                 
@@ -132,7 +132,7 @@ class SongsService:
             songIds = AlbumSongService.findByAlbumId(albumId)
             if not songIds:
                 return None, ErrorCodes.NOT_FOUND
-            songs = SongsRepo.findByIds(songIds)
+            songs = SongsRepo.getByIds(songIds)
             if not songs:
                 return None, ErrorCodes.NOT_FOUND
             return songs, None
@@ -154,7 +154,7 @@ class SongsService:
                 return None, ErrorCodes.NOT_FOUND
                 
             songIds = [str(albumSong.songId) for albumSong in albumSongs['result']]
-            songs = SongsRepo.findByIds(songIds)
+            songs = SongsRepo.getByIds(songIds)
             if not songs:
                 return None, ErrorCodes.NOT_FOUND
                 
@@ -192,17 +192,18 @@ class SongsService:
             return None, ErrorCodes.OPERATION_FAILED
     
     @staticmethod
-    def doCreate(title: str, artistId: str, audioUrl: str, albumIds: list[str], genreIds: list[str] = None, backgroundImage: str = None, duration: int = None, description: str = None, subArtistIds: list[str] = None):
+    def doCreate(title: str, artistId: str, storageId: str, albumIds: list[str], genreIds: list[str] = None, storageImageId: str = None, duration: int = None, description: str = None, subArtistIds: list[str] = None):
         try:
-            if not title or not artistId or not albumIds or not audioUrl or title == "" or artistId == "" or albumIds == [] or audioUrl == "":
+            if not title or not artistId or not albumIds or not storageId or title == "" or artistId == "" or albumIds == [] or storageId == "":
                 return None, ErrorCodes.INVALID_INPUT
+            
             song = Songs(
                 title=title,
-                description=description,
-                audioUrl=audioUrl,
-                backgroundImage=backgroundImage,
+                artistId=artistId,
+                storageId=storageId,
+                storageImageId=storageImageId,
                 duration=duration,
-                isActive=False
+                description=description
             )
             songId = SongsRepo.create(song)
             if not songId:
@@ -218,7 +219,7 @@ class SongsService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doUpdate(id: str, title: str = None, backgroundImage: str = None, duration: int = None, description: str = None):
+    def doUpdate(id: str, title: str = None, storageImageId: str = None, duration: int = None, description: str = None):
         try:
             if not id or id == "":
                 return None, ErrorCodes.INVALID_INPUT
@@ -229,8 +230,8 @@ class SongsService:
 
             if title is not None:
                 currentSong.title = title
-            if backgroundImage is not None:
-                currentSong.backgroundImage = backgroundImage
+            if storageImageId is not None:
+                currentSong.storageImageId = storageImageId
             if duration is not None:
                 currentSong.duration = duration
             if description is not None:

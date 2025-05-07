@@ -9,7 +9,7 @@ class AlbumsService:
         try:
             if not page or not pageSize:
                 return None, ErrorCodes.INVALID_INPUT
-            result = AlbumsRepo.findAllPaginated(page, pageSize)
+            result = AlbumsRepo.filterAllPaginated(page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -19,7 +19,7 @@ class AlbumsService:
     @staticmethod
     def findAll():
         try:
-            result = AlbumsRepo.findAll()
+            result = AlbumsRepo.filterAll()
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -83,7 +83,7 @@ class AlbumsService:
             albumsIds = AlbumSongService.findBySongId(songId)
             if not albumsIds:
                 return None, ErrorCodes.NOT_FOUND
-            albums = AlbumsRepo.findByIds(albumsIds)
+            albums = AlbumsRepo.getByIds(albumsIds)
             if not albums:
                 return None, ErrorCodes.NOT_FOUND
             return albums, None
@@ -91,17 +91,15 @@ class AlbumsService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doCreate(name, description=None, backgroundImage=None):
+    def doCreate(name, artistId, description=None, storageImageId=None):
         try:
-            if not name:
+            if not name or not artistId:
                 return None, ErrorCodes.INVALID_INPUT
-            existing = AlbumsRepo.getByName(name)
-            if existing and existing.exists():
-                return None, ErrorCodes.ALREADY_EXISTS
             album = Albums(
                 name=name,
                 description=description,
-                backgroundImage=backgroundImage
+                storageImageId=storageImageId,
+                artistId=artistId
             )
             created = AlbumsRepo.create(album)
             if not created:
@@ -111,7 +109,7 @@ class AlbumsService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doUpdate(id, name=None, description=None, backgroundImage=None):
+    def doUpdate(id, artistId, name=None, description=None, storageImageId=None):
         try:
             if not id:
                 return None, ErrorCodes.INVALID_INPUT
@@ -122,8 +120,10 @@ class AlbumsService:
                 currentAlbum.name = name
             if description is not None:
                 currentAlbum.description = description
-            if backgroundImage is not None:
-                currentAlbum.backgroundImage = backgroundImage
+            if storageImageId is not None:
+                currentAlbum.storageImageId = storageImageId
+            if artistId is not None:
+                currentAlbum.artistId = artistId
             updated = AlbumsRepo.update(currentAlbum)
             if not updated:
                 return None, ErrorCodes.UPDATE_FAILED

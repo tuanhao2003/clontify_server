@@ -137,17 +137,17 @@ class CreateSong(View):
             title = data.get("title")
             artistId = data.get("artistId")
             genreIds = data.get("genreId")
-            audioUrl = data.get("audioUrl")
-            backgroundImage = data.get("backgroundImage")
+            storageId = data.get("storageId")
+            storageImageId = data.get("storageImageId")
             duration = data.get("duration")
             description = data.get("description")
             albumIds = data.get("albumId")
             subArtistIds = data.get("subArtistId")
 
-            if not title or not artistId or not albumIds or not audioUrl:
+            if not title or not artistId or not albumIds or not storageId:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            song, error = SongsService.doCreate(title, artistId, audioUrl, albumIds, genreIds, backgroundImage, duration, description, subArtistIds)
+            song, error = SongsService.doCreate(title, artistId, storageId, albumIds, genreIds, storageImageId, duration, description, subArtistIds)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
@@ -166,14 +166,14 @@ class UpdateSong(View):
             data = json.loads(request.body.decode('utf-8'))
             id = data.get("id")
             title = data.get("title")
-            backgroundImage = data.get("backgroundImage")
+            storageImageId = data.get("storageImageId")
             duration = data.get("duration")
             description = data.get("description")
             
             if not id:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            song, error = SongsService.doUpdate(id, title, backgroundImage, duration, description)
+            song, error = SongsService.doUpdate(id, title, storageImageId, duration, description)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")

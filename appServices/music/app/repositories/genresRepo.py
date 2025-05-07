@@ -5,7 +5,7 @@ import uuid
 
 class GenresRepo:
     @staticmethod
-    def findAllPaginated(page: int = 1, pageSize: int = 10):
+    def filterAllPaginated(page: int = 1, pageSize: int = 10):
         try:
             result = Genres.objects.filter(isActive=True)
             paginator = Paginator(result, pageSize)
@@ -19,7 +19,7 @@ class GenresRepo:
             return None
 
     @staticmethod
-    def findAll():
+    def filterAll():
         try:
             return Genres.objects.filter(isActive=True)
         except Exception:
@@ -54,9 +54,9 @@ class GenresRepo:
             return None
 
     @staticmethod
-    def filterByName(name: str):
+    def getByName(name: str):
         try:
-            return Genres.objects.filter(name__icontains=name, isActive=True)
+            return Genres.objects.filter(name=name, isActive=True)
         except Exception:
             return None
 

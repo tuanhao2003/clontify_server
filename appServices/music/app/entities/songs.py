@@ -7,9 +7,12 @@ class Songs(Base):
     title = models.CharField(max_length=255)
     description = models.CharField(blank=True, null= True)
     artistId = models.UUIDField()
-    audioUrl = models.URLField()
-    backgroundImage = models.URLField(blank=True, null=True)
+    storageId = models.UUIDField(unique=True, null=False, blank=False)
+    storageImageId = models.UUIDField(unique=True, null=True, blank=True)
     duration = models.PositiveIntegerField()
     
     def __str__(self):
         return self.id
+    
+    class Meta:
+        app_label = "app" 

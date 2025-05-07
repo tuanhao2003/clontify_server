@@ -2,12 +2,14 @@ from app.repositories.albumSongRepo import AlbumSongRepo
 from app.entities.albumSong import AlbumSong
 from common.errorCodes import ErrorCodes
 import uuid
+from app.repositories.songsRepo import SongsRepo
+from app.repositories.albumsRepo import AlbumsRepo
 
 class AlbumSongService:
     @staticmethod
     def findAllPaginated(page: int = 1, pageSize: int = 10):
         try:
-            result = AlbumSongRepo.getAllPaginated(page, pageSize)
+            result = AlbumSongRepo.filterAllPaginated(page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -17,7 +19,7 @@ class AlbumSongService:
     @staticmethod
     def findAll():
         try:
-            result = AlbumSongRepo.getAll()
+            result = AlbumSongRepo.filterAll()
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -77,8 +79,20 @@ class AlbumSongService:
     @staticmethod
     def doCreate(albumId: str, songId: str):
         try:
+            if not albumId or not songId:
+                return None, ErrorCodes.INVALID_INPUT
             albumId = uuid.UUID(albumId)
             songId = uuid.UUID(songId)
+            song = SongsRepo.getById(songId)
+            if not song:
+                return None, ErrorCodes.NOT_FOUND
+            album = AlbumsRepo.getById(albumId)
+            if not album:
+                return None, ErrorCodes.NOT_FOUND
+            
+            existing = AlbumSongRepo.getExactly(albumId, songId)
+            if existing:
+                return None, ErrorCodes.ALREADY_EXISTS
             albumSong = AlbumSong(albumId=albumId, songId=songId)
             result = AlbumSongRepo.create(albumSong)
             if not result:
@@ -93,6 +107,8 @@ class AlbumSongService:
             albumId = uuid.UUID(albumId)
             songId = uuid.UUID(songId)
             albumSong = AlbumSongRepo.getExactly(albumId, songId)
+            if not albumSong:
+                return None, ErrorCodes.NOT_FOUND
             result = AlbumSongRepo.delete(albumSong)
             if not result:
                 return None, ErrorCodes.DELETE_FAILED

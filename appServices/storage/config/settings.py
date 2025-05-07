@@ -12,9 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
-
-load_dotenv()
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,20 +39,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
-    'app',
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "corsheaders",
+    "app",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "common.jwtMiddleware.JwtMiddleware"
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -82,13 +82,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'storage_db'),
-        'USER': os.getenv('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "storageservice",
+        "USER": "admin",
+        "PASSWORD": "admin",
+        "HOST": "postgres",
+        "PORT": "5432",
     }
 }
 
@@ -135,22 +135,65 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS settings
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
 
-# AWS S3 settings
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-AWS_REGION = os.getenv('AWS_REGION', 'ap-southeast-1')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com'
+CORS_ALLOWED_ORIGINS = [
+    "https://fe-spotify.vercel.app",
+    "http://localhost:50050",
+    "http://localhost:8080",
+    "http://localhost:50051",
+    "http://localhost:8081",
+    "http://localhost:5173",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://fe-spotify.vercel.app",
+    "http://localhost:50050",
+    "http://localhost:8080",
+    "http://localhost:50051",
+    "http://localhost:8081",
+    "http://localhost:5173",
+]
+
+def parseBoolean(value):
+    return str(value).lower() in ('true', '1', 't', 'yes', 'y')
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get("JWT_ACCESS_TOKEN_LIFETIME", 30))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get("JWT_REFRESH_TOKEN_LIFETIME", 7))),
+    'ROTATE_REFRESH_TOKENS': parseBoolean(os.environ.get("JWT_ROTATE_REFRESH_TOKENS", "True")),
+    'BLACKLIST_AFTER_ROTATION': parseBoolean(os.environ.get("JWT_BLACKLIST_AFTER_ROTATION", "True")),
+    'ALGORITHM': os.environ.get("JWT_ALGORITHM", ""),
+    'SIGNING_KEY': os.environ.get("JWT_SECRET_KEY", ""),
+    'VERIFYING_KEY': os.environ.get("JWT_VERIFYING_KEY", None),
+    'AUTH_HEADER_TYPES': os.environ.get("JWT_AUTH_HEADER_TYPES", ("Bearer",)),
+    'AUTH_TOKEN_CLASSES': os.environ.get("JWT_AUTH_TOKEN_CLASSES", ("rest_framework_simplejwt.tokens.AccessToken",)),
+    'USER_ID_FIELD': os.environ.get("JWT_USER_ID_FIELD", "id"),
+    'USER_ID_CLAIM': os.environ.get("JWT_USER_ID_CLAIM", "user_id"),
+}
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+
+CORS_ALLOW_CREDENTIALS = parseBoolean(os.environ.get("CORS_ALLOW_CREDENTIALS", "True"))
+CSRF_COOKIE_HTTPONLY = parseBoolean(os.environ.get("CSRF_COOKIE_HTTPONLY", "False"))
+CSRF_COOKIE_SAMESITE = os.environ.get("CSRF_COOKIE_SAMESITE", "Lax")
+CSRF_COOKIE_SECURE = parseBoolean(os.environ.get("CSRF_COOKIE_SECURE", "False"))
+CSRF_COOKIE_AGE = int(os.environ.get("CSRF_COOKIE_AGE", "604800"))
+
+USERS_GRPC_HOST = os.environ.get("USERS_GRPC_HOST", "users_service")
+USERS_GRPC_PORT = os.environ.get("USERS_GRPC_PORT", "50051")
+AUTH_GRPC_HOST = os.environ.get("AUTH_GRPC_HOST", "auth_service")
+AUTH_GRPC_PORT = os.environ.get("AUTH_GRPC_PORT", "50050")
+
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "")
+AWS_DEFAULT_ACL = os.environ.get("AWS_DEFAULT_ACL", "")
+AWS_S3_CUSTOM_DOMAIN = os.environ.get("AWS_S3_CUSTOM_DOMAIN", "")
+AWS_S3_OBJECT_PARAMETERS = os.environ.get("AWS_S3_OBJECT_PARAMETERS", "")
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
-AWS_DEFAULT_ACL = 'public-read'
-AWS_QUERYSTRING_AUTH = False
 
-# File upload settings
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB

@@ -10,7 +10,7 @@ class GenresService:
         try:
             if not page or not pageSize:
                 return None, ErrorCodes.INVALID_INPUT
-            result = GenresRepo.findAllPaginated(page, pageSize)
+            result = GenresRepo.filterAllPaginated(page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -20,7 +20,7 @@ class GenresService:
     @staticmethod
     def findAll():
         try:
-            result = GenresRepo.findAll()
+            result = GenresRepo.filterAll()
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -81,10 +81,10 @@ class GenresService:
         try:
             if not songId:
                 return None, ErrorCodes.INVALID_INPUT
-            genreIds = GenreSongService.findBySongId(songId)
+            genreIds = GenreSongService.filterBySongId(songId)
             if not genreIds:
                 return None, ErrorCodes.NOT_FOUND
-            genres = GenresRepo.findByIds(genreIds)
+            genres = GenresRepo.getByIds(genreIds)
             if not genres:
                 return None, ErrorCodes.NOT_FOUND
             return genres, None
@@ -96,7 +96,7 @@ class GenresService:
         try:
             if not name:
                 return None, ErrorCodes.INVALID_INPUT
-            existing = GenresRepo.filterByName(name)
+            existing = GenresRepo.getByName(name)
             if existing and existing.exists():
                 return None, ErrorCodes.ALREADY_EXISTS
             genre = Genres(

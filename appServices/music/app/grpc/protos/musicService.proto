@@ -10,8 +10,8 @@ message Song {
     string title = 2;
     string description = 3;
     string artistId = 4;
-    string audioUrl = 5;
-    string backgroundImage = 6;
+    string storageId = 5;
+    string storageImageId = 6;
     int32 duration = 7;
     google.protobuf.Timestamp createdAt = 8;
     google.protobuf.Timestamp updatedAt = 9;
@@ -22,10 +22,10 @@ message Song {
 message CreateSongRequest {
     string title = 1;
     string artistId = 2;
-    string audioUrl = 3;
+    string storageId = 3;
     repeated string albumIds = 4;
     repeated string genreIds = 5;
-    string backgroundImage = 6;
+    string storageImageId = 6;
     int32 duration = 7;
     string description = 8;
     repeated string subArtistIds = 9;
@@ -34,7 +34,7 @@ message CreateSongRequest {
 message UpdateSongRequest {
     string id = 1;
     string title = 2;
-    string backgroundImage = 3;
+    string storageImageId = 3;
     int32 duration = 4;
     string description = 5;
 }
@@ -51,10 +51,10 @@ message SongListResponse {
 
 message Album {
     string id = 1;
-    string title = 2;
+    string name = 2;
     string description = 3;
-    string artistId = 4;
-    string backgroundImage = 5;
+    string storageImageId = 4;
+    string artistId = 5;
     google.protobuf.Timestamp createdAt = 6;
     google.protobuf.Timestamp updatedAt = 7;
     google.protobuf.Timestamp deletedAt = 8;
@@ -62,18 +62,18 @@ message Album {
 }
 
 message CreateAlbumRequest {
-    string title = 1;
-    string artistId = 2;
-    string backgroundImage = 3;
-    string description = 4;
-    repeated string songIds = 5;
+    string name = 1;
+    string description = 2;
+    string storageImageId = 3;
+    string artistId = 4;
 }
 
 message UpdateAlbumRequest {
     string id = 1;
-    string title = 2;
-    string backgroundImage = 3;
-    string description = 4;
+    string name = 2;
+    string description = 3;
+    string storageImageId = 4;
+    string artistId = 5;
 }
 
 message AlbumResponse {

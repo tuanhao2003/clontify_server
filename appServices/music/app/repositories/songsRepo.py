@@ -9,7 +9,7 @@ import uuid
 
 class SongsRepo:
     @staticmethod
-    def findAllPaginated(page: int = 1, pageSize: int = 10):
+    def filterAllPaginated(page: int = 1, pageSize: int = 10):
         try:
             result = Songs.objects.filter(isActive=True)
             paginator = Paginator(result, pageSize)
@@ -23,7 +23,7 @@ class SongsRepo:
             return None
 
     @staticmethod
-    def findAll():
+    def filterAll():
         try:
             return Songs.objects.filter(isActive=True)
         except Exception:
@@ -65,7 +65,7 @@ class SongsRepo:
             return None
         
     @staticmethod
-    def findByArtistId(artistId: uuid.UUID):
+    def filterByArtistId(artistId: uuid.UUID):
         try:
             ownedSongs = Songs.objects.filter(artistId=artistId, isActive=True)
             participatedSongIds = SongSubArtist.objects.filter(subArtistID=artistId).values_list('songID', flat=True)
@@ -76,7 +76,7 @@ class SongsRepo:
             return None
 
     @staticmethod
-    def findByArtistIdPaginated(artistId: uuid.UUID, page: int = 1, pageSize: int = 10):
+    def filterByArtistIdPaginated(artistId: uuid.UUID, page: int = 1, pageSize: int = 10):
         try:
             ownedSongs = Songs.objects.filter(artistId=artistId, isActive=True)
             participatedSongIds = SongSubArtist.objects.filter(subArtistID=artistId).values_list('songID', flat=True)

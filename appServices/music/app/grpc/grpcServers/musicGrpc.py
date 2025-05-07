@@ -39,8 +39,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 songProto.id = str(song.id)
                 songProto.title = song.title
                 songProto.artistId = str(song.artistId)
-                songProto.audioUrl = song.audioUrl
-                songProto.backgroundImage = song.backgroundImage
+                songProto.storageId = str(song.storageId)
+                songProto.storageImageId = str(song.storageImageId) if song.storageImageId else ""
                 songProto.duration = song.duration
                 songProto.description = song.description
                 songProto.createdAt = self._parseTimestamp(song.createdAt)
@@ -75,8 +75,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                     id=str(song.id),
                     title=song.title,
                     artistId=str(song.artistId),
-                    audioUrl=song.audioUrl,
-                    backgroundImage=song.backgroundImage,
+                    storageId=str(song.storageId),
+                    storageImageId=str(song.storageImageId) if song.storageImageId else "",
                     duration=song.duration,
                     description=song.description,
                     createdAt=self._parseTimestamp(song.createdAt),
@@ -112,8 +112,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 songProto.id = str(song.id)
                 songProto.title = song.title
                 songProto.artistId = str(song.artistId)
-                songProto.audioUrl = song.audioUrl
-                songProto.backgroundImage = song.backgroundImage
+                songProto.storageId = str(song.storageId)
+                songProto.storageImageId = str(song.storageImageId) if song.storageImageId else ""
                 songProto.duration = song.duration
                 songProto.description = song.description
                 songProto.createdAt = self._parseTimestamp(song.createdAt)
@@ -149,8 +149,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 songProto.id = str(song.id)
                 songProto.title = song.title
                 songProto.artistId = str(song.artistId)
-                songProto.audioUrl = song.audioUrl
-                songProto.backgroundImage = song.backgroundImage
+                songProto.storageId = str(song.storageId)
+                songProto.storageImageId = str(song.storageImageId) if song.storageImageId else ""
                 songProto.duration = song.duration
                 songProto.description = song.description
                 songProto.createdAt = self._parseTimestamp(song.createdAt)
@@ -168,11 +168,11 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
         try:
             song, error = SongsService.doCreate(
                 title=request.title,
-                artistId=str(request.artistId),
-                audioUrl=request.audioUrl,
+                artistId=request.artistId,
+                storageId=request.storageId,
                 albumIds=request.albumIds,
                 genreIds=request.genreIds,
-                backgroundImage=request.backgroundImage,
+                storageImageId=request.storageImageId,
                 duration=request.duration,
                 description=request.description,
                 subArtistIds=request.subArtistIds
@@ -199,8 +199,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                     id=str(song.id),
                     title=song.title,
                     artistId=str(song.artistId),
-                    audioUrl=song.audioUrl,
-                    backgroundImage=song.backgroundImage,
+                    storageId=str(song.storageId),
+                    storageImageId=str(song.storageImageId) if song.storageImageId else "",
                     duration=song.duration,
                     description=song.description,
                     createdAt=self._parseTimestamp(song.createdAt),
@@ -219,7 +219,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             song, error = SongsService.doUpdate(
                 id=str(request.id),
                 title=request.title,
-                backgroundImage=request.backgroundImage,
+                storageImageId=request.storageImageId,
                 duration=request.duration,
                 description=request.description
             )
@@ -245,8 +245,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                     id=str(song.id),
                     title=song.title,
                     artistId=str(song.artistId),
-                    audioUrl=song.audioUrl,
-                    backgroundImage=song.backgroundImage,
+                    storageId=str(song.storageId),
+                    storageImageId=str(song.storageImageId) if song.storageImageId else "",
                     duration=song.duration,
                     description=song.description,
                     createdAt=self._parseTimestamp(song.createdAt),
@@ -285,8 +285,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                     id=str(result.id),
                     title=result.title,
                     artistId=str(result.artistId),
-                    audioUrl=result.audioUrl,
-                    backgroundImage=result.backgroundImage,
+                    storageId=str(result.storageId),
+                    storageImageId=str(result.storageImageId) if result.storageImageId else "",
                     duration=result.duration,
                     description=result.description,
                     createdAt=self._parseTimestamp(result.createdAt),
@@ -316,10 +316,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             for album in albums:
                 albumProto = response.albums.add()
                 albumProto.id = str(album.id)
-                albumProto.title = album.title
+                albumProto.name = album.name
                 albumProto.description = album.description
-                albumProto.artistId = str(album.artistId)
-                albumProto.backgroundImage = album.backgroundImage
+                albumProto.storageImageId = str(album.storageImageId) if album.storageImageId else ""
+                albumProto.artistId = str(album.artistId) if album.artistId else ""
                 albumProto.createdAt = self._parseTimestamp(album.createdAt)
                 albumProto.updatedAt = self._parseTimestamp(album.updatedAt)
                 albumProto.deletedAt = self._parseTimestamp(album.deletedAt)
@@ -350,10 +350,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             return musicService_pb2.AlbumResponse(
                 album=musicService_pb2.Album(
                     id=str(album.id),
-                    title=album.title,
+                    name=album.name,
                     description=album.description,
-                    artistId=str(album.artistId),
-                    backgroundImage=album.backgroundImage,
+                    storageImageId=str(album.storageImageId) if album.storageImageId else "",
+                    artistId=str(album.artistId) if album.artistId else "",
                     createdAt=self._parseTimestamp(album.createdAt),
                     updatedAt=self._parseTimestamp(album.updatedAt),
                     deletedAt=self._parseTimestamp(album.deletedAt),
@@ -367,10 +367,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
 
     def findAlbumsByTitle(self, request, context):
         try:
-            albums, error = AlbumsService.findByTitle(request.value)
+            albums, error = AlbumsService.findByName(request.value)
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                context.set_details("Invalid title")
+                context.set_details("Invalid name")
                 return None
             if error == ErrorCodes.NOT_FOUND:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
@@ -385,10 +385,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             for album in albums:
                 albumProto = response.albums.add()
                 albumProto.id = str(album.id)
-                albumProto.title = album.title
+                albumProto.name = album.name
                 albumProto.description = album.description
-                albumProto.artistId = str(album.artistId)
-                albumProto.backgroundImage = album.backgroundImage
+                albumProto.storageImageId = str(album.storageImageId) if album.storageImageId else ""
+                albumProto.artistId = str(album.artistId) if album.artistId else ""
                 albumProto.createdAt = self._parseTimestamp(album.createdAt)
                 albumProto.updatedAt = self._parseTimestamp(album.updatedAt)
                 albumProto.deletedAt = self._parseTimestamp(album.deletedAt)
@@ -420,10 +420,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             for album in albums:
                 albumProto = response.albums.add()
                 albumProto.id = str(album.id)
-                albumProto.title = album.title
+                albumProto.name = album.name
                 albumProto.description = album.description
-                albumProto.artistId = str(album.artistId)
-                albumProto.backgroundImage = album.backgroundImage
+                albumProto.storageImageId = str(album.storageImageId) if album.storageImageId else ""
+                albumProto.artistId = str(album.artistId) if album.artistId else ""
                 albumProto.createdAt = self._parseTimestamp(album.createdAt)
                 albumProto.updatedAt = self._parseTimestamp(album.updatedAt)
                 albumProto.deletedAt = self._parseTimestamp(album.deletedAt)
@@ -438,11 +438,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
     def createAlbum(self, request, context):
         try:
             album, error = AlbumsService.doCreate(
-                title=request.title,
-                artistId=str(request.artistId),
-                backgroundImage=request.backgroundImage,
+                name=request.name,
+                artistId=request.artistId,
                 description=request.description,
-                songIds=request.songIds
+                storageImageId=request.storageImageId
             )
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
@@ -464,10 +463,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             return musicService_pb2.AlbumResponse(
                 album=musicService_pb2.Album(
                     id=str(album.id),
-                    title=album.title,
+                    name=album.name,
                     description=album.description,
-                    artistId=str(album.artistId),
-                    backgroundImage=album.backgroundImage,
+                    storageImageId=str(album.storageImageId) if album.storageImageId else "",
+                    artistId=str(album.artistId) if album.artistId else "",
                     createdAt=self._parseTimestamp(album.createdAt),
                     updatedAt=self._parseTimestamp(album.updatedAt),
                     deletedAt=self._parseTimestamp(album.deletedAt),
@@ -483,9 +482,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
         try:
             album, error = AlbumsService.doUpdate(
                 id=str(request.id),
-                title=request.title,
+                artistId=request.artistId,
+                name=request.name,
                 description=request.description,
-                backgroundImage=request.backgroundImage
+                storageImageId=request.storageImageId
             )
             if error == ErrorCodes.INVALID_INPUT:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
@@ -507,10 +507,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             return musicService_pb2.AlbumResponse(
                 album=musicService_pb2.Album(
                     id=str(album.id),
-                    title=album.title,
+                    name=album.name,
                     description=album.description,
-                    artistId=str(album.artistId),
-                    backgroundImage=album.backgroundImage,
+                    storageImageId=str(album.storageImageId) if album.storageImageId else "",
+                    artistId=str(album.artistId) if album.artistId else "",
                     createdAt=self._parseTimestamp(album.createdAt),
                     updatedAt=self._parseTimestamp(album.updatedAt),
                     deletedAt=self._parseTimestamp(album.deletedAt),
@@ -545,10 +545,10 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             return musicService_pb2.AlbumResponse(
                 album=musicService_pb2.Album(
                     id=str(result.id),
-                    title=result.title,
+                    name=result.name,
                     description=result.description,
-                    artistId=str(result.artistId),
-                    backgroundImage=result.backgroundImage,
+                    storageImageId=str(result.storageImageId) if result.storageImageId else "",
+                    artistId=str(result.artistId) if result.artistId else "",
                     createdAt=self._parseTimestamp(result.createdAt),
                     updatedAt=self._parseTimestamp(result.updatedAt),
                     deletedAt=self._parseTimestamp(result.deletedAt),

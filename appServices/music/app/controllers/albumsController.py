@@ -77,12 +77,13 @@ class CreateAlbum(View):
             data = json.loads(request.body.decode('utf-8'))
             name = data.get("name")
             description = data.get("description")
-            backgroundImage = data.get("backgroundImage")
+            storageImageId = data.get("storageImageId")
+            artistId = data.get("artistId")
 
-            if not name or not description or not backgroundImage:
+            if not name or not description or not storageImageId or not artistId:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            album, error = AlbumsService.doCreate(name, description, backgroundImage)
+            album, error = AlbumsService.doCreate(name, artistId, description, storageImageId)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
@@ -102,12 +103,13 @@ class UpdateAlbum(View):
             id = data.get("id")
             name = data.get("name")
             description = data.get("description")
-            backgroundImage = data.get("backgroundImage")
+            storageImageId = data.get("storageImageId")
+            artistId = data.get("artistId")
 
-            if not id or not name or not description or not backgroundImage:
+            if not id or not name or not description or not storageImageId or not artistId:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            album, error = AlbumsService.doUpdate(id, name, description, backgroundImage)
+            album, error = AlbumsService.doUpdate(id, artistId, name, description, storageImageId)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")

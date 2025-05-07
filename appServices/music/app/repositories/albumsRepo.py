@@ -5,7 +5,7 @@ import uuid
 
 class AlbumsRepo:
     @staticmethod
-    def findAllPaginated(page: int = 1, pageSize: int = 10):
+    def filterAllPaginated(page: int = 1, pageSize: int = 10):
         try:
             result = Albums.objects.filter(isActive=True)
             paginator = Paginator(result, pageSize)
@@ -19,7 +19,7 @@ class AlbumsRepo:
             return None
 
     @staticmethod
-    def findAll():
+    def filterAll():
         try:
             return Albums.objects.filter(isActive=True)
         except Exception:
@@ -57,6 +57,27 @@ class AlbumsRepo:
     def filterByName(name: str):
         try:
             return Albums.objects.filter(name__icontains=name, isActive=True)
+        except Exception:
+            return None
+
+    @staticmethod
+    def filterByArtistId(artistId: uuid.UUID):
+        try:
+            return Albums.objects.filter(artistId=artistId, isActive=True)
+        except Exception:
+            return None
+
+    @staticmethod
+    def filterByArtistIdPaginated(artistId: uuid.UUID, page: int = 1, pageSize: int = 10):
+        try:
+            result = Albums.objects.filter(artistId=artistId, isActive=True)
+            paginator = Paginator(result, pageSize)
+            return {
+                'result': paginator.get_page(page),
+                'total': paginator.count,
+                'totalPages': paginator.num_pages,
+                'currentPage': page
+            }
         except Exception:
             return None
 

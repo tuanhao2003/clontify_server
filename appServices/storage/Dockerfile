@@ -10,8 +10,8 @@ RUN python -m grpc_tools.protoc \
     -I./app/grpc/protos \
     --python_out=./app/grpc/protos \
     --grpc_python_out=./app/grpc/protos \
+    ./app/grpc/protos/storageService.proto \
     ./app/grpc/protos/musicService.proto \
-    ./app/grpc/protos/usersService.proto && \
     sed -i 's/^import \(.*_pb2\)/from . import \1/' ./app/grpc/protos/*_pb2_grpc.py && \
     sed -i 's/^import \(.*_pb2\)/from . import \1/' ./app/grpc/protos/*_pb2*.py
     

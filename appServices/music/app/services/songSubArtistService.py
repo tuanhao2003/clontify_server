@@ -10,7 +10,7 @@ class SongSubArtistService:
     @staticmethod
     def findAllPaginated(page: int = 1, pageSize: int = 10):
         try:
-            result = SongSubArtistRepo.getAllPaginated(page, pageSize)
+            result = SongSubArtistRepo.filterAllPaginated(page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -20,7 +20,7 @@ class SongSubArtistService:
     @staticmethod
     def findAll():
         try:
-            result = SongSubArtistRepo.getAll()
+            result = SongSubArtistRepo.filterAll()
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -38,9 +38,9 @@ class SongSubArtistService:
             return None, ErrorCodes.OPERATION_FAILED
         
     @staticmethod
-    def findByArtistIdPaginated(subArtistId: str, page: int = 1, pageSize: int = 10):
+    def findBySubArtistIdPaginated(subArtistId: str, page: int = 1, pageSize: int = 10):
         try:
-            result = SongSubArtistRepo.filterByArtistIdPaginated(uuid.UUID(subArtistId), page, pageSize)
+            result = SongSubArtistRepo.filterBySubArtistIdPaginated(uuid.UUID(subArtistId), page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -48,9 +48,9 @@ class SongSubArtistService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def findByArtistId(subArtistId: str):
+    def findBySubArtistId(subArtistId: str):
         try:
-            result = SongSubArtistRepo.filterByArtistId(uuid.UUID(subArtistId))
+            result = SongSubArtistRepo.filterBySubArtistId(uuid.UUID(subArtistId))
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
