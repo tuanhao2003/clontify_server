@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package app.grpc.protos.storage;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service StorageService {
+  rpc findAll(google.protobuf.Empty) returns (StorageDataListResponse);
+  rpc findById(StorageDataIdRequest) returns (StorageDataResponse);
+  rpc findByIds(StorageDataIdsRequest) returns (StorageDataListResponse);
+  rpc findByFileName(StorageDataFileNameRequest) returns (StorageDataListResponse);
+  rpc findByUserId(StorageDataUserIdRequest) returns (StorageDataListResponse);
+  rpc findByFileType(StorageDataFileTypeRequest) returns (StorageDataListResponse);
+  rpc create(StorageDataCreateRequest) returns (StorageDataResponse);
+  rpc update(StorageDataUpdateRequest) returns (StorageDataResponse);
+  rpc delete(StorageDataIdRequest) returns (StorageDataResponse);
+}
+
+message StorageData {
+  string id = 1;
+  string fileName = 2;
+  string fileType = 3;
+  string userId = 4;
+  int64 fileSize = 5;
+  string filePath = 6;
+  string fileUrl = 7;
+  google.protobuf.Timestamp createdAt = 8;
+  google.protobuf.Timestamp updatedAt = 9;
+  google.protobuf.Timestamp deletedAt = 10;
+  bool isActive = 11;
+}
+
+message StorageDataIdRequest {
+  string id = 1;
+}
+
+message StorageDataIdsRequest {
+  repeated string ids = 1;
+}
+
+message StorageDataFileNameRequest {
+  string fileName = 1;
+}
+
+message StorageDataUserIdRequest {
+  string userId = 1;
+}
+
+message StorageDataFileTypeRequest {
+  string fileType = 1;
+}
+
+message StorageDataCreateRequest {
+  string fileName = 1;
+  string fileType = 2;
+  string userId = 3;
+  int64 fileSize = 4;
+  string filePath = 5;
+  string fileUrl = 6;
+}
+
+message StorageDataUpdateRequest {
+  string id = 1;
+  string fileName = 2;
+  string fileType = 3;
+  int64 fileSize = 4;
+  string filePath = 5;
+  string fileUrl = 6;
+}
+
+message StorageDataResponse {
+  StorageData data = 1;
+}
+
+message StorageDataListResponse {
+  repeated StorageData data = 1;
+} 

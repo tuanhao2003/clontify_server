@@ -5,7 +5,7 @@ from common.baseEntity import Base
 class StorageData(Base):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     userId = models.UUIDField()
-    fileName = models.CharField(max_length=255)
+    fileName = models.CharField(max_length=255, unique=True)
     fileType = models.CharField(max_length=255)
     fileSize = models.IntegerField()
     fileUrl = models.URLField(blank=True, null=True)
