@@ -7,6 +7,9 @@ from django.core.paginator import Paginator
 from django.db import models
 import uuid
 from app.enums.songTypes import SongTypes
+import logging
+
+logger = logging.getLogger('SongsRepo')
 
 class SongsRepo:
     @staticmethod
@@ -96,28 +99,37 @@ class SongsRepo:
     @staticmethod
     def create(song: Songs):
         try:
+            logger.info(f"Attempting to save song with ID: {song.id}")
             song.save()
+            logger.info(f"Successfully saved song with ID: {song.id}")
             return song
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to save song: {str(e)}", exc_info=True)
             return None
 
     @staticmethod
     def update(song: Songs):
         try:
+            logger.info(f"Attempting to update song with ID: {song.id}")
             song.updatedAt = now()
             song.save()
+            logger.info(f"Successfully updated song with ID: {song.id}")
             return song
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to update song: {str(e)}", exc_info=True)
             return None
 
     @staticmethod
     def delete(song: Songs):
         try:
+            logger.info(f"Attempting to delete song with ID: {song.id}")
             song.isActive = False
             song.deletedAt = now()
             song.save()
+            logger.info(f"Successfully deleted song with ID: {song.id}")
             return song
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to delete song: {str(e)}", exc_info=True)
             return None
 
     @staticmethod

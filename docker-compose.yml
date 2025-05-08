@@ -86,24 +86,24 @@ services:
     networks:
       - clontify-network
 
-  storage:
-    build:
-      context: ./appServices/storage
-      dockerfile: Dockerfile
-    container_name: storage_service
-    restart: no
-    volumes:
-      - ./appServices/common:/storage_service/common
-    env_file:
-      - .env
-    environment:
-      - PYTHONPATH=/storage_service/common
-    depends_on:
-      - postgres
-    ports:
-      - "8083:8083"
-    networks:
-      - clontify-network
+  # storage:
+  #   build:
+  #     context: ./appServices/storage
+  #     dockerfile: Dockerfile
+  #   container_name: storage_service
+  #   restart: no
+  #   volumes:
+  #     - ./appServices/common:/storage_service/common
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - PYTHONPATH=/storage_service/common
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "8083:8083"
+  #   networks:
+  #     - clontify-network
 
 
 volumes:

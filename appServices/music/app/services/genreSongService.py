@@ -89,6 +89,7 @@ class GenreSongService:
                 return None, ErrorCodes.NOT_FOUND
             if GenreSongRepo.getExactly(genreId, songId):
                 return None, ErrorCodes.ALREADY_EXISTS
+            
             genreSong = GenreSong(genreId=genreId, songId=songId)
             result = GenreSongRepo.create(genreSong)
             if not result:

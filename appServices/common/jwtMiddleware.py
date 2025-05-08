@@ -22,7 +22,8 @@ class JwtMiddleware:
             if not user_id:
                 return BaseResponse.invalidToken("Token không chứa user_id")
             request.user_id = user_id
-        except (TokenError, InvalidToken):
-            return BaseResponse.invalidToken("Token không hợp lệ")
+        except (TokenError, InvalidToken) as e:
+            return BaseResponse.invalidToken("Token không hợp lệ", str(e))
 
         return self.get_response(request)
+        

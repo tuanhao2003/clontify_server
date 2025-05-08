@@ -82,7 +82,7 @@ class RegisterController(View):
         if error == ErrorCodes.OPERATION_FAILED:
             return BaseResponse.internalError("Xảy ra lỗi trong quá trình đăng ký")
         if error:
-            return BaseResponse.internalError("Lỗi hệ thống")
+            return BaseResponse.internalError("Lỗi hệ thống", str(error))
 
         return BaseResponse.success("Tạo tài khoản thành công", {
             "account": AccountSerializer(result["account"]).data,

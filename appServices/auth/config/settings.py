@@ -141,10 +141,10 @@ REST_FRAMEWORK = {
 
 PUBLIC_ENDPOINTS = [
     '/',
-    '/login',
-    '/register',
-    '/refresh-token',
-    '/csrf',
+    '/auth/login',
+    '/auth/register',
+    '/auth/refresh-token',
+    '/auth/csrf',
     '/password-reset/request',
     '/password-reset/verify',
 ]
@@ -204,4 +204,4 @@ EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
-PASSWORD_RESET_TOKEN_LIFETIME = timedelta(minutes=int(os.environ.get("PASSWORD_RESET_TOKEN_LIFETIME", 15)))
+PASSWORD_RESET_TOKEN_LIFETIME = timedelta(minutes=int(os.environ.get("PASSWORD_RESET_TOKEN_LIFETIME", 15)))  

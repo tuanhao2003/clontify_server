@@ -7,8 +7,5 @@ class AlbumSong(Base):
     songId = models.UUIDField()
     order = models.PositiveIntegerField(blank=True, null=True)
 
-    def __str__(self):
-        return self.id
-
     class Meta:
         app_label = "app" 

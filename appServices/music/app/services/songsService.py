@@ -6,10 +6,10 @@ import uuid
 from app.services.genreSongService import GenreSongService
 from app.services.albumSongService import AlbumSongService
 from app.enums.songTypes import SongTypes
+from app.services.albumsService import AlbumsService
+from app.services.genresService import GenresService
 
 class SongsService:
-
-
     @staticmethod
     def findAllPaginated(page: int = 1, pageSize: int = 10):
         try:
@@ -194,29 +194,47 @@ class SongsService:
     
     @staticmethod
     def doCreate(title: str, artistId: str, storageId: str, albumIds: list[str], songType: str, genreIds: list[str] = None, storageImageId: str = None, duration: int = None, description: str = None, subArtistIds: list[str] = None):
-        try:
+        try:            
             if not title or not artistId or not albumIds or not storageId or not songType or title == "" or artistId == "" or albumIds == [] or storageId == "" or songType == "":
                 return None, ErrorCodes.INVALID_INPUT
             
-            song = Songs(
-                title=title,
-                artistId=uuid.UUID(artistId),
-                storageId=uuid.UUID(storageId),
-                storageImageId=uuid.UUID(storageImageId) if storageImageId else None,
-                duration=duration,
-                description=description,
-                songType=SongTypes[songType]
-            )
-            songId = SongsRepo.create(song)
-            if not songId:
+            try:
+                song = Songs(
+                    title=title,
+                    artistId=uuid.UUID(artistId),
+                    storageId=uuid.UUID(storageId),
+                    storageImageId=uuid.UUID(storageImageId) if storageImageId else None,
+                    duration=duration,
+                    description=description,
+                    songType=SongTypes[songType]
+                )
+            except Exception:
+                return None, ErrorCodes.INVALID_INPUT
+            
+            try:
+                song = SongsRepo.create(song)
+                if not song:
+                    return None, ErrorCodes.CREATE_FAILED
+            except Exception:
                 return None, ErrorCodes.CREATE_FAILED
+            
+            songId = str(song.id)
             for id in albumIds:
-                AlbumSongService.doCreate(uuid.UUID(id), songId)
+                albumExists, _ = AlbumsService.findById(id)
+                if albumExists:
+                    AlbumSongService.doCreate(albumId=id, songId=songId)
+                else:
+                    pass
+            
             if genreIds:
                 for id in genreIds:
-                    GenreSongService.doCreate(uuid.UUID(id), songId)
+                    genreExists, _ = GenresService.findById(id)
+                    if genreExists:
+                        GenreSongService.doCreate(genreId=id, songId=songId)
+                    else:
+                        pass
 
-            return songId, None
+            return song, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
@@ -253,27 +271,23 @@ class SongsService:
         try:
             if not id:
                 return None, ErrorCodes.INVALID_INPUT
-            currentSong = SongsRepo.getById(uuid.UUID(id))
-            if not currentSong:
-                return None, ErrorCodes.NOT_FOUND
+            currentSong, error = SongsService.findById(id)
+            if error:
+                return None, error
 
             albumSongs, error = AlbumSongService.findBySongId(id)
             if error:
                 return None, error
             if albumSongs:
                 for albumSong in albumSongs:
-                    _, error = AlbumSongService.doDelete(str(albumSong.albumId), str(albumSong.songId))
-                    if error:
-                        return None, error
+                    AlbumSongService.doDelete(str(albumSong.albumId), str(albumSong.songId))
 
             genreSongs, error = GenreSongService.findBySongId(id)
             if error:
                 return None, error
             if genreSongs:
                 for genreSong in genreSongs:
-                    _, error = GenreSongService.doDelete(str(genreSong.genreId), str(genreSong.songId))
-                    if error:
-                        return None, error
+                    GenreSongService.doDelete(str(genreSong.genreId), str(genreSong.songId))
                     
             songSubArtists = SongSubArtistRepo.filterBySongId(uuid.UUID(id))
             if songSubArtists:

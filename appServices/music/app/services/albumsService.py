@@ -3,6 +3,12 @@ from app.entities.albums import Albums
 from common.errorCodes import ErrorCodes
 from app.services.albumSongService import AlbumSongService
 import uuid
+import sys
+
+import logging
+logger = logging.getLogger("__name__")
+
+
 class AlbumsService:
     @staticmethod
     def findAllPaginated(page: int = 1, pageSize: int = 10):
@@ -94,22 +100,36 @@ class AlbumsService:
     def doCreate(name, artistId, description=None, storageImageId=None):
         try:
             if not name or not artistId:
+                logger.error(f"INVALID_INPUT: name={name}, artistId={artistId}")
+                return None, ErrorCodes.INVALID_INPUT
+            try:
+                storage_uuid = uuid.UUID(storageImageId) if storageImageId else None
+            except Exception as e:
+                logger.error(f"Invalid storageImageId: {storageImageId}, error: {e}")
+                return None, ErrorCodes.INVALID_INPUT
+            try:
+                artist_uuid = uuid.UUID(artistId)
+            except Exception as e:
+                logger.error(f"Invalid artistId: {artistId}, error: {e}")
                 return None, ErrorCodes.INVALID_INPUT
             album = Albums(
                 name=name,
                 description=description,
-                storageImageId=uuid.UUID(storageImageId) if storageImageId else None,
-                artistId=uuid.UUID(artistId)
+                storageImageId=storage_uuid,
+                artistId=artist_uuid
             )
             created = AlbumsRepo.create(album)
             if not created:
+                logger.error(f"CREATE_FAILED: album={album}")
                 return None, ErrorCodes.CREATE_FAILED
+            logger.info(f"SUCCESS: album={album}")
             return created, None
-        except Exception:
+        except Exception as e:
+            logger.error(f"OPERATION_FAILED: error={e}", exc_info=True)
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doUpdate(id, artistId, name=None, description=None, storageImageId=None):
+    def doUpdate(id, name=None, description=None, storageImageId=None):
         try:
             if not id:
                 return None, ErrorCodes.INVALID_INPUT
@@ -122,8 +142,7 @@ class AlbumsService:
                 currentAlbum.description = description
             if storageImageId is not None:
                 currentAlbum.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
-            if artistId is not None:
-                currentAlbum.artistId = uuid.UUID(artistId)
+
             updated = AlbumsRepo.update(currentAlbum)
             if not updated:
                 return None, ErrorCodes.UPDATE_FAILED

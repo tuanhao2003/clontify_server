@@ -6,6 +6,9 @@ from app.grpc.grpcClients.usersGrpcClient import UsersGrpcClient
 from common.errorCodes import ErrorCodes
 from rest_framework_simplejwt.exceptions import TokenError
 from datetime import datetime
+import logging
+
+logger = logging.getLogger('__name__')
 
 class AuthService:
     @staticmethod
@@ -64,16 +67,21 @@ class AuthService:
     @staticmethod
     def register(username, password, email, fullName="noname", avatarUrl=None, bio=None, dateOfBirth=None, phoneNumber=None):
         try:
+            logger.info(f"Starting registration process for username: {username}, email: {email}")
+            
             existingAccount, error = AccountsService.findByUsername(username)
             if existingAccount:
+                logger.warning(f"Registration failed - Username already exists: {username}")
                 return None, ErrorCodes.ALREADY_EXISTS
 
             existingAccount, error = AccountsService.findByEmail(email)
             if existingAccount:
+                logger.warning(f"Registration failed - Email already exists: {email}")
                 return None, ErrorCodes.ALREADY_EXISTS
 
             role, error = RolesService.findByName("NORMAL")
             if error:
+                logger.error(f"Failed to find NORMAL role: {error}")
                 return None, error
 
             account, error = AccountsService.doCreate(
@@ -83,10 +91,14 @@ class AuthService:
                 roleId=str(role.id)
             )
             if error:
+                logger.error(f"Failed to create account: {error}")
                 return None, error
+
+            logger.info(f"Account created successfully with ID: {account.id}")
 
             tokens, error = AuthService.createToken(account)
             if error or not tokens:
+                logger.error(f"Failed to create tokens for account {account.id}: {error}")
                 return None, ErrorCodes.OPERATION_FAILED
 
             usersClient = UsersGrpcClient()
@@ -95,6 +107,7 @@ class AuthService:
                     try:
                         dateOfBirth = datetime.strptime(dateOfBirth, "%Y-%m-%d")
                     except ValueError:
+                        logger.error(f"Invalid date format for dateOfBirth: {dateOfBirth}")
                         return None, ErrorCodes.INVALID_INPUT
                     
                 profile, error = usersClient.doCreate(
@@ -106,15 +119,20 @@ class AuthService:
                     phoneNumber=phoneNumber
                 )
                 if error:
+                    logger.error(f"Failed to create user profile for account {account.id}: {error}")
                     AccountsService.doDelete(account.id)
                     return None, error
+                
+                logger.info(f"User profile created successfully for account {account.id}")
             finally:
                 usersClient.close()
 
+            logger.info(f"Registration completed successfully for username: {username}")
             return {
                 "account": account,
                 "profile": profile,
             }, None
 
-        except Exception:
+        except Exception as e:
+            logger.error(f"Unexpected error during registration: {str(e)}", exc_info=True)
             return None, ErrorCodes.OPERATION_FAILED

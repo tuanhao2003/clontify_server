@@ -6,11 +6,8 @@ class Albums(Base):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    storageImageId = models.UUIDField(unique=True, null=True, blank=True)
+    storageImageId = models.UUIDField(null=True, blank=True)
     artistId = models.UUIDField()
-
-    def __str__(self):
-        return self.name
 
     class Meta:
         app_label = "app" 

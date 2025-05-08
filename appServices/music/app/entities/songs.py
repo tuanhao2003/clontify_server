@@ -9,12 +9,8 @@ class Songs(Base):
     description = models.CharField(blank=True, null= True)
     artistId = models.UUIDField()
     storageId = models.UUIDField(unique=True, null=False, blank=False)
-    storageImageId = models.UUIDField(unique=True, null=True, blank=True)
-    duration = models.PositiveIntegerField()
+    storageImageId = models.UUIDField(null=True, blank=True)
+    duration = models.PositiveIntegerField(null=True, blank=True)
     songType = models.CharField(max_length=255, choices=SongTypes.choices)
-    
-    def __str__(self):
-        return self.id
-    
     class Meta:
         app_label = "app" 

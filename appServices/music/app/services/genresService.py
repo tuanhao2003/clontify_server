@@ -135,14 +135,11 @@ class GenresService:
             if not id:
                 return None, ErrorCodes.INVALID_INPUT
             
-            currentGenre = GenresRepo.getById(uuid.UUID(id))
-            if not currentGenre:
-                return None, ErrorCodes.NOT_FOUND
-
-            genreSongs, error = GenreSongService.findByGenreId(id)
+            currentGenre, error = GenresService.findById(id)
             if error:
                 return None, error
 
+            genreSongs, error = GenreSongService.findByGenreId(id)
             if genreSongs:
                 for genreSong in genreSongs:
                     _, error = GenreSongService.doDelete(id, str(genreSong.songId))

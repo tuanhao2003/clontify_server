@@ -5,5 +5,5 @@ class SongSubArtist(Base):
     songID = models.UUIDField()
     subArtistID = models.UUIDField()
     
-    def __str__(self):
-        return self.id
+    class Meta:
+        app_label = "app" 

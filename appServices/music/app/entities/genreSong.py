@@ -6,5 +6,5 @@ class GenreSong(Base):
     songID = models.UUIDField()
     genreID = models.UUIDField()
     
-    def __str__(self):
-        return self.id
+    class Meta:
+        app_label = "app" 
