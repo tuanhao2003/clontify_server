@@ -4,7 +4,7 @@ WORKDIR /auth_service
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
+# COPY . .
 
 CMD python -m grpc_tools.protoc ./app/grpc/protos/authService.proto --python_out=./app/grpc/protos --grpc_python_out=./app/grpc/protos --proto_path=./app/grpc/protos && \
     python manage.py makemigrations app && \
