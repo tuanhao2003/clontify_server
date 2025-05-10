@@ -4,7 +4,7 @@ WORKDIR /music_service
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-# COPY . .
+COPY . .
 
 RUN python -m grpc_tools.protoc \
     -I./app/grpc/protos \
