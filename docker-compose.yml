@@ -38,7 +38,7 @@ services:
     restart: no
     volumes:
       - ./appServices/common:/auth_service/common
-      # - ./appServices/auth:/auth_service
+      - ./appServices/auth:/auth_service
     env_file:
       - .env
     environment:
@@ -58,7 +58,7 @@ services:
     restart: no
     volumes:
       - ./appServices/common:/users_service/common
-      # - ./appServices/users:/users_service
+      - ./appServices/users:/users_service
     env_file:
       - .env
     environment:
@@ -78,7 +78,7 @@ services:
     restart: no
     volumes:
       - ./appServices/common:/music_service/common
-      # - ./appServices/music:/music_service
+      - ./appServices/music:/music_service
     env_file:
       - .env
     environment:
@@ -98,7 +98,7 @@ services:
   #   restart: no
   #   volumes:
   #     - ./appServices/common:/storage_service/common
-  # #     - - ./appServices/storage:/storage_service
+  #     - - ./appServices/storage:/storage_service
   #   env_file:
   #     - .env
   #   environment:
