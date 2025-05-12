@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:15
-    container_name: postgres_container
+    # container_name: postgres_container
     restart: unless-stopped
     environment:
       POSTGRES_USER: admin
@@ -15,10 +15,10 @@ services:
     command: ["postgres", "-c", "log_statement=all"]
     networks:
       - clontify-network
-  
+
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin_container
+    # container_name: pgadmin_container
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@clontify.com
@@ -34,13 +34,11 @@ services:
     build:
       context: ./appServices/auth
       dockerfile: Dockerfile
-    container_name: auth_service
+    # container_name: auth_service
     restart: no
     volumes:
       - ./appServices/common:/auth_service/common
       - ./appServices/auth:/auth_service
-    env_file:
-      - .env
     environment:
       - PYTHONPATH=/auth_service/common
     depends_on:
@@ -54,13 +52,11 @@ services:
     build:
       context: ./appServices/users
       dockerfile: Dockerfile
-    container_name: users_service
+    # container_name: users_service
     restart: no
     volumes:
       - ./appServices/common:/users_service/common
       - ./appServices/users:/users_service
-    env_file:
-      - .env
     environment:
       - PYTHONPATH=/users_service/common
     depends_on:
@@ -74,13 +70,11 @@ services:
     build:
       context: ./appServices/music
       dockerfile: Dockerfile
-    container_name: music_service
+    # container_name: music_service
     restart: no
     volumes:
       - ./appServices/common:/music_service/common
       - ./appServices/music:/music_service
-    env_file:
-      - .env
     environment:
       - PYTHONPATH=/music_service/common
     depends_on:
@@ -94,13 +88,11 @@ services:
   #   build:
   #     context: ./appServices/storage
   #     dockerfile: Dockerfile
-  #   container_name: storage_service
+  # #   container_name: storage_service
   #   restart: no
   #   volumes:
   #     - ./appServices/common:/storage_service/common
-  #     - - ./appServices/storage:/storage_service
-  #   env_file:
-  #     - .env
+  #     - ./appServices/storage:/storage_service
   #   environment:
   #     - PYTHONPATH=/storage_service/common
   #   depends_on:
@@ -110,10 +102,8 @@ services:
   #   networks:
   #     - clontify-network
 
-
 volumes:
   postgres_data:
-
 
 networks:
   clontify-network:

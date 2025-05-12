@@ -192,5 +192,5 @@ CSRF_COOKIE_SAMESITE = os.environ.get("CSRF_COOKIE_SAMESITE", "Lax")
 CSRF_COOKIE_SECURE = parseBoolean(os.environ.get("CSRF_COOKIE_SECURE", "False"))
 CSRF_COOKIE_AGE = int(os.environ.get("CSRF_COOKIE_AGE", "604800"))
 
-AUTH_GRPC_HOST = os.environ.get("AUTH_GRPC_HOST", "auth_service")
+AUTH_GRPC_HOST = os.environ.get("AUTH_GRPC_HOST", "auth")
 AUTH_GRPC_PORT = os.environ.get("AUTH_GRPC_PORT", "50050")

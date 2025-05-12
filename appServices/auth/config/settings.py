@@ -194,7 +194,7 @@ CSRF_COOKIE_SAMESITE = os.environ.get("CSRF_COOKIE_SAMESITE", "Lax")
 CSRF_COOKIE_SECURE = parseBoolean(os.environ.get("CSRF_COOKIE_SECURE", "False"))
 CSRF_COOKIE_AGE = int(os.environ.get("CSRF_COOKIE_AGE", "604800"))
 
-USERS_GRPC_HOST = os.environ.get("USERS_GRPC_HOST", "users_service")
+USERS_GRPC_HOST = os.environ.get("USERS_GRPC_HOST", "users")
 USERS_GRPC_PORT = os.environ.get("USERS_GRPC_PORT", "50051")
 
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "")
