@@ -1,0 +1,183 @@
+syntax = "proto3";
+
+package app.grpc.protos.music;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service MusicService {
+    rpc filterAllSongs(google.protobuf.Empty) returns (stream Song);
+    rpc getSongById(StringRequest) returns (Song);
+    rpc filterSongsByTitle(StringRequest) returns (stream Song);
+    rpc filterSongsByArtistId(StringRequest) returns (stream Song);
+    rpc filterSongsBySongType(StringRequest) returns (stream Song);
+    rpc createSong(CreateSongRequest) returns (Song);
+    rpc updateSong(UpdateSongRequest) returns (Song);
+    rpc deleteSong(StringRequest) returns (Song);
+
+    rpc filterAllAlbums(google.protobuf.Empty) returns (stream Album);
+    rpc getAlbumById(StringRequest) returns (Album);
+    rpc filterAlbumsByName(StringRequest) returns (stream Album);
+    rpc filterAlbumsByArtistId(StringRequest) returns (stream Album);
+    rpc createAlbum(CreateAlbumRequest) returns (Album);
+    rpc updateAlbum(UpdateAlbumRequest) returns (Album);
+    rpc deleteAlbum(StringRequest) returns (Album);
+
+    rpc filterAllGenres(google.protobuf.Empty) returns (stream Genre);
+    rpc getGenreById(StringRequest) returns (Genre);
+    rpc filterGenresByName(StringRequest) returns (stream Genre);
+    rpc createGenre(CreateGenreRequest) returns (Genre);
+    rpc updateGenre(UpdateGenreRequest) returns (Genre);
+    rpc deleteGenre(StringRequest) returns (Genre);
+
+    rpc filterAllAlbumSongs(google.protobuf.Empty) returns (stream AlbumSong);
+    rpc getAlbumSongByIds(CreateAlbumSongRequest) returns (AlbumSong);
+    rpc filterAlbumSongsByAlbumId(StringRequest) returns (stream AlbumSong);
+    rpc filterAlbumSongsBySongId(StringRequest) returns (stream AlbumSong);
+    rpc createAlbumSong(CreateAlbumSongRequest) returns (AlbumSong);
+    rpc deleteAlbumSong(CreateAlbumSongRequest) returns (AlbumSong);
+
+    rpc filterAllGenreSongs(google.protobuf.Empty) returns (stream GenreSong);
+    rpc getGenreSongByIds(CreateGenreSongRequest) returns (GenreSong);
+    rpc filterGenreSongsByGenreId(StringRequest) returns (stream GenreSong);
+    rpc filterGenreSongsBySongId(StringRequest) returns (stream GenreSong);
+    rpc createGenreSong(CreateGenreSongRequest) returns (GenreSong);
+    rpc deleteGenreSong(CreateGenreSongRequest) returns (GenreSong);
+
+    rpc filterAllSongSubArtists(google.protobuf.Empty) returns (stream SongSubArtist);
+    rpc getSongSubArtistByIds(CreateSongSubArtistRequest) returns (SongSubArtist);
+    rpc filterSongSubArtistsBySongId(StringRequest) returns (stream SongSubArtist);
+    rpc filterSongSubArtistsBySubArtistId(StringRequest) returns (stream SongSubArtist);
+    rpc createSongSubArtist(CreateSongSubArtistRequest) returns (SongSubArtist);
+    rpc deleteSongSubArtist(CreateSongSubArtistRequest) returns (SongSubArtist);
+}
+message Song {
+    string id = 1;
+    string title = 2;
+    string description = 3;
+    string artistId = 4;
+    string storageId = 5;
+    string storageImageId = 6;
+    int32 duration = 7;
+    string songType = 8;
+    google.protobuf.Timestamp createdAt = 9;
+    google.protobuf.Timestamp updatedAt = 10;
+    google.protobuf.Timestamp deletedAt = 11;
+    bool isActive = 12;
+}
+
+message Album {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string storageImageId = 4;
+    string artistId = 5;
+    google.protobuf.Timestamp createdAt = 6;
+    google.protobuf.Timestamp updatedAt = 7;
+    google.protobuf.Timestamp deletedAt = 8;
+    bool isActive = 9;
+}
+
+message Genre {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string backgroundImage = 4;
+    google.protobuf.Timestamp createdAt = 5;
+    google.protobuf.Timestamp updatedAt = 6;
+    google.protobuf.Timestamp deletedAt = 7;
+    bool isActive = 8;
+}
+
+message AlbumSong {
+    string albumId = 1;
+    string songId = 2;
+    google.protobuf.Timestamp createdAt = 3;
+    google.protobuf.Timestamp updatedAt = 4;
+    google.protobuf.Timestamp deletedAt = 5;
+    bool isActive = 6;
+}
+
+message GenreSong {
+    string genreId = 1;
+    string songId = 2;
+    google.protobuf.Timestamp createdAt = 3;
+    google.protobuf.Timestamp updatedAt = 4;
+    google.protobuf.Timestamp deletedAt = 5;
+    bool isActive = 6;
+}
+
+message SongSubArtist {
+    string songId = 1;
+    string subArtistId = 2;
+    google.protobuf.Timestamp createdAt = 3;
+    google.protobuf.Timestamp updatedAt = 4;
+    google.protobuf.Timestamp deletedAt = 5;
+    bool isActive = 6;
+}
+
+message StringRequest {
+    string value = 1;
+}
+
+message CreateSongRequest {
+    string title = 1;
+    string artistId = 2;
+    string storageId = 3;
+    string storageImageId = 4;
+    int32 duration = 5;
+    string description = 6;
+    string songType = 7;
+}
+
+message UpdateSongRequest {
+    string id = 1;
+    string title = 2;
+    string storageImageId = 3;
+    int32 duration = 4;
+    string description = 5;
+    string songType = 6;
+}
+
+message CreateAlbumRequest {
+    string name = 1;
+    string description = 2;
+    string storageImageId = 3;
+    string artistId = 4;
+}
+
+message UpdateAlbumRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string storageImageId = 4;
+    string artistId = 5;
+}
+
+message CreateGenreRequest {
+    string name = 1;
+    string description = 2;
+    string backgroundImage = 3;
+}
+
+message UpdateGenreRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string backgroundImage = 4;
+}
+
+message CreateAlbumSongRequest {
+    string albumId = 1;
+    string songId = 2;
+}
+
+message CreateGenreSongRequest {
+    string genreId = 1;
+    string songId = 2;
+}
+
+message CreateSongSubArtistRequest {
+    string songId = 1;
+    string subArtistId = 2;
+}

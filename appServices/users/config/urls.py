@@ -17,13 +17,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from app.controllers.profilesController import *
+from app.controllers.favoritesController import *
 import uuid
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('artist/<uuid:id>', GetProfile.as_view(), name="findArtist"),
+    path('artist/<str:id>', GetProfile.as_view(), name="findArtist"),
     path('profiles', GetProfile.as_view(), name="filterByNameOrBirthDate"),
     path('profile', GetProfile.as_view(), name="viewProfile"),
     path('profile/update', UpdateProfile.as_view(), name="updateProfile"),
     path('profile/delete', DeleteProfile.as_view(), name="deleteProfile"),
+
+    path('favorites', GetFavorites.as_view(), name='get_favorites'),
+    path('favorite/create', CreateFavorite.as_view(), name='create_favorite'),
+    path('favorite/delete', DeleteFavorite.as_view(), name='delete_favorite'),
+    path('favorite/<str:id>', GetFavorites.as_view(), name='get_favorite_by_id'),
 ]

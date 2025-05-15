@@ -22,7 +22,7 @@ class GetProfile(View):
                 return BaseResponse.invalidToken("Token không hợp lệ")
             
         if id is not None:
-            result, error = ProfilesService.findByID(str(id))
+            result, error = ProfilesService.findByID(id)
             if error == ErrorCodes.INVALID_INPUT:
                 return BaseResponse.badRequest("Thiếu ID")
             if error == ErrorCodes.NOT_FOUND:
