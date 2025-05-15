@@ -119,6 +119,8 @@ class UploadFile(View):
     def post(self, request):
         try:
             file = request.FILES.get('file')
+            fileType = request.POST.get('fileType')
+            fileName = request.POST.get('fileName')
             if not file:
                 return BaseResponse.badRequest("Không tìm thấy file")
 
@@ -126,10 +128,12 @@ class UploadFile(View):
             if file.content_type not in allowedTypes:
                 return BaseResponse.badRequest("Chỉ chấp nhận file mp3 và mp4")
 
-            s3Key, s3Url = StorageDataService.uploadToS3(file, file.name, file.content_type)
-            if not s3Key or not s3Url:
-                return BaseResponse.internalError("Upload file thất bại")
+            result, error = StorageDataService.uploadToS3(file, fileName, fileType)
+            if error:
+                return BaseResponse.internalError("Upload file thất bại", str(error))
 
+            s3Key = result['key']
+            s3Url = result['url']
             return BaseResponse.success("Upload thành công", {
                 'fileName': s3Key,
                 'fileType': file.content_type,
@@ -172,13 +176,13 @@ class UpdateStorageData(View):
             fileName = data.get("fileName")
             fileType = data.get("fileType")
             fileSize = data.get("fileSize")
-            filePath = data.get("filePath")
             fileUrl = data.get("fileUrl")
-            
+            description = data.get("description")
+
             if not id:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            storageData, error = StorageDataService.doUpdate(id, fileName, fileType, fileSize, filePath, fileUrl)
+            storageData, error = StorageDataService.doUpdate(id=id, fileName=fileName, fileType=fileType, fileSize=fileSize, fileUrl=fileUrl, description=description)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")

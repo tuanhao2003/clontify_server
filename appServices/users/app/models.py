@@ -1,1 +1,1 @@
-from app.entities.profiles import *
+from app.entities.profiles import Profiles

@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from common.baseEntity import Base
+from app.enums.fileTypeEnums import FileTypeEnums
 
 class StorageData(Base):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -10,10 +11,6 @@ class StorageData(Base):
     fileSize = models.IntegerField()
     fileUrl = models.URLField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-
-
-    def __str__(self):
-        return self.name
 
     class Meta:
         app_label = "app" 

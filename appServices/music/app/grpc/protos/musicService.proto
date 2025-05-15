@@ -5,6 +5,52 @@ package app.grpc.protos.music;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
+service MusicService {
+    rpc filterAllSongs(google.protobuf.Empty) returns (stream Song);
+    rpc getSongById(StringRequest) returns (Song);
+    rpc filterSongsByTitle(StringRequest) returns (stream Song);
+    rpc filterSongsByArtistId(StringRequest) returns (stream Song);
+    rpc filterSongsBySongType(StringRequest) returns (stream Song);
+    rpc createSong(CreateSongRequest) returns (Song);
+    rpc updateSong(UpdateSongRequest) returns (Song);
+    rpc deleteSong(StringRequest) returns (Song);
+
+    rpc filterAllAlbums(google.protobuf.Empty) returns (stream Album);
+    rpc getAlbumById(StringRequest) returns (Album);
+    rpc filterAlbumsByName(StringRequest) returns (stream Album);
+    rpc filterAlbumsByArtistId(StringRequest) returns (stream Album);
+    rpc createAlbum(CreateAlbumRequest) returns (Album);
+    rpc updateAlbum(UpdateAlbumRequest) returns (Album);
+    rpc deleteAlbum(StringRequest) returns (Album);
+
+    rpc filterAllGenres(google.protobuf.Empty) returns (stream Genre);
+    rpc getGenreById(StringRequest) returns (Genre);
+    rpc filterGenresByName(StringRequest) returns (stream Genre);
+    rpc createGenre(CreateGenreRequest) returns (Genre);
+    rpc updateGenre(UpdateGenreRequest) returns (Genre);
+    rpc deleteGenre(StringRequest) returns (Genre);
+
+    rpc filterAllAlbumSongs(google.protobuf.Empty) returns (stream AlbumSong);
+    rpc getAlbumSongByIds(CreateAlbumSongRequest) returns (AlbumSong);
+    rpc filterAlbumSongsByAlbumId(StringRequest) returns (stream AlbumSong);
+    rpc filterAlbumSongsBySongId(StringRequest) returns (stream AlbumSong);
+    rpc createAlbumSong(CreateAlbumSongRequest) returns (AlbumSong);
+    rpc deleteAlbumSong(CreateAlbumSongRequest) returns (AlbumSong);
+
+    rpc filterAllGenreSongs(google.protobuf.Empty) returns (stream GenreSong);
+    rpc getGenreSongByIds(CreateGenreSongRequest) returns (GenreSong);
+    rpc filterGenreSongsByGenreId(StringRequest) returns (stream GenreSong);
+    rpc filterGenreSongsBySongId(StringRequest) returns (stream GenreSong);
+    rpc createGenreSong(CreateGenreSongRequest) returns (GenreSong);
+    rpc deleteGenreSong(CreateGenreSongRequest) returns (GenreSong);
+
+    rpc filterAllSongSubArtists(google.protobuf.Empty) returns (stream SongSubArtist);
+    rpc getSongSubArtistByIds(CreateSongSubArtistRequest) returns (SongSubArtist);
+    rpc filterSongSubArtistsBySongId(StringRequest) returns (stream SongSubArtist);
+    rpc filterSongSubArtistsBySubArtistId(StringRequest) returns (stream SongSubArtist);
+    rpc createSongSubArtist(CreateSongSubArtistRequest) returns (SongSubArtist);
+    rpc deleteSongSubArtist(CreateSongSubArtistRequest) returns (SongSubArtist);
+}
 message Song {
     string id = 1;
     string title = 2;
@@ -134,51 +180,4 @@ message CreateGenreSongRequest {
 message CreateSongSubArtistRequest {
     string songId = 1;
     string subArtistId = 2;
-}
-
-service MusicService {
-    rpc filterAllSongs(google.protobuf.Empty) returns (stream Song);
-    rpc getSongById(StringRequest) returns (Song);
-    rpc filterSongsByTitle(StringRequest) returns (stream Song);
-    rpc filterSongsByArtistId(StringRequest) returns (stream Song);
-    rpc filterSongsBySongType(StringRequest) returns (stream Song);
-    rpc createSong(CreateSongRequest) returns (Song);
-    rpc updateSong(UpdateSongRequest) returns (Song);
-    rpc deleteSong(StringRequest) returns (Song);
-
-    rpc filterAllAlbums(google.protobuf.Empty) returns (stream Album);
-    rpc getAlbumById(StringRequest) returns (Album);
-    rpc filterAlbumsByName(StringRequest) returns (stream Album);
-    rpc filterAlbumsByArtistId(StringRequest) returns (stream Album);
-    rpc createAlbum(CreateAlbumRequest) returns (Album);
-    rpc updateAlbum(UpdateAlbumRequest) returns (Album);
-    rpc deleteAlbum(StringRequest) returns (Album);
-
-    rpc filterAllGenres(google.protobuf.Empty) returns (stream Genre);
-    rpc getGenreById(StringRequest) returns (Genre);
-    rpc filterGenresByName(StringRequest) returns (stream Genre);
-    rpc createGenre(CreateGenreRequest) returns (Genre);
-    rpc updateGenre(UpdateGenreRequest) returns (Genre);
-    rpc deleteGenre(StringRequest) returns (Genre);
-
-    rpc filterAllAlbumSongs(google.protobuf.Empty) returns (stream AlbumSong);
-    rpc getAlbumSongByIds(CreateAlbumSongRequest) returns (AlbumSong);
-    rpc filterAlbumSongsByAlbumId(StringRequest) returns (stream AlbumSong);
-    rpc filterAlbumSongsBySongId(StringRequest) returns (stream AlbumSong);
-    rpc createAlbumSong(CreateAlbumSongRequest) returns (AlbumSong);
-    rpc deleteAlbumSong(CreateAlbumSongRequest) returns (AlbumSong);
-
-    rpc filterAllGenreSongs(google.protobuf.Empty) returns (stream GenreSong);
-    rpc getGenreSongByIds(CreateGenreSongRequest) returns (GenreSong);
-    rpc filterGenreSongsByGenreId(StringRequest) returns (stream GenreSong);
-    rpc filterGenreSongsBySongId(StringRequest) returns (stream GenreSong);
-    rpc createGenreSong(CreateGenreSongRequest) returns (GenreSong);
-    rpc deleteGenreSong(CreateGenreSongRequest) returns (GenreSong);
-
-    rpc filterAllSongSubArtists(google.protobuf.Empty) returns (stream SongSubArtist);
-    rpc getSongSubArtistByIds(CreateSongSubArtistRequest) returns (SongSubArtist);
-    rpc filterSongSubArtistsBySongId(StringRequest) returns (stream SongSubArtist);
-    rpc filterSongSubArtistsBySubArtistId(StringRequest) returns (stream SongSubArtist);
-    rpc createSongSubArtist(CreateSongSubArtistRequest) returns (SongSubArtist);
-    rpc deleteSongSubArtist(CreateSongSubArtistRequest) returns (SongSubArtist);
 }

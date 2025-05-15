@@ -16,129 +16,111 @@ class StorageGrpc(storageService_pb2_grpc.StorageServiceServicer):
         else:
             raise ValueError("Invalid timestamp format")
 
+    def uploadToS3(self, request, context):
+        try:
+            file = request.file
+            fileName = request.fileName
+            fileType = request.fileType
+
+            if not file or fileName or fileType or fileName == "" or fileType == "":
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("Dữ liệu không hợp lệ")
+                return None
+            
+            result, error = StorageDataService.uploadToS3(file=file, fileName=fileName, fileType=fileType)
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details(str(error))
+                return None
+            return storageService_pb2.UploadToS3Response(
+                key=result["key"],
+                url=result["url"]
+            )
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+                 
     def findAll(self, request, context):
         try:
             result, error = StorageDataService.findAll()
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details(str(error))
-                return None
-            for item in result:
+            for data in result:
                 yield storageService_pb2.StorageData(
-                    id=str(item.id),
-                    fileName=item.fileName,
-                    fileType=item.fileType,
-                    userId=str(item.userId),
-                    fileSize=item.fileSize,
-                    filePath=item.filePath,
-                    fileUrl=item.fileUrl,
-                    isActive=item.isActive,
-                    createdAt=self._parseTimestamp(item.createdAt),
-                    updatedAt=self._parseTimestamp(item.updatedAt),
-                    deletedAt=self._parseTimestamp(item.deletedAt)
+                    id=data.id,
+                    userId=data.userId,
+                    fileName=data.fileName,
+                    fileType=data.fileType,
+                    fileSize=data.fileSize,
+                    fileUrl=data.fileUrl,
+                    description=data.description,
+                    createdAt=self._parseTimestamp(data.createdAt),
+                    updatedAt=self._parseTimestamp(data.updatedAt),
+                    deletedAt=self._parseTimestamp(data.deletedAt),
+                    isActive=data.isActive
                 )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
-
+        
     def findById(self, request, context):
         try:
-            result, error = StorageDataService.findById(request.id)
+            id = request.str
+            if not id or id == "":
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("ID không hợp lệ")
+                return None
+            result, error = StorageDataService.findById(id)
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details(str(error))
                 return None
             return storageService_pb2.StorageData(
-                id=str(result.id),
+                id=result.id,
+                userId=result.userId,
                 fileName=result.fileName,
                 fileType=result.fileType,
-                userId=str(result.userId),
                 fileSize=result.fileSize,
-                filePath=result.filePath,
                 fileUrl=result.fileUrl,
-                isActive=result.isActive,
+                description=result.description,
                 createdAt=self._parseTimestamp(result.createdAt),
                 updatedAt=self._parseTimestamp(result.updatedAt),
-                deletedAt=self._parseTimestamp(result.deletedAt)
+                deletedAt=self._parseTimestamp(result.deletedAt),
+                isActive=result.isActive
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
-
+            
     def findByIds(self, request, context):
         try:
-            result, error = StorageDataService.findByIds(request.ids)
+            ids = request.strs
+            if not ids or len(ids) == 0:
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("ID không hợp lệ")
+                return None
+            result, error = StorageDataService.findByIds(ids)
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details(str(error))
                 return None
-            for item in result:
+            for data in result:
                 yield storageService_pb2.StorageData(
-                    id=str(item.id),
-                    fileName=item.fileName,
-                    fileType=item.fileType,
-                    userId=str(item.userId),
-                    fileSize=item.fileSize,
-                    filePath=item.filePath,
-                    fileUrl=item.fileUrl,
-                    isActive=item.isActive,
-                    createdAt=self._parseTimestamp(item.createdAt),
-                    updatedAt=self._parseTimestamp(item.updatedAt),
-                    deletedAt=self._parseTimestamp(item.deletedAt)
-                )
-        except Exception as e:
-            context.set_code(grpc.StatusCode.INTERNAL)
-            context.set_details(str(e))
-            return None
-
-    def findByFileName(self, request, context):
-        try:
-            result, error = StorageDataService.findByFileName(request.fileName)
-            if error:
-                context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details(str(error))
-                return None
-            for item in result:
-                yield storageService_pb2.StorageData(
-                    id=str(item.id),
-                    fileName=item.fileName,
-                    fileType=item.fileType,
-                    userId=str(item.userId),
-                    fileSize=item.fileSize,
-                    filePath=item.filePath,
-                    fileUrl=item.fileUrl,
-                    isActive=item.isActive,
-                    createdAt=self._parseTimestamp(item.createdAt),
-                    updatedAt=self._parseTimestamp(item.updatedAt),
-                    deletedAt=self._parseTimestamp(item.deletedAt)
-                )
-        except Exception as e:
-            context.set_code(grpc.StatusCode.INTERNAL)
-            context.set_details(str(e))
-            return None
-
-    def findByUserId(self, request, context):
-        try:
-            result, error = StorageDataService.findByUserId(request.userId)
-            if error:
-                context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details(str(error))
-                return None
-            for item in result:
-                yield storageService_pb2.StorageData(
-                    id=str(item.id),
-                    fileName=item.fileName,
-                    fileType=item.fileType,
-                    userId=str(item.userId),
-                    fileSize=item.fileSize,
-                    filePath=item.filePath,
-                    fileUrl=item.fileUrl,
-                    isActive=item.isActive,
-                    createdAt=self._parseTimestamp(item.createdAt),
-                    updatedAt=self._parseTimestamp(item.updatedAt),
-                    deletedAt=self._parseTimestamp(item.deletedAt)
+                    id=data.id,
+                    userId=data.userId,
+                    fileName=data.fileName,
+                    fileType=data.fileType,
+                    fileSize=data.fileSize,
+                    fileUrl=data.fileUrl,
+                    description=data.description,
+                    createdAt=self._parseTimestamp(data.createdAt),
+                    updatedAt=self._parseTimestamp(data.updatedAt),
+                    deletedAt=self._parseTimestamp(data.deletedAt),
+                    isActive=data.isActive
                 )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
@@ -147,113 +129,191 @@ class StorageGrpc(storageService_pb2_grpc.StorageServiceServicer):
 
     def findByFileType(self, request, context):
         try:
-            result, error = StorageDataService.findByFileType(request.fileType)
+            fileType = request.str
+            if not fileType or fileType == "":
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("File type không hợp lệ")
+                return None
+            result, error = StorageDataService.findByFileType(fileType)
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details(str(error))
                 return None
-            for item in result:
+            for data in result:
                 yield storageService_pb2.StorageData(
-                    id=str(item.id),
-                    fileName=item.fileName,
-                    fileType=item.fileType,
-                    userId=str(item.userId),
-                    fileSize=item.fileSize,
-                    filePath=item.filePath,
-                    fileUrl=item.fileUrl,
-                    isActive=item.isActive,
-                    createdAt=self._parseTimestamp(item.createdAt),
-                    updatedAt=self._parseTimestamp(item.updatedAt),
-                    deletedAt=self._parseTimestamp(item.deletedAt)
+                    id=data.id,
+                    userId=data.userId,
+                    fileName=data.fileName,
+                    fileType=data.fileType,
+                    fileSize=data.fileSize,
+                    fileUrl=data.fileUrl,
+                    description=data.description,
+                    createdAt=self._parseTimestamp(data.createdAt),
+                    updatedAt=self._parseTimestamp(data.updatedAt),
+                    deletedAt=self._parseTimestamp(data.deletedAt),
+                    isActive=data.isActive
                 )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
-
-    def create(self, request, context):
+        
+    def findByUserId(self, request, context):
         try:
-            result, error = StorageDataService.doCreate(
-                request.fileName,
-                request.fileType,
-                request.userId,
-                request.fileSize,
-                request.filePath,
-                request.fileUrl
-            )
+            userId = request.str
+            if not userId or userId == "":
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("User ID không hợp lệ")
+                return None
+            result, error = StorageDataService.findByUserId(userId)
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details(str(error))
+                return None
+            for data in result:
+                yield storageService_pb2.StorageData(
+                    id=data.id,
+                    userId=data.userId,
+                    fileName=data.fileName,
+                    fileType=data.fileType,
+                    fileSize=data.fileSize,
+                    fileUrl=data.fileUrl,
+                    description=data.description,
+                    createdAt=self._parseTimestamp(data.createdAt),
+                    updatedAt=self._parseTimestamp(data.updatedAt),
+                    deletedAt=self._parseTimestamp(data.deletedAt),
+                    isActive=data.isActive
+                )
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+        
+    def findByFileName(self, request, context):
+        try:
+            fileName = request.str
+            if not fileName or fileName == "":
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("File name không hợp lệ")
+                return None
+            result, error = StorageDataService.findByFileName(fileName)
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details(str(error))
+                return None
+            for data in result:
+                yield storageService_pb2.StorageData(
+                    id=data.id,
+                    userId=data.userId,
+                    fileName=data.fileName,
+                    fileType=data.fileType,
+                    fileSize=data.fileSize,
+                    fileUrl=data.fileUrl,
+                    description=data.description,
+                    createdAt=self._parseTimestamp(data.createdAt),
+                    updatedAt=self._parseTimestamp(data.updatedAt),
+                    deletedAt=self._parseTimestamp(data.deletedAt),
+                    isActive=data.isActive
+                )
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+        
+    def doCreate(self, request, context):
+        try:
+            userId = request.userId
+            fileName = request.fileName
+            fileType = request.fileType
+            fileSize = request.fileSize
+            fileUrl = request.fileUrl
+            description = request.description
+            if not userId or not fileName or not fileType  or not fileUrl or userId == "" or fileName == "" or fileType == "" or fileUrl == "":
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("Dữ liệu không hợp lệ")
+                return None
+            result, error = StorageDataService.doCreate(fileName=fileName, fileType=fileType, userId=userId, fileUrl=fileUrl, description=description, fileSize=fileSize)
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details(str(error))
                 return None
             return storageService_pb2.StorageData(
-                id=str(result.id),
+                id=result.id,
+                userId=result.userId,
                 fileName=result.fileName,
                 fileType=result.fileType,
-                userId=str(result.userId),
                 fileSize=result.fileSize,
-                filePath=result.filePath,
                 fileUrl=result.fileUrl,
-                isActive=result.isActive,
+                description=result.description,
                 createdAt=self._parseTimestamp(result.createdAt),
                 updatedAt=self._parseTimestamp(result.updatedAt),
-                deletedAt=self._parseTimestamp(result.deletedAt)
+                deletedAt=self._parseTimestamp(result.deletedAt),
+                isActive=result.isActive
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
-
-    def update(self, request, context):
+        
+    def doUpdate(self, request, context):
         try:
-            result, error = StorageDataService.doUpdate(
-                request.id,
-                request.fileName,
-                request.fileType,
-                request.fileSize,
-                request.filePath,
-                request.fileUrl
-            )
+            id = request.id
+            fileName = request.fileName
+            fileType = request.fileType
+            fileSize = request.fileSize
+            fileUrl = request.fileUrl
+            description = request.description
+            if not id or id == "":
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("ID không hợp lệ")
+                return None
+            result, error = StorageDataService.doUpdate(id=id, fileName=fileName, fileType=fileType, fileSize=fileSize, fileUrl=fileUrl, description=description)
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details(str(error))
                 return None
             return storageService_pb2.StorageData(
-                id=str(result.id),
+                id=result.id,
+                userId=result.userId,
                 fileName=result.fileName,
                 fileType=result.fileType,
-                userId=str(result.userId),
                 fileSize=result.fileSize,
-                filePath=result.filePath,
                 fileUrl=result.fileUrl,
-                isActive=result.isActive,
+                description=result.description,
                 createdAt=self._parseTimestamp(result.createdAt),
                 updatedAt=self._parseTimestamp(result.updatedAt),
-                deletedAt=self._parseTimestamp(result.deletedAt)
+                deletedAt=self._parseTimestamp(result.deletedAt),
+                isActive=result.isActive
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return None
-
-    def delete(self, request, context):
+        
+    def doDelete(self, request, context):
         try:
-            result, error = StorageDataService.doDelete(request.id)
+            id = request.str
+            if not id or id == "":
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("ID không hợp lệ")
+                return None
+            result, error = StorageDataService.doDelete(id=id)
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 context.set_details(str(error))
                 return None
             return storageService_pb2.StorageData(
-                id=str(result.id),
+                id=result.id,
+                userId=result.userId,
                 fileName=result.fileName,
                 fileType=result.fileType,
-                userId=str(result.userId),
                 fileSize=result.fileSize,
-                filePath=result.filePath,
                 fileUrl=result.fileUrl,
-                isActive=result.isActive,
+                description=result.description,
                 createdAt=self._parseTimestamp(result.createdAt),
                 updatedAt=self._parseTimestamp(result.updatedAt),
-                deletedAt=self._parseTimestamp(result.deletedAt)
+                deletedAt=self._parseTimestamp(result.deletedAt),
+                isActive=result.isActive
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)

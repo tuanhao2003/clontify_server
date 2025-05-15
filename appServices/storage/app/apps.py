@@ -5,6 +5,6 @@ class AppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'app'
     def ready(self):
-        from .grpc.grpcServers.storageGrpc import serve
         import threading
-        threading.Thread(target=serve).start()
+        from app.grpc.grpcServers.storageGrpc import serve
+        threading.Thread(target=serve, daemon=True).start()
