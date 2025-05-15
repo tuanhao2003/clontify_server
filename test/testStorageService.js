@@ -119,39 +119,39 @@ async function testUploadFile(file, fileType, fileName) {
 // testGetStorageData();
 
 // 2. Get storage data by ID
-// testGetStorageDataById('your-uuid-here');
+// testGetStorageDataById('8c37e119-06af-485d-96f7-ff53870de2da');
 
 // 3. Create storage data
 // testCreateStorageData({
-//     fileName: 'test.mp3',
+//     fileName: '0bcc61a6-e3bf-4ef7-896d-264ab62f4b2c.mp3',
 //     fileType: 'audio/mpeg',
-//     userId: 'user-uuid',
-//     fileUrl: 'https://example.com/test.mp3',
-//     fileSize: 1024,
+//     userId: localStorage.getItem('account_id'),
+//     fileUrl: 'https://clontify-storage.s3.ap-southeast-2.amazonaws.com/0bcc61a6-e3bf-4ef7-896d-264ab62f4b2c.mp3',
+//     fileSize: 409964,
 //     description: 'Test file'
 // });
 
 // 4. Update storage data
 // testUpdateStorageData({
-//     id: 'your-uuid-here',
+//     id: '8c37e119-06af-485d-96f7-ff53870de2da',
 //     fileName: 'updated.mp3',
 //     fileType: 'audio/mpeg',
-//     fileSize: 2048,
-//     fileUrl: 'https://example.com/updated.mp3',
+//     fileSize: 409964,
+//     fileUrl: 'https://clontify-storage.s3.ap-southeast-2.amazonaws.com/0bcc61a6-e3bf-4ef7-896d-264ab62f4b2c.mp3',
 //     description: 'Updated test file'
 // });
 
 // 5. Delete storage data
-// testDeleteStorageData('your-uuid-here');
+testDeleteStorageData('8c37e119-06af-485d-96f7-ff53870de2da');
 
 // 6. Upload file
-const fileInput = document.createElement('input');
-fileInput.type = 'file';
-fileInput.accept = 'audio/mpeg,video/mp4';
-fileInput.onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        testUploadFile(file, 'SONG', 'test.mp3');
-    }
-};
-fileInput.click();
+// const fileInput = document.createElement('input');
+// fileInput.type = 'file';
+// fileInput.accept = 'audio/mpeg,video/mp4';
+// fileInput.onchange = (e) => {
+//     const file = e.target.files[0];
+//     if (file) {
+//         testUploadFile(file, 'AUDIO', 'test.mp3');
+//     }
+// };
+// fileInput.click();
