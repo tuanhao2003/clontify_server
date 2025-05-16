@@ -61,6 +61,23 @@ class GetProfile(View):
             return BaseResponse.success("Thành công", ProfileSerializer(result, many=True).data)
 
         return BaseResponse.badRequest("Không có tham số nào hợp lệ")
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        except json.JSONDecodeError:
+            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+            
+        accountID = data.get("accountID")
+        if not accountID:
+            return BaseResponse.badRequest("Thiếu accountID")
+            
+        result, error = ProfilesService.findByAccountID(str(accountID))
+        if error == ErrorCodes.INVALID_INPUT:
+            return BaseResponse.badRequest("ID tài khoản không hợp lệ")
+        if error == ErrorCodes.NOT_FOUND:
+            return BaseResponse.notFound("Không tìm thấy hồ sơ")
+        return BaseResponse.success("Thành công", ProfileSerializer(result).data)
     
 class UpdateProfile(View):
     def post(self, request):
