@@ -20,11 +20,22 @@ class StorageDataService:
                 region_name=settings.AWS_S3_REGION_NAME
             )
 
-            if not file or not fileName or not fileType or fileName == "" or fileType == "" or fileType not in FileTypeEnums.__members__:
+            if not file or not fileName or not fileType or fileName == "" or fileType == "":
                 return None, ErrorCodes.INVALID_INPUT
             
             fileExtension = fileName.split('.')[-1]
             s3Key = f"{uuid.uuid4()}.{fileExtension}"
+            
+            if fileType == FileTypeEnums.AUDIO:
+                folder = "audios"
+            elif fileType == FileTypeEnums.IMAGE:
+                folder = "images"
+            elif fileType == FileTypeEnums.VIDEO:
+                folder = "videos"
+            else:
+                return None, ErrorCodes.INVALID_INPUT
+            
+            s3Key = f"{folder}/{s3Key}"
             
             s3Client.upload_fileobj(
                 file,

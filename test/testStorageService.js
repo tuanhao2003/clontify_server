@@ -91,8 +91,6 @@ async function testUploadFile(file, fileType, fileName) {
     console.log('Testing Upload File...');
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('fileType', fileType);
-    formData.append('fileName', fileName);
     const headers = {
         'X-CSRFToken': getCSRFToken(),
         'Authorization': `Bearer ${getAuthToken()}`
@@ -142,7 +140,7 @@ async function testUploadFile(file, fileType, fileName) {
 // });
 
 // 5. Delete storage data
-testDeleteStorageData('8c37e119-06af-485d-96f7-ff53870de2da');
+// testDeleteStorageData('8c37e119-06af-485d-96f7-ff53870de2da');
 
 // 6. Upload file
 // const fileInput = document.createElement('input');
@@ -151,7 +149,7 @@ testDeleteStorageData('8c37e119-06af-485d-96f7-ff53870de2da');
 // fileInput.onchange = (e) => {
 //     const file = e.target.files[0];
 //     if (file) {
-//         testUploadFile(file, 'AUDIO', 'test.mp3');
+//         testUploadFile(file);
 //     }
 // };
 // fileInput.click();

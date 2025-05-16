@@ -5,6 +5,7 @@ from app.serializers.storageDataSerializer import StorageDataSerializer
 from common.baseResponse import BaseResponse
 from common.errorCodes import ErrorCodes
 import json
+from app.enums.fileTypeEnums import FileTypeEnums
 
 class GetStorageData(View):
     def get(self, request, id=None):
@@ -119,14 +120,20 @@ class UploadFile(View):
     def post(self, request):
         try:
             file = request.FILES.get('file')
-            fileType = request.POST.get('fileType')
-            fileName = request.POST.get('fileName')
             if not file:
                 return BaseResponse.badRequest("Không tìm thấy file")
 
-            allowedTypes = ['audio/mpeg', 'video/mp4']
-            if file.content_type not in allowedTypes:
-                return BaseResponse.badRequest("Chỉ chấp nhận file mp3 và mp4")
+            fileName = file.name
+            fileType = file.content_type
+
+            if fileType == 'audio/mpeg':
+                fileType = FileTypeEnums.AUDIO
+            elif fileType == 'video/mp4':
+                fileType = FileTypeEnums.VIDEO
+            elif fileType in ['image/jpeg', 'image/png', 'image/gif']:
+                fileType = FileTypeEnums.IMAGE
+            else:
+                return BaseResponse.badRequest("Chỉ chấp nhận file mp3, mp4 và hình ảnh (jpg, png, gif)")
 
             result, error = StorageDataService.uploadToS3(file, fileName, fileType)
             if error:
@@ -136,7 +143,7 @@ class UploadFile(View):
             s3Url = result['url']
             return BaseResponse.success("Upload thành công", {
                 'fileName': s3Key,
-                'fileType': file.content_type,
+                'fileType': fileType,
                 'fileSize': file.size,
                 'fileUrl': s3Url
             })
