@@ -51,7 +51,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "common.jwtMiddleware.JwtMiddleware"
+    "common.jwtMiddleware.JwtMiddleware",
+    "common.roleMiddleware.RoleMiddleware"
 ]
 
 TEMPLATES = [
@@ -148,6 +149,18 @@ PUBLIC_ENDPOINTS = [
     '/password-reset/request',
     '/password-reset/verify',
 ]
+
+ACCESSIBILITY = {
+    'ADMIN_REQUIRED': [
+
+    ],
+    'ARTIST_REQUIRED': [
+
+    ],
+    'USER_REQUIRED': [
+
+    ]
+}
 
 ROOT_URLCONF = "config.urls"
 

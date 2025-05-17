@@ -37,6 +37,13 @@ class AuthService:
     def createToken(account):
         try:
             refresh = RefreshToken.for_user(account)
+            
+            role, error = RolesService.findById(account.roleId)
+            if error:
+                return None, ErrorCodes.OPERATION_FAILED
+                
+            refresh['role'] = role.name
+            
             return {
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
