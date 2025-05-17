@@ -265,12 +265,30 @@ class StorageDataService:
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                 region_name=settings.AWS_S3_REGION_NAME
             )
+
+            file_type = None
+            if s3_key.startswith('audios/'):
+                file_type = FileTypeEnums.AUDIO
+            elif s3_key.startswith('videos/'):
+                file_type = FileTypeEnums.VIDEO
+            elif s3_key.startswith('images/'):
+                file_type = FileTypeEnums.IMAGE
+
+            params = {
+                'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                'Key': s3_key
+            }
+
+            if file_type == FileTypeEnums.VIDEO:
+                params['ResponseContentDisposition'] = 'inline'
+            elif file_type == FileTypeEnums.AUDIO:
+                params['ResponseContentDisposition'] = 'inline'
+            elif file_type == FileTypeEnums.IMAGE:
+                params['ResponseContentDisposition'] = 'inline'
+
             url = s3Client.generate_presigned_url(
                 'get_object',
-                Params={
-                    'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
-                    'Key': s3_key
-                },
+                Params=params,
                 ExpiresIn=86400
             )
             return url, None
