@@ -29,6 +29,15 @@ class GetProfile(View):
                 if error == ErrorCodes.NOT_FOUND:
                     return BaseResponse.notFound("Không tìm thấy hồ sơ")
                 return BaseResponse.success("Thành công", ProfileSerializer(result).data)
+            elif len(ids := request.GET.getlist("ids[]", [])) > 0:
+                result, error = ProfilesService.findByIds(ids)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Bài hát không tồn tại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", ProfileSerializer(result, many=True).data)
 
             if accountID:
                 result, error = ProfilesService.findByAccountID(str(accountID))

@@ -13,6 +13,13 @@ class ProfilesRepo:
             return None
 
     @staticmethod
+    def getByIds(ids: list[uuid.UUID]):
+        try:
+            return Profiles.objects.filter(id__in=ids, isActive=True)
+        except Exception:
+            return None
+
+    @staticmethod
     def getByAccountID(accountID: uuid.UUID):
         try:
             return Profiles.objects.get(accountID=accountID, isActive=True)

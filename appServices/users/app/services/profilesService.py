@@ -19,6 +19,16 @@ class ProfilesService:
         if not profile:
             return None, ErrorCodes.NOT_FOUND
         return profile, None
+    
+    @staticmethod
+    def findByIds(ids: list[str]):
+        if not ids or len(ids) == 0:
+            return None, ErrorCodes.INVALID_INPUT
+            
+        profiles = ProfilesRepo.getByIds([uuid.UUID(id) for id in ids])
+        if not profiles:
+            return None, ErrorCodes.NOT_FOUND
+        return profiles, None
 
     @staticmethod 
     def findByAccountID(accountID: str):

@@ -21,6 +21,15 @@ class GetSongs(View):
                         return BaseResponse.notFound("Bài hát không tồn tại")
                     return BaseResponse.internalError("Lỗi hệ thống", str(error))
                 return BaseResponse.success("Thành công", SongsSerializer(result).data)
+            elif len(ids := request.GET.getlist("ids[]", [])) > 0:
+                result, error = SongsService.findByIds(ids)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Bài hát không tồn tại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", SongsSerializer(result, many=True).data)
             
             if not page or not pageSize:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
