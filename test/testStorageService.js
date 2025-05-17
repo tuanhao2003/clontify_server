@@ -112,6 +112,14 @@ async function testUploadFile(file, fileType, fileName) {
     }
 }
 
+// Test genPublicUrl (presigned url) from s3Key
+async function testGenPublicUrl(s3Key) {
+    console.log('Testing Gen Public Url...');
+    const response = await makeRequest('/storage/public-url', 'POST', { s3Key });
+    console.log('Response:', response);
+    return response;
+}
+
 // Example usage:
 // 1. Get all storage data
 // testGetStorageData();
@@ -153,3 +161,6 @@ async function testUploadFile(file, fileType, fileName) {
 //     }
 // };
 // fileInput.click();
+
+// 7. Gen public url
+// testGenPublicUrl('0bcc61a6-e3bf-4ef7-896d-264ab62f4b2c.mp3');

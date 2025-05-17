@@ -11,56 +11,71 @@ from django.utils.timezone import now
 
 class GetProfile(View):
     def get(self, request, id=None):
-        authHeader = request.headers.get("Authorization")
-        accountID = None
-        if authHeader and authHeader.startswith("Bearer "):
-            tokenStr = authHeader.split(" ")[1]
-            try:
-                token = AccessToken(tokenStr)
-                accountID = token.get("user_id")
-            except (TokenError, InvalidToken):
-                return BaseResponse.invalidToken("Token không hợp lệ")
-            
-        if id is not None:
-            result, error = ProfilesService.findByID(id)
-            if error == ErrorCodes.INVALID_INPUT:
-                return BaseResponse.badRequest("Thiếu ID")
-            if error == ErrorCodes.NOT_FOUND:
-                return BaseResponse.notFound("Không tìm thấy hồ sơ")
-            return BaseResponse.success("Thành công", ProfileSerializer(result).data)
-
-        if accountID:
-            result, error = ProfilesService.findByAccountID(str(accountID))
-            if error == ErrorCodes.INVALID_INPUT:
-                return BaseResponse.badRequest("Thiếu ID tài khoản")
-            if error == ErrorCodes.NOT_FOUND:
-                return BaseResponse.notFound("Không tìm thấy hồ sơ")
-            return BaseResponse.success("Thành công", ProfileSerializer(result).data)
-        
         try:
-            data = json.loads(request.body.decode('utf-8'))
+            authHeader = request.headers.get("Authorization")
+            accountID = None
+            if authHeader and authHeader.startswith("Bearer "):
+                tokenStr = authHeader.split(" ")[1]
+                try:
+                    token = AccessToken(tokenStr)
+                    accountID = token.get("user_id")
+                except (TokenError, InvalidToken):
+                    return BaseResponse.invalidToken("Token không hợp lệ")
+                
+            if id is not None:
+                result, error = ProfilesService.findByID(id)
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Thiếu ID")
+                if error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Không tìm thấy hồ sơ")
+                return BaseResponse.success("Thành công", ProfileSerializer(result).data)
+
+            if accountID:
+                result, error = ProfilesService.findByAccountID(str(accountID))
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Thiếu ID tài khoản")
+                if error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Không tìm thấy hồ sơ")
+                return BaseResponse.success("Thành công", ProfileSerializer(result).data)
         except json.JSONDecodeError:
             return BaseResponse.badRequest("Dữ liệu không hợp lệ")
-        fullName = data.get("email")
-        date = data.get("date")
+        
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+        
+            fullName = data.get("fullname")
+            date = data.get("date")
+            accountId = data.get("accountID")
 
-        if fullName:
-            result, error = ProfilesService.findByFullName(fullName)
-            if error == ErrorCodes.INVALID_INPUT:
-                return BaseResponse.badRequest("Thiếu tên đầy đủ")
-            if error == ErrorCodes.NOT_FOUND:
-                return BaseResponse.notFound("Không tìm thấy hồ sơ")
-            return BaseResponse.success("Thành công", ProfileSerializer(result).data)
+            if accountId:
+                result, error = ProfilesService.findByAccountID(accountId)
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Thiếu tên đầy đủ")
+                if error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Không tìm thấy hồ sơ")
+                return BaseResponse.success("Thành công", ProfileSerializer(result).data)
 
-        if date:
-            result, error = ProfilesService.findByDateOfBirth(date)
-            if error == ErrorCodes.INVALID_INPUT:
-                return BaseResponse.badRequest("Ngày không hợp lệ")
-            if error == ErrorCodes.NOT_FOUND:
-                return BaseResponse.notFound("Không tìm thấy hồ sơ nào")
-            return BaseResponse.success("Thành công", ProfileSerializer(result, many=True).data)
 
-        return BaseResponse.badRequest("Không có tham số nào hợp lệ")
+            if fullName:
+                result, error = ProfilesService.findByFullName(fullName)
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Thiếu tên đầy đủ")
+                if error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Không tìm thấy hồ sơ")
+                return BaseResponse.success("Thành công", ProfileSerializer(result).data)
+
+            if date:
+                result, error = ProfilesService.findByDateOfBirth(date)
+                if error == ErrorCodes.INVALID_INPUT:
+                    return BaseResponse.badRequest("Ngày không hợp lệ")
+                if error == ErrorCodes.NOT_FOUND:
+                    return BaseResponse.notFound("Không tìm thấy hồ sơ nào")
+                return BaseResponse.success("Thành công", ProfileSerializer(result, many=True).data)
+
+            return BaseResponse.badRequest("Không có tham số nào hợp lệ")
+        except json.JSONDecodeError:
+            return BaseResponse.badRequest("Dữ liệu không hợp lệ")
     
 class UpdateProfile(View):
     def post(self, request):

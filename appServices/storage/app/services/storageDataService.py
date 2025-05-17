@@ -46,10 +46,8 @@ class StorageDataService:
                     'ContentType': fileType
                 }
             )
-            
-            s3Url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3Key}"
-            
-            return {"key":s3Key, "url":s3Url}, None
+                        
+            return s3Key, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
@@ -256,4 +254,26 @@ class StorageDataService:
                 return None, ErrorCodes.DELETE_FAILED
             return deleted, None
         except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def genPublicUrl(s3_key, expires_in=86400):
+        try:
+            s3Client = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
+            url = s3Client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                    'Key': s3_key
+                },
+                ExpiresIn=expires_in
+            )
+            return url, None
+        except Exception as e:
+            print(e)
             return None, ErrorCodes.OPERATION_FAILED 

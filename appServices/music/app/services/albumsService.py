@@ -80,6 +80,30 @@ class AlbumsService:
             return albums, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
+        
+    @staticmethod
+    def findByArtistId(artistID: str):
+        try:
+            if not artistID:
+                return None, ErrorCodes.INVALID_INPUT
+            albums = AlbumsRepo.filterByArtistId(uuid.UUID(artistID))
+            if not albums:
+                return None, ErrorCodes.NOT_FOUND
+            return albums, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+        
+    @staticmethod
+    def findByArtistIdPaginated(artistID: str, page: int = 1, pageSize: int = 10):
+        try:
+            if not artistID:
+                return None, ErrorCodes.INVALID_INPUT
+            albums = AlbumsRepo.filterByArtistIdPaginated(uuid.UUID(artistID), page, pageSize)
+            if not albums:
+                return None, ErrorCodes.NOT_FOUND
+            return albums, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
     
     @staticmethod
     def findBySongId(songId: str):

@@ -139,13 +139,12 @@ class UploadFile(View):
             if error:
                 return BaseResponse.internalError("Upload file thất bại", str(error))
 
-            s3Key = result['key']
-            s3Url = result['url']
+            s3Key = result
             return BaseResponse.success("Upload thành công", {
                 'fileName': s3Key,
                 'fileType': fileType,
                 'fileSize': file.size,
-                'fileUrl': s3Url
+                'fileUrl': s3Key
             })
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -220,5 +219,19 @@ class DeleteStorageData(View):
                     return BaseResponse.internalError("Xóa dữ liệu thất bại")
                 return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", StorageDataSerializer(storageData).data)
+        except Exception as e:
+            return BaseResponse.internalError("Lỗi hệ thống", str(e))
+
+class GenPublicUrl(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            s3Key = data.get("s3Key")
+            if not s3Key:
+                return BaseResponse.badRequest("Thiếu ID")
+            url, error = StorageDataService.genPublicUrl(s3Key)
+            if error:
+                return BaseResponse.internalError("Không tạo được url")
+            return BaseResponse.success("Thành công", {"publicUrl": url})
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e)) 
