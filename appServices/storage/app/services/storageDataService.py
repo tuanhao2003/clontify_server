@@ -266,25 +266,25 @@ class StorageDataService:
                 region_name=settings.AWS_S3_REGION_NAME
             )
 
-            file_type = None
+            content_type = None
             if s3_key.startswith('audios/'):
-                file_type = FileTypeEnums.AUDIO
+                content_type = 'audio/mpeg'
             elif s3_key.startswith('videos/'):
-                file_type = FileTypeEnums.VIDEO
+                content_type = 'video/mp4'
             elif s3_key.startswith('images/'):
-                file_type = FileTypeEnums.IMAGE
+                if s3_key.endswith('.jpg') or s3_key.endswith('.jpeg'):
+                    content_type = 'image/jpeg'
+                elif s3_key.endswith('.png'):
+                    content_type = 'image/png'
+                elif s3_key.endswith('.gif'):
+                    content_type = 'image/gif'
 
             params = {
                 'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
-                'Key': s3_key
+                'Key': s3_key,
+                'ResponseContentDisposition': 'inline',
+                'ResponseContentType': content_type
             }
-
-            if file_type == FileTypeEnums.VIDEO:
-                params['ResponseContentDisposition'] = 'inline'
-            elif file_type == FileTypeEnums.AUDIO:
-                params['ResponseContentDisposition'] = 'inline'
-            elif file_type == FileTypeEnums.IMAGE:
-                params['ResponseContentDisposition'] = 'inline'
 
             url = s3Client.generate_presigned_url(
                 'get_object',

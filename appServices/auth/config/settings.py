@@ -52,7 +52,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "common.jwtMiddleware.JwtMiddleware",
-    "common.roleMiddleware.RoleMiddleware"
+    # "common.roleMiddleware.RoleMiddleware"
 ]
 
 TEMPLATES = [
