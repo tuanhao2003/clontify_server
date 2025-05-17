@@ -1,3 +1,4 @@
+from django.http import HttpRequest
 from django.views import View
 from app.services.songsService import SongsService
 from app.entities.songs import Songs
@@ -7,7 +8,7 @@ from common.errorCodes import ErrorCodes
 import json
 
 class GetSongs(View):
-    def get(self, request, id=None):
+    def get(self, request: HttpRequest, id=None):
         try:
             page = int(request.GET.get("page", "1"))
             pageSize = int(request.GET.get("pageSize", "10"))
@@ -21,6 +22,16 @@ class GetSongs(View):
                         return BaseResponse.notFound("Bài hát không tồn tại")
                     return BaseResponse.internalError("Lỗi hệ thống", str(error))
                 return BaseResponse.success("Thành công", SongsSerializer(result).data)
+            elif len(ids := request.GET.getlist("ids[]", [])) > 0:
+                result, error = SongsService.findByIds(ids)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Bài hát không tồn tại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", SongsSerializer(result).data)
+
             
             if not page or not pageSize:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
