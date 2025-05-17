@@ -50,8 +50,8 @@ services:
     volumes:
       - ./appServices/common:/auth_service/common
       - ./appServices/auth:/auth_service
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
     environment:
       - PYTHONPATH=/auth_service/common
     depends_on:
@@ -72,8 +72,8 @@ services:
     volumes:
       - ./appServices/common:/users_service/common
       - ./appServices/users:/users_service
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
     environment:
       - PYTHONPATH=/users_service/common
     depends_on:
@@ -94,8 +94,8 @@ services:
     volumes:
       - ./appServices/common:/music_service/common
       - ./appServices/music:/music_service
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
     environment:
       - PYTHONPATH=/music_service/common
     depends_on:
@@ -116,8 +116,8 @@ services:
     volumes:
       - ./appServices/common:/storage_service/common
       - ./appServices/storage:/storage_service
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
     environment:
       - PYTHONPATH=/storage_service/common
     depends_on:
