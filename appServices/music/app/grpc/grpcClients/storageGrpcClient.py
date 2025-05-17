@@ -3,6 +3,8 @@ from app.grpc.protos import storageService_pb2, storageService_pb2_grpc
 from django.conf import settings
 from common.errorCodes import ErrorCodes
 from google.protobuf import empty_pb2
+from datetime import datetime
+from google.protobuf.timestamp_pb2 import Timestamp
 
 class StorageGrpcClient:
     def __init__(self):
@@ -16,6 +18,33 @@ class StorageGrpcClient:
             self.channel.close()
             self.channel = None
             self.stub = None
+
+    def _parseTimestamp(self, dt):
+        if not dt or not isinstance(dt, datetime):
+            return None
+        timestamp = Timestamp()
+        timestamp.FromDatetime(dt)
+        return timestamp
+    
+    def _parseDatetime(self, timestamp):
+        if not timestamp or not isinstance(timestamp, Timestamp):
+            return None
+        return timestamp.ToDatetime()
+
+    def _storageSerializer(self, storage):
+        return {
+            'id': storage.id,
+            'userId': storage.userId,
+            'fileName': storage.fileName,
+            'fileType': storage.fileType,
+            'fileSize': storage.fileSize,
+            'fileUrl': storage.fileUrl,
+            'description': storage.description,
+            'createdAt': self._parseDatetime(storage.createdAt),
+            'updatedAt': self._parseDatetime(storage.updatedAt),
+            'deletedAt': self._parseDatetime(storage.deletedAt),
+            'isActive': storage.isActive
+        }
 
     def uploadToS3(self, file_bytes, fileName, fileType):
         try:
@@ -33,14 +62,17 @@ class StorageGrpcClient:
             grpcResponse = self.stub.findById(request)
             if grpcResponse is None:
                 return None, ErrorCodes.grpcStatusMapping(grpc.RpcError.code())
-            return grpcResponse, None
-        except Exception as e:
-            return None, str(e)
+            return self._storageSerializer(grpcResponse), None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
 
     def findAll(self):
         try:
             grpcResponse = self.stub.findAll(empty_pb2.Empty())
-            return list(grpcResponse), None
+            storages = []
+            for storage in grpcResponse:
+                storages.append(self._storageSerializer(storage))
+            return storages, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
@@ -48,7 +80,10 @@ class StorageGrpcClient:
         try:
             request = storageService_pb2.ListStringRequest(strs=ids)
             grpcResponse = self.stub.findByIds(request)
-            return list(grpcResponse), None
+            storages = []
+            for storage in grpcResponse:
+                storages.append(self._storageSerializer(storage))
+            return storages, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
@@ -56,7 +91,10 @@ class StorageGrpcClient:
         try:
             request = storageService_pb2.StringRequest(str=fileType)
             grpcResponse = self.stub.findByFileType(request)
-            return list(grpcResponse), None
+            storages = []
+            for storage in grpcResponse:
+                storages.append(self._storageSerializer(storage))
+            return storages, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
@@ -64,7 +102,10 @@ class StorageGrpcClient:
         try:
             request = storageService_pb2.StringRequest(str=userId)
             grpcResponse = self.stub.findByUserId(request)
-            return list(grpcResponse), None
+            storages = []
+            for storage in grpcResponse:
+                storages.append(self._storageSerializer(storage))
+            return storages, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
@@ -72,7 +113,10 @@ class StorageGrpcClient:
         try:
             request = storageService_pb2.StringRequest(str=fileName)
             grpcResponse = self.stub.findByFileName(request)
-            return list(grpcResponse), None
+            storages = []
+            for storage in grpcResponse:
+                storages.append(self._storageSerializer(storage))
+            return storages, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
@@ -89,7 +133,7 @@ class StorageGrpcClient:
             grpcResponse = self.stub.doCreate(request)
             if grpcResponse is None:
                 return None, ErrorCodes.grpcStatusMapping(grpc.RpcError.code())
-            return grpcResponse, None
+            return self._storageSerializer(grpcResponse), None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
@@ -106,7 +150,7 @@ class StorageGrpcClient:
             grpcResponse = self.stub.doUpdate(request)
             if grpcResponse is None:
                 return None, ErrorCodes.grpcStatusMapping(grpc.RpcError.code())
-            return grpcResponse, None
+            return self._storageSerializer(grpcResponse), None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
@@ -116,7 +160,7 @@ class StorageGrpcClient:
             grpcResponse = self.stub.doDelete(request)
             if grpcResponse is None:
                 return None, ErrorCodes.grpcStatusMapping(grpc.RpcError.code())
-            return grpcResponse, None
+            return self._storageSerializer(grpcResponse), None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
 
