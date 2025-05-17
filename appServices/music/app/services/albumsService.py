@@ -110,9 +110,10 @@ class AlbumsService:
         try:
             if not songId:
                 return None, ErrorCodes.INVALID_INPUT
-            albumsIds = AlbumSongService.findBySongId(songId)
-            if not albumsIds:
-                return None, ErrorCodes.NOT_FOUND
+            albumSong, error = AlbumSongService.findBySongId(songId)
+            if error:
+                return None, error
+            albumsIds = [albumSong.albumId for albumSong in albumSong]
             albums = AlbumsRepo.getByIds(albumsIds)
             if not albums:
                 return None, ErrorCodes.NOT_FOUND

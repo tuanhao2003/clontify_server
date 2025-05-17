@@ -153,7 +153,7 @@ async function testGenPublicUrl(s3Key) {
 // 6. Upload file
 // const fileInput = document.createElement('input');
 // fileInput.type = 'file';
-// fileInput.accept = 'audio/mpeg,video/mp4';
+// fileInput.accept = 'audio/mpeg,video/mp4,image/png,image/jpeg';
 // fileInput.onchange = (e) => {
 //     const file = e.target.files[0];
 //     if (file) {

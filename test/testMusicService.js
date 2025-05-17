@@ -48,17 +48,17 @@ async function makeRequest(url, method = 'GET', body = null) {
     }
 }
 
-// // test albums
-// async function testAlbumsController() {
-//     console.log('Testing Albums Controller...');
-//     const albumId = "75d14f62-dd62-47bf-9c7d-d68671abd824"; // Valid UUID format
+// test albums
+async function testAlbumsController() {
+    console.log('Testing Albums Controller...');
+    const albumId = "75d14f62-dd62-47bf-9c7d-d68671abd824"; // Valid UUID format
 
-    // // Test 1: Get all albums (paginated)
+    // Test 1: Get all albums (paginated)
     // console.log('\nTest 1: Get all albums');
     // const getAllAlbums = await makeRequest(`${BASE_URL}/albums?page=1&pageSize=10`);
     // console.log('Response:', getAllAlbums);
 
-    // // Test 2: Get album by ID
+    // Test 2: Get album by ID
     // console.log('\nTest 2: Get album by ID');
     // try {
     //     const getAlbumById = await makeRequest(`${BASE_URL}/album/${albumId}`);
@@ -70,7 +70,7 @@ async function makeRequest(url, method = 'GET', body = null) {
     //     console.error('Error fetching album:', error);
     // }
 
-    // // Test 3: Search albums by name
+    // Test 3: Search albums by name
     // console.log('\nTest 3: Search albums by name');
     // const searchByName = await makeRequest(`${BASE_URL}/albums`, 'POST', {
     //     name: 'Test Album',
@@ -79,18 +79,18 @@ async function makeRequest(url, method = 'GET', body = null) {
     // });
     // console.log('Response:', searchByName);
 
-    // // Test 4: Create new album
-    // console.log('\nTest 4: Create new album');
-    // const accountId = localStorage.getItem('account_id');
-    // const createAlbum = await makeRequest(`${BASE_URL}/album/create`, 'POST', {
-    //     name: 'New Test Album',
-    //     description: 'Test album description',
-    //     storageImageId: crypto.randomUUID(),
-    //     artistId: accountId
-    // });
-    // console.log('Response:', createAlbum);
+    // Test 4: Create new album
+    console.log('\nTest 4: Create new album');
+    const accountId = localStorage.getItem('account_id');
+    const createAlbum = await makeRequest(`${BASE_URL}/album/create`, 'POST', {
+        name: 'New Test Album',
+        description: 'Test album description',
+        storageImageId: crypto.randomUUID(),
+        artistId: accountId
+    });
+    console.log('Response:', createAlbum);
 
-    // // Test 5: Update album
+    // Test 5: Update album
     // console.log('\nTest 5: Update album');
     // const updateAlbum = await makeRequest(`${BASE_URL}/album/update`, 'POST', {
     //     id: albumId,
@@ -100,24 +100,24 @@ async function makeRequest(url, method = 'GET', body = null) {
     // });
     // console.log('Response:', updateAlbum);
 
-    // // Test 6: Delete album
+    // Test 6: Delete album
     // console.log('\nTest 6: Delete album');
     // const deleteAlbum = await makeRequest(`${BASE_URL}/album/delete`, 'POST', {
     //     id: "fc9debe5-3085-4346-8f71-e49e69ec41fc"
     // });
     // console.log('Response:', deleteAlbum);
-// }
-// // Run all tests
-// testAlbumsController().catch(console.error);
+}
+// Run all tests
+testAlbumsController().catch(console.error);
 
 
 
 
 
-// // Test Cases for Genres Controller
-// async function testGenresController() {
-//     console.log('Testing Genres Controller...');
-//     const genreId = '8fd250dd-1fcb-470a-973c-22d942e7496d'; // Replace with actual genre ID
+// Test Cases for Genres Controller
+async function testGenresController() {
+    console.log('Testing Genres Controller...');
+    const genreId = '8fd250dd-1fcb-470a-973c-22d942e7496d'; // Replace with actual genre ID
 
     // // Test 1: Get all genres (paginated)
     // console.log('\nTest 1: Get all genres');
@@ -170,19 +170,19 @@ async function makeRequest(url, method = 'GET', body = null) {
     //     id: genreId // Replace with actual genre ID
     // });
     // console.log('Response:', deleteGenre);
-// }
-// // Run all tests
-// testGenresController().catch(console.error); 
+}
+// Run all tests
+testGenresController().catch(console.error); 
 
 
 
 
 
-// // Test Cases for Songs Controller
-// async function testSongsController() {
-//     console.log('Testing Songs Controller...');
-//     const songId = '060b94ed-6102-45e4-bd45-09bd6732fd6a'; // Replace with actual song ID
-//     const accountId = localStorage.getItem('account_id');
+// Test Cases for Songs Controller
+async function testSongsController() {
+    console.log('Testing Songs Controller...');
+    const songId = '060b94ed-6102-45e4-bd45-09bd6732fd6a'; // Replace with actual song ID
+    const accountId = localStorage.getItem('account_id');
 
     // // Test 1: Get all songs (paginated)
     // console.log('\nTest 1: Get all songs');
@@ -248,6 +248,6 @@ async function makeRequest(url, method = 'GET', body = null) {
     //     id: songId // Replace with actual song ID
     // });
     // console.log('Response:', deleteSong);
-// }
-// // Run all tests
-// testSongsController().catch(console.error); 
+}
+// Run all tests
+testSongsController().catch(console.error); 

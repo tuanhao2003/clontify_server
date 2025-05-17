@@ -8,13 +8,17 @@ from app.services.storageDataService import StorageDataService
 from common.errorCodes import ErrorCodes
 
 class StorageGrpc(storageService_pb2_grpc.StorageServiceServicer):
-    def _parseTimestamp(self, timestamp):
-        if isinstance(timestamp, datetime):
-            return Timestamp(seconds=int(timestamp.replace(tzinfo=None).timestamp()), nanos=timestamp.microsecond * 1000)
-        elif isinstance(timestamp, (int, float)):
-            return Timestamp(seconds=int(timestamp), nanos=0)
-        else:
-            raise ValueError("Invalid timestamp format")
+    def _parseTimestamp(self, dt):
+        if not dt or not isinstance(dt, datetime):
+            return None
+        timestamp = Timestamp()
+        timestamp.FromDatetime(dt)
+        return timestamp
+    
+    def _parseDatetime(self, timestamp):
+        if not timestamp or not isinstance(timestamp, Timestamp):
+            return None
+        return timestamp.ToDatetime()
 
     def uploadToS3(self, request, context):
         try:
@@ -68,22 +72,27 @@ class StorageGrpc(storageService_pb2_grpc.StorageServiceServicer):
         
     def findById(self, request, context):
         try:
-            id = request.str
+            id = str(request.str)
             if not id or id == "":
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 context.set_details("ID không hợp lệ")
                 return None
             result, error = StorageDataService.findById(id)
             if error:
-                context.set_code(grpc.StatusCode.INTERNAL)
-                context.set_details(str(error))
+                if error == ErrorCodes.NOT_FOUND:
+                    context.set_code(grpc.StatusCode.NOT_FOUND)
+                    context.set_details("Không tìm thấy dữ liệu")
+                else:
+                    context.set_code(grpc.StatusCode.INTERNAL)
+                    context.set_details(str(error))
                 return None
+                
             return storageService_pb2.StorageData(
-                id=result.id,
-                userId=result.userId,
+                id=str(result.id),
+                userId=str(result.userId),
                 fileName=result.fileName,
                 fileType=result.fileType,
-                fileSize=result.fileSize,
+                fileSize=str(result.fileSize),
                 fileUrl=result.fileUrl,
                 description=result.description,
                 createdAt=self._parseTimestamp(result.createdAt),
@@ -93,7 +102,7 @@ class StorageGrpc(storageService_pb2_grpc.StorageServiceServicer):
             )
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
-            context.set_details(str(e))
+            context.set_details(f"Lỗi hệ thống: {str(e)}")
             return None
             
     def findByIds(self, request, context):
@@ -315,6 +324,24 @@ class StorageGrpc(storageService_pb2_grpc.StorageServiceServicer):
                 deletedAt=self._parseTimestamp(result.deletedAt),
                 isActive=result.isActive
             )
+        except Exception as e:
+            context.set_code(grpc.StatusCode.INTERNAL)
+            context.set_details(str(e))
+            return None
+
+    def genPublicUrl(self, request, context):
+        try:
+            s3Key = request.s3Key
+            if not s3Key or s3Key == "":
+                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+                context.set_details("dữ liệu không hợp lệ")
+                return None
+            url, error = StorageDataService.genPublicUrl(s3Key)
+            if error:
+                context.set_code(grpc.StatusCode.INTERNAL)
+                context.set_details("Không tạo được public url")
+                return None
+            return storageService_pb2.GenPublicUrlResponse(publicUrl=url)
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))

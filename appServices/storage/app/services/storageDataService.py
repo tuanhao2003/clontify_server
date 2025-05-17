@@ -76,7 +76,7 @@ class StorageDataService:
     @staticmethod
     def findById(id: str):
         try:
-            if not id:
+            if not id or id == "":
                 return None, ErrorCodes.INVALID_INPUT
             storageData = StorageDataRepo.getById(uuid.UUID(id))
             if not storageData:
@@ -257,7 +257,7 @@ class StorageDataService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def genPublicUrl(s3_key, expires_in=86400):
+    def genPublicUrl(s3_key):
         try:
             s3Client = boto3.client(
                 's3',
@@ -271,7 +271,7 @@ class StorageDataService:
                     'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
                     'Key': s3_key
                 },
-                ExpiresIn=expires_in
+                ExpiresIn=86400
             )
             return url, None
         except Exception as e:
