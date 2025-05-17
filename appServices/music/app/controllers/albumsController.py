@@ -48,14 +48,15 @@ class GetAlbums(View):
         try:
             data = json.loads(request.body.decode('utf-8'))
             name = data.get("name")
+            artistId = data.get("artistID")
             page = int(data.get("page", "1"))
             pageSize = int(data.get("pageSize", "10"))
 
             if not page or not pageSize:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
             
-            if not name or name == "":
-                result, error = AlbumsService.findAllPaginated(page, pageSize)
+            if artistId and artistId != "":
+                result, error = AlbumsService.findByArtistIdPaginated(artistId, page, pageSize)
                 if error:
                     if error == ErrorCodes.INVALID_INPUT:
                         return BaseResponse.badRequest("Dữ liệu không hợp lệ")
@@ -69,7 +70,22 @@ class GetAlbums(View):
                     'currentPage': result['currentPage']
                 })
 
-            result, error = AlbumsService.findByNamePaginated(name, page, pageSize)
+            if name and name != "":
+                result, error = AlbumsService.findByNamePaginated(name, page, pageSize)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Không tìm thấy album")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", {
+                    'result': AlbumsSerializer(result['result'], many=True).data,
+                    'total': result['total'],
+                    'totalPages': result['totalPages'],
+                    'currentPage': result['currentPage']
+                })
+            
+            result, error = AlbumsService.findAllPaginated(page, pageSize)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")

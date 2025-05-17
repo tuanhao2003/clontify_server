@@ -7,3 +7,4 @@ class SongSubArtist(Base):
     
     class Meta:
         app_label = "app" 
+        unique_together = ('songID', 'subArtistID')

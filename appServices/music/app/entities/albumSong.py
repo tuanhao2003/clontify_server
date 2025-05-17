@@ -9,3 +9,4 @@ class AlbumSong(Base):
 
     class Meta:
         app_label = "app" 
+        unique_together = ('albumId', 'songId')

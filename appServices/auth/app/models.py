@@ -1,1 +1,1 @@
-from app.repositories.accountsRepo import AccountsRepo
+from app.entities.accounts import Accounts

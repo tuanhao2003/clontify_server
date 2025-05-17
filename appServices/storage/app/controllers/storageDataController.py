@@ -5,6 +5,7 @@ from app.serializers.storageDataSerializer import StorageDataSerializer
 from common.baseResponse import BaseResponse
 from common.errorCodes import ErrorCodes
 import json
+from app.enums.fileTypeEnums import FileTypeEnums
 
 class GetStorageData(View):
     def get(self, request, id=None):
@@ -122,19 +123,28 @@ class UploadFile(View):
             if not file:
                 return BaseResponse.badRequest("Không tìm thấy file")
 
-            allowedTypes = ['audio/mpeg', 'video/mp4']
-            if file.content_type not in allowedTypes:
-                return BaseResponse.badRequest("Chỉ chấp nhận file mp3 và mp4")
+            fileName = file.name
+            fileType = file.content_type
 
-            s3Key, s3Url = StorageDataService.uploadToS3(file, file.name, file.content_type)
-            if not s3Key or not s3Url:
-                return BaseResponse.internalError("Upload file thất bại")
+            if fileType == 'audio/mpeg':
+                fileType = FileTypeEnums.AUDIO
+            elif fileType == 'video/mp4':
+                fileType = FileTypeEnums.VIDEO
+            elif fileType in ['image/jpeg', 'image/png', 'image/gif']:
+                fileType = FileTypeEnums.IMAGE
+            else:
+                return BaseResponse.badRequest("Chỉ chấp nhận file mp3, mp4 và hình ảnh (jpg, png, gif)")
 
+            result, error = StorageDataService.uploadToS3(file, fileName, fileType)
+            if error:
+                return BaseResponse.internalError("Upload file thất bại", str(error))
+
+            s3Key = result
             return BaseResponse.success("Upload thành công", {
                 'fileName': s3Key,
-                'fileType': file.content_type,
+                'fileType': fileType,
                 'fileSize': file.size,
-                'fileUrl': s3Url
+                'fileUrl': s3Key
             })
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
@@ -172,13 +182,13 @@ class UpdateStorageData(View):
             fileName = data.get("fileName")
             fileType = data.get("fileType")
             fileSize = data.get("fileSize")
-            filePath = data.get("filePath")
             fileUrl = data.get("fileUrl")
-            
+            description = data.get("description")
+
             if not id:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            storageData, error = StorageDataService.doUpdate(id, fileName, fileType, fileSize, filePath, fileUrl)
+            storageData, error = StorageDataService.doUpdate(id=id, fileName=fileName, fileType=fileType, fileSize=fileSize, fileUrl=fileUrl, description=description)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
@@ -209,5 +219,19 @@ class DeleteStorageData(View):
                     return BaseResponse.internalError("Xóa dữ liệu thất bại")
                 return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", StorageDataSerializer(storageData).data)
+        except Exception as e:
+            return BaseResponse.internalError("Lỗi hệ thống", str(e))
+
+class GenPublicUrl(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            s3Key = data.get("s3Key")
+            if not s3Key:
+                return BaseResponse.badRequest("Thiếu ID")
+            url, error = StorageDataService.genPublicUrl(s3Key)
+            if error:
+                return BaseResponse.internalError("Không tạo được url")
+            return BaseResponse.success("Thành công", {"publicUrl": url})
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e)) 

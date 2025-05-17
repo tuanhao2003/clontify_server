@@ -110,6 +110,6 @@ class RefreshToken(View):
             return BaseResponse.internalError("Lỗi hệ thống")
 
         return BaseResponse.success("Làm mới token thành công", {
-            "accessToken": tokens["access"],
-            "refreshToken": tokens["refresh"]
+            "access_token": tokens["access"],
+            "refresh_token": tokens["refresh"]
         })

@@ -4,12 +4,14 @@ from django.conf import settings
 from app.entities.storageData import StorageData
 from app.repositories.storageDataRepo import StorageDataRepo
 from common.errorCodes import ErrorCodes
-import os
+from app.enums.fileTypeEnums import FileTypeEnums
 from botocore.exceptions import ClientError
+from app.grpc.grpcClients.usersGrpcClient import UsersGrpcClient
+
 
 class StorageDataService:
     @staticmethod
-    def uploadToS3(file, fileName, fileType):
+    def uploadToS3(file: bytes, fileName: str, fileType: str):
         try:
             s3Client = boto3.client(
                 's3',
@@ -17,9 +19,23 @@ class StorageDataService:
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                 region_name=settings.AWS_S3_REGION_NAME
             )
+
+            if not file or not fileName or not fileType or fileName == "" or fileType == "":
+                return None, ErrorCodes.INVALID_INPUT
             
             fileExtension = fileName.split('.')[-1]
             s3Key = f"{uuid.uuid4()}.{fileExtension}"
+            
+            if fileType == FileTypeEnums.AUDIO:
+                folder = "audios"
+            elif fileType == FileTypeEnums.IMAGE:
+                folder = "images"
+            elif fileType == FileTypeEnums.VIDEO:
+                folder = "videos"
+            else:
+                return None, ErrorCodes.INVALID_INPUT
+            
+            s3Key = f"{folder}/{s3Key}"
             
             s3Client.upload_fileobj(
                 file,
@@ -30,13 +46,10 @@ class StorageDataService:
                     'ContentType': fileType
                 }
             )
-            
-            s3Url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3Key}"
-            
-            return s3Key, s3Url
-        except ClientError as e:
-            print(f"Error uploading to S3: {str(e)}")
-            return None, None
+                        
+            return s3Key, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
     def findAllPaginated(page: int = 1, pageSize: int = 10):
@@ -116,6 +129,12 @@ class StorageDataService:
         try:
             if not userId or userId == "":
                 return None, ErrorCodes.INVALID_INPUT
+            
+            userGrpcClient = UsersGrpcClient()
+            _, error = userGrpcClient.findByID(userId)
+            if error:
+                return None, error
+            
             if not page or not pageSize:
                 return None, ErrorCodes.INVALID_INPUT
             result = StorageDataRepo.filterByUserIdPaginated(uuid.UUID(userId), page, pageSize)
@@ -124,12 +143,20 @@ class StorageDataService:
             return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
+        finally:
+            userGrpcClient.close()
 
     @staticmethod
     def findByUserId(userId: str):
         try:
             if not userId or userId == "":
                 return None, ErrorCodes.INVALID_INPUT
+            
+            userGrpcClient = UsersGrpcClient()
+            _, error = userGrpcClient.findByID(userId)
+            if error:
+                return None, error
+            
             result = StorageDataRepo.filterByUserId(uuid.UUID(userId))
             if not result:
                 return None, ErrorCodes.NOT_FOUND
@@ -140,11 +167,11 @@ class StorageDataService:
     @staticmethod
     def findByFileTypePaginated(fileType: str, page: int = 1, pageSize: int = 10):
         try:
-            if not fileType or fileType == "":
+            if not fileType or fileType == "" or fileType not in FileTypeEnums.__members__:
                 return None, ErrorCodes.INVALID_INPUT
             if not page or not pageSize:
                 return None, ErrorCodes.INVALID_INPUT
-            result = StorageDataRepo.filterByFileTypePaginated(fileType, page, pageSize)
+            result = StorageDataRepo.filterByFileTypePaginated(FileTypeEnums[fileType], page, pageSize)
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -154,9 +181,9 @@ class StorageDataService:
     @staticmethod
     def findByFileType(fileType: str):
         try:
-            if not fileType or fileType == "":
+            if not fileType or fileType == "" or fileType not in FileTypeEnums.__members__:
                 return None, ErrorCodes.INVALID_INPUT
-            result = StorageDataRepo.filterByFileType(fileType)
+            result = StorageDataRepo.filterByFileType(FileTypeEnums[fileType])
             if not result:
                 return None, ErrorCodes.NOT_FOUND
             return result, None
@@ -164,7 +191,7 @@ class StorageDataService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doCreate(fileName: str, fileType: str, userId: str, description: str = None, fileUrl: str = None, fileSize: int = None):
+    def doCreate(fileName: str, fileType: str, userId: str, fileUrl: str, description: str = None, fileSize: int = None):
         try:
             if not fileName or not fileType or not userId or fileName == "" or fileType == "" or userId == "":
                 return None, ErrorCodes.INVALID_INPUT
@@ -185,7 +212,7 @@ class StorageDataService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doUpdate(id: str, fileName: str = None, fileType: str = None, fileSize: int = None, filePath: str = None, fileUrl: str = None):
+    def doUpdate(id: str, fileName: str = None, fileType: str = None, fileSize: int = None, fileUrl: str = None, description: str = None):
         try:
             if not id or id == "":
                 return None, ErrorCodes.INVALID_INPUT
@@ -200,10 +227,10 @@ class StorageDataService:
                 currentStorageData.fileType = fileType
             if fileSize is not None:
                 currentStorageData.fileSize = fileSize
-            if filePath is not None:
-                currentStorageData.filePath = filePath
             if fileUrl is not None:
                 currentStorageData.fileUrl = fileUrl
+            if description is not None:
+                currentStorageData.description = description
 
             updated = StorageDataRepo.update(currentStorageData)
             if not updated:
@@ -227,4 +254,26 @@ class StorageDataService:
                 return None, ErrorCodes.DELETE_FAILED
             return deleted, None
         except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
+    def genPublicUrl(s3_key, expires_in=86400):
+        try:
+            s3Client = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
+            url = s3Client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                    'Key': s3_key
+                },
+                ExpiresIn=expires_in
+            )
+            return url, None
+        except Exception as e:
+            print(e)
             return None, ErrorCodes.OPERATION_FAILED 

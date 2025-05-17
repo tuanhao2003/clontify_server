@@ -6,73 +6,66 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
 service StorageService {
-  rpc findAll(google.protobuf.Empty) returns (StorageDataListResponse);
-  rpc findById(StorageDataIdRequest) returns (StorageDataResponse);
-  rpc findByIds(StorageDataIdsRequest) returns (StorageDataListResponse);
-  rpc findByFileName(StorageDataFileNameRequest) returns (StorageDataListResponse);
-  rpc findByUserId(StorageDataUserIdRequest) returns (StorageDataListResponse);
-  rpc findByFileType(StorageDataFileTypeRequest) returns (StorageDataListResponse);
-  rpc create(StorageDataCreateRequest) returns (StorageDataResponse);
-  rpc update(StorageDataUpdateRequest) returns (StorageDataResponse);
-  rpc delete(StorageDataIdRequest) returns (StorageDataResponse);
+    rpc uploadToS3(UploadToS3Request) returns (UploadToS3Response) {}
+    rpc findById(StringRequest) returns (StorageData) {}
+    rpc findAll(google.protobuf.Empty) returns (stream StorageData) {}
+    rpc findByIds(ListStringRequest) returns (stream StorageData) {}
+    rpc findByFileType(StringRequest) returns (stream StorageData) {}
+    rpc findByUserId(StringRequest) returns (stream StorageData) {}
+    rpc findByFileName(StringRequest) returns (stream StorageData) {}
+    rpc doCreate(CreateRequest) returns (StorageData) {}
+    rpc doUpdate(UpdateRequest) returns (StorageData) {}
+    rpc doDelete(StringRequest) returns (StorageData) {}
 }
+
 
 message StorageData {
-  string id = 1;
-  string fileName = 2;
-  string fileType = 3;
-  string userId = 4;
-  int64 fileSize = 5;
-  string filePath = 6;
-  string fileUrl = 7;
-  google.protobuf.Timestamp createdAt = 8;
-  google.protobuf.Timestamp updatedAt = 9;
-  google.protobuf.Timestamp deletedAt = 10;
-  bool isActive = 11;
+    string id = 1;
+    string userId = 2;
+    string fileName = 3;
+    string fileType = 4;
+    string fileSize = 5;
+    string fileUrl = 6;
+    string description = 7;
+    google.protobuf.Timestamp createdAt = 8;
+    google.protobuf.Timestamp updatedAt = 9;
+    google.protobuf.Timestamp deletedAt = 10;
+    bool isActive = 11;
 }
 
-message StorageDataIdRequest {
-  string id = 1;
+message StringRequest {
+    string str = 1;
 }
 
-message StorageDataIdsRequest {
-  repeated string ids = 1;
+message ListStringRequest {
+    repeated string strs = 1;
 }
 
-message StorageDataFileNameRequest {
-  string fileName = 1;
+message CreateRequest {
+    string userId = 1;
+    string fileName = 2;
+    string fileType = 3;
+    string fileSize = 4;
+    string fileUrl = 5;
+    string description = 6;
 }
 
-message StorageDataUserIdRequest {
-  string userId = 1;
+message UpdateRequest {
+    string id = 1;
+    string fileName = 2;
+    string fileType = 3;
+    string fileSize = 4;
+    string fileUrl = 5;
+    string description = 6;
 }
 
-message StorageDataFileTypeRequest {
-  string fileType = 1;
+message UploadToS3Request {
+    bytes file = 1;
+    string fileName = 2;
+    string fileType = 3;
 }
 
-message StorageDataCreateRequest {
-  string fileName = 1;
-  string fileType = 2;
-  string userId = 3;
-  int64 fileSize = 4;
-  string filePath = 5;
-  string fileUrl = 6;
+message UploadToS3Response {
+    string key = 1;
+    string url = 2;
 }
-
-message StorageDataUpdateRequest {
-  string id = 1;
-  string fileName = 2;
-  string fileType = 3;
-  int64 fileSize = 4;
-  string filePath = 5;
-  string fileUrl = 6;
-}
-
-message StorageDataResponse {
-  StorageData data = 1;
-}
-
-message StorageDataListResponse {
-  repeated StorageData data = 1;
-} 

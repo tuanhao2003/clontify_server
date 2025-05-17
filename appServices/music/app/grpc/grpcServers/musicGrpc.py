@@ -74,7 +74,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterByTitle(self, request, context):
+    def filterSongsByTitle(self, request, context):
         try:
             songs, error = SongsService.findByTitle(request.value)
             if error:
@@ -101,7 +101,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterByArtistId(self, request, context):
+    def filterSongsByArtistId(self, request, context):
         try:
             songs, error = SongsService.findByArtistId(str(request.value))
             if error:
@@ -128,7 +128,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterBySongType(self, request, context):
+    def filterSongsBySongType(self, request, context):
         try:
             songs, error = SongsService.findBySongType(request.value)
             if error:
@@ -295,7 +295,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterByName(self, request, context):
+    def filterAlbumsByName(self, request, context):
         try:
             albums, error = AlbumsService.findByName(request.value)
             if error:
@@ -319,7 +319,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterByArtistId(self, request, context):
+    def filterAlbumsByArtistId(self, request, context):
         try:
             albums, error = AlbumsService.findByArtistId(str(request.value))
             if error:
@@ -468,7 +468,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterByName(self, request, context):
+    def filterGenresByName(self, request, context):
         try:
             genres, error = GenresService.findByName(request.value)
             if error:
@@ -610,7 +610,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterByAlbumId(self, request, context):
+    def filterAlbumSongsByAlbumId(self, request, context):
         try:
             albumSongs, error = AlbumSongService.findByAlbumId(str(request.value))
             if error:
@@ -631,7 +631,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterBySongId(self, request, context):
+    def filterAlbumSongsBySongId(self, request, context):
         try:
             albumSongs, error = AlbumSongService.findBySongId(str(request.value))
             if error:
@@ -742,7 +742,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterByGenreId(self, request, context):
+    def filterGenreSongsByGenreId(self, request, context):
         try:
             genreSongs, error = GenreSongService.findByGenreId(str(request.value))
             if error:
@@ -763,7 +763,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterBySongId(self, request, context):
+    def filterGenreSongsBySongId(self, request, context):
         try:
             genreSongs, error = GenreSongService.findBySongId(str(request.value))
             if error:
@@ -874,7 +874,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterBySongId(self, request, context):
+    def filterSongSubArtistsBySongId(self, request, context):
         try:
             songSubArtists, error = SongSubArtistService.findBySongId(str(request.value))
             if error:
@@ -895,7 +895,7 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
             context.set_details(str(e))
             return None
 
-    def filterBySubArtistId(self, request, context):
+    def filterSongSubArtistsBySubArtistId(self, request, context):
         try:
             songSubArtists, error = SongSubArtistService.findBySubArtistId(str(request.value))
             if error:

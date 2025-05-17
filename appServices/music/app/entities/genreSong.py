@@ -8,3 +8,4 @@ class GenreSong(Base):
     
     class Meta:
         app_label = "app" 
+        unique_together = ('songID', 'genreID')

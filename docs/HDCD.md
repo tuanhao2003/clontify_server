@@ -7,10 +7,10 @@
 ---
 # Hướng dẫn cấu hình service
 ## Vào /database/init.sql thêm `CREATE DATABASE tên service;`
-## Vào file `setting` config các mục sau: `SECRET_KEY`(giống authservice), `INSTALLED_APPS`, `MIDDLEWARE`, `DATABASES`, `REST_FRAMEWORK`, `SIMPLE_JWT` và các config cors, csrf như authservice
+## Vào file `setting` config các mục sau: `INSTALLED_APPS`, `MIDDLEWARE`, `DATABASES`, `REST_FRAMEWORK`, `SIMPLE_JWT` và các config cors, csrf như authservice
 ## Vào thư mục `entities`, tạo các file entity đại diện cho các bảng trong db
 ## Viết repo, service, controller
-## Import các file repo vào file `models.py`
+## Import các file entities vào file `models.py`
 ## Viết file `urls.py`
 ---
 # Hướng dẫn cấu hình gRPC
