@@ -120,7 +120,7 @@ class AlbumsService:
             return albums, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
-
+    
     @staticmethod
     def doCreate(name, artistId, description=None, storageImageId=None):
         try:

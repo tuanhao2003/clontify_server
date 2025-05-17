@@ -13,13 +13,12 @@ from app.services.songSubArtistService import SongSubArtistService
 from common.errorCodes import ErrorCodes
 
 class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
-    def _parseTimestamp(self, timestamp):
-        if isinstance(timestamp, datetime):
-            return Timestamp(seconds=int(timestamp.replace(tzinfo=None).timestamp()), nanos=timestamp.microsecond * 1000)
-        elif isinstance(timestamp, (int, float)):
-            return Timestamp(seconds=int(timestamp), nanos=0)
-        else:
-            raise ValueError("Invalid timestamp format")
+    def _parseTimestamp(self, dt):
+        if not dt or not isinstance(dt, datetime):
+            return None
+        timestamp = Timestamp()
+        timestamp.FromDatetime(dt)
+        return timestamp
 
     def filterAllSongs(self, request, context):
         try:

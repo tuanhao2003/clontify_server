@@ -8,21 +8,21 @@ class ProfilesRepo:
     @staticmethod
     def getByID(id: uuid.UUID):
         try:
-            return Profiles.objects.get(id=id)
+            return Profiles.objects.get(id=id, isActive=True)
         except Profiles.DoesNotExist:
             return None
 
     @staticmethod
     def getByAccountID(accountID: uuid.UUID):
         try:
-            return Profiles.objects.get(accountID=accountID)
+            return Profiles.objects.get(accountID=accountID, isActive=True)
         except Profiles.DoesNotExist:
             return None
 
     @staticmethod
     def getByFullName(fullName: str):
         try:
-            return Profiles.objects.get(fullName=fullName)
+            return Profiles.objects.get(fullName=fullName, isActive=True)
         except Profiles.DoesNotExist:
             return None
 
@@ -58,7 +58,7 @@ class ProfilesRepo:
     @staticmethod
     def update(profile: Profiles):
         try:
-            prof = Profiles.objects.get(id=profile.id)
+            prof = Profiles.objects.get(id=profile.id, isActive=True)
             prof.fullName = profile.fullName
             prof.avatarUrl = profile.avatarUrl
             prof.bio = profile.bio
@@ -73,7 +73,7 @@ class ProfilesRepo:
     @staticmethod
     def delete(id: uuid.UUID):
         try:
-            profile = Profiles.objects.get(id=id)
+            profile = Profiles.objects.get(id=id, isActive=True)
             profile.deletedAt = now()
             profile.save()
             return profile

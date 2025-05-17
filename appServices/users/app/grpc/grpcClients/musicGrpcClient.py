@@ -10,7 +10,7 @@ from common.errorCodes import ErrorCodes
 class MusicGrpcClient:
     def __init__(self):
         self.host = getattr(settings, 'MUSIC_GRPC_HOST', 'music_service')
-        self.port = getattr(settings, 'MUSIC_GRPC_PORT', '50053')
+        self.port = getattr(settings, 'MUSIC_GRPC_PORT', '50052')
         self.channel = grpc.insecure_channel(f'{self.host}:{self.port}')
         self.stub = musicService_pb2_grpc.MusicServiceStub(self.channel)
     
@@ -36,9 +36,9 @@ class MusicGrpcClient:
         return {
             'id': song.id,
             'title': song.title,
-            'artistID': song.artistID,
-            'storageID': song.storageID,
-            'storageImageID': song.storageImageID,
+            'artistId': song.artistId,
+            'storageId': song.storageId,
+            'storageImageId': song.storageImageId,
             'duration': song.duration,
             'description': song.description,
             'songType': song.songType,
@@ -107,7 +107,8 @@ class MusicGrpcClient:
     
     def getSongById(self, id):
         try:
-            grpcResponse = self.stub.getSongById(musicService_pb2.StringRequest(value=id))
+            data = musicService_pb2.StringRequest(value=id)
+            grpcResponse = self.stub.getSongById(data)
             if grpcResponse is None:
                 return None, ErrorCodes.grpcStatusMapping(grpc.RpcError.code())
             return self._songSerializer(grpcResponse), None
@@ -116,7 +117,8 @@ class MusicGrpcClient:
 
     def filterSongsByTitle(self, title):
         try:
-            grpcResponse = self.stub.filterSongsByTitle(musicService_pb2.StringRequest(value=title))
+            data = musicService_pb2.StringRequest(value=title)
+            grpcResponse = self.stub.filterSongsByTitle(data)
             if grpcResponse is None:
                 return None, ErrorCodes.grpcStatusMapping(grpc.RpcError.code())
             songs = []
@@ -128,7 +130,8 @@ class MusicGrpcClient:
 
     def filterSongsByArtistId(self, artistId):
         try:
-            grpcResponse = self.stub.filterSongsByArtistId(musicService_pb2.StringRequest(value=artistId))
+            data = musicService_pb2.StringRequest(value=artistId)
+            grpcResponse = self.stub.filterSongsByArtistId(data)
             if grpcResponse is None:
                 return None, ErrorCodes.grpcStatusMapping(grpc.RpcError.code())
             songs = []
@@ -140,7 +143,8 @@ class MusicGrpcClient:
 
     def filterSongsBySongType(self, songType):
         try:
-            grpcResponse = self.stub.filterSongsBySongType(musicService_pb2.StringRequest(value=songType))
+            data = musicService_pb2.StringRequest(value=songType)
+            grpcResponse = self.stub.filterSongsBySongType(data)
             if grpcResponse is None:
                 return None, ErrorCodes.grpcStatusMapping(grpc.RpcError.code())
             songs = []

@@ -88,9 +88,9 @@ class FavoritesService:
 
             musicClient = MusicGrpcClient()
             try:
-                song, error = musicClient.getSongById(str(songId))
+                _, error = musicClient.getSongById(str(songId))
                 if error:
-                    return None, ErrorCodes.NOT_FOUND
+                    return None, error
                 
                 favorite = Favorites(profileID=profileId, songID=songId)
                 result = FavoritesRepo.create(favorite)
