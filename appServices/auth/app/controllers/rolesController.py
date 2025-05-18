@@ -50,7 +50,7 @@ class GetRoles(View):
             if not page or not pageSize:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ", str(error))
 
-            if name:
+            if name and name != "":
                 result, error = RolesService.findByNamePaginated(name, page, pageSize)
                 if error:
                     if error == ErrorCodes.INVALID_INPUT:
