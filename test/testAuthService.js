@@ -57,9 +57,21 @@ async function testGetRoles(data) {
     console.log('Response:', response);
     return response;
 }
+async function testCreateRoles(data) {
+    console.log('Testing Favorite...');
+    const response = await makeRequest('/role/create', 'POST', data);
+    console.log('Response:', response);
+    return response;
+}
 
 // Example usage:
-testGetRoles({
-    page: 1,
-    pageSize:10
+// testGetRoles({
+//     name: "ADMIN",
+//     page: 1,
+//     pageSize:10
+// });
+
+testCreateRoles({
+    name: "MMSB",
+    description: "no cap"
 });

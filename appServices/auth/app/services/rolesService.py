@@ -60,7 +60,7 @@ class RolesService:
         if not name:
             return None, ErrorCodes.INVALID_INPUT
 
-        if RolesRepo.getByName(name):
+        if RolesRepo.filterByName(name):
             return None, ErrorCodes.ALREADY_EXISTS
 
         role = Roles(
