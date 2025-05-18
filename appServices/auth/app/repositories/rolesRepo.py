@@ -19,7 +19,7 @@ class RolesRepo:
     @staticmethod
     def filterByNamePaginated(name: str, page: int = 1, pageSize: int = 10):
         try:
-            result = Roles.objects.filter(name__iscontains=name, isActive=True)
+            result = Roles.objects.filter(name__icontains=name, isActive=True)
             paginator = Paginator(result, pageSize)
             return {
                 'result': paginator,
@@ -33,7 +33,7 @@ class RolesRepo:
     @staticmethod
     def filterByName(name: str):
         try:
-            return Roles.objects.get(name__iscontains=name)
+            return Roles.objects.get(name__icontains=name)
         except Roles.DoesNotExist:
             return None
 
