@@ -31,7 +31,7 @@ class GetRoles(View):
                     return BaseResponse.notFound("Chưa có vai trò nào", str(error))
                 return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", {
-                'result': RolesSerializer(result['result'], many=True).data,
+                'result': RolesSerializer(result['result'].object_list, many=True).data,
                 'total': result['total'],
                 'totalPages': result['totalPages'],
                 'currentPage': result['currentPage']
@@ -59,7 +59,7 @@ class GetRoles(View):
                         return BaseResponse.notFound("Chưa có vai trò nào", str(error))
                     return BaseResponse.internalError("Lỗi hệ thống", str(error))
                 return BaseResponse.success("Thành công", {
-                    'result': RolesSerializer(result['result'], many=True).data,
+                    'result': RolesSerializer(result['result'].object_list, many=True).data,
                     'total': result['total'],
                     'totalPages': result['totalPages'],
                     'currentPage': result['currentPage']
@@ -73,7 +73,7 @@ class GetRoles(View):
                     return BaseResponse.notFound("Chưa có vai trò nào", str(error))
                 return BaseResponse.internalError("Lỗi hệ thống", str(error))
             return BaseResponse.success("Thành công", {
-                'result': RolesSerializer(result['result'], many=True).data,
+                'result': RolesSerializer(result['result'].object_list, many=True).data,
                 'total': result['total'],
                 'totalPages': result['totalPages'],
                 'currentPage': result['currentPage']
