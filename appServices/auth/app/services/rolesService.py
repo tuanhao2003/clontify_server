@@ -135,7 +135,7 @@ class RolesService:
     @staticmethod
     def doDeleteMany(ids: list[str]):
         try:
-            if not ids or len(ids):
+            if not ids or len(ids) == 0:
                 return None, ErrorCodes.INVALID_INPUT
             result = []
             for i in ids:
