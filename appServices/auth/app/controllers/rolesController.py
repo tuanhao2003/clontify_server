@@ -136,18 +136,29 @@ class DeleteRole(View):
         try:
             data = json.loads(request.body.decode('utf-8'))
             id = data.get("id")
-            if not id:
+            ids = data.get("ids")
+            if not id and not ids:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ", str(error))
-            
-            role, error = RolesService.doDelete(id)
-            if error:
-                if error == ErrorCodes.INVALID_INPUT:
-                    return BaseResponse.badRequest("Dữ liệu không hợp lệ", str(error))
-                elif error == ErrorCodes.NOT_FOUND:
-                    return BaseResponse.notFound("Vai trò không tồn tại", str(error))
-                elif error == ErrorCodes.DELETE_FAILED:
-                    return BaseResponse.internalError("Xóa vai trò thất bại", str(error))
-                return BaseResponse.internalError("Lỗi hệ thống", str(error))
-            return BaseResponse.success("Thành công", RolesSerializer(role).data)
+            if id:
+                role, error = RolesService.doDelete(id)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ", str(error))
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Vai trò không tồn tại", str(error))
+                    elif error == ErrorCodes.DELETE_FAILED:
+                        return BaseResponse.internalError("Xóa vai trò thất bại", str(error))
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", RolesSerializer(role).data)
+            if ids:
+                roles, error = RolesService.doDeleteMany(ids)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ", str(error))
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Vai trò không tồn tại", str(error))
+                    elif error == ErrorCodes.DELETE_FAILED:
+                        return BaseResponse.internalError("Xóa vai trò thất bại", str(error))
+                return BaseResponse.success("Thành công", RolesSerializer(roles, many=True).data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e)) 
