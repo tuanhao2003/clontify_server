@@ -13,6 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database:/docker-entrypoint-initdb.d:ro
+      - ./serverclontify.sql:/serverclontify.sql
     command: ["postgres", "-c", "log_statement=all"]
     networks:
       - clontify-network

@@ -78,8 +78,20 @@ class FavoritesRepo:
     @staticmethod
     def create(favorite: Favorites):
         try:
-            favorite.save()
-            return favorite
+            favorite.updatedAt = now()
+            favorite.deletedAt = None
+            favorite.isActive = True
+            obj, created = Favorites.objects.update_or_create(
+                profileID=favorite.profileID,
+                songID=favorite.songID,
+                defaults={
+                    'updatedAt': favorite.updatedAt,
+                    'isActive': favorite.isActive,
+                    'createdAt': favorite.createdAt,
+                    'deletedAt': favorite.deletedAt,
+                }
+            )
+            return obj
         except Exception:
             return None
 
