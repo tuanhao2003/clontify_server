@@ -30,6 +30,7 @@ urlpatterns = [
 
     path('favorites', GetFavorites.as_view(), name='get_favorites'),
     path('favorite/create', CreateFavorite.as_view(), name='create_favorite'),
+    path('favorite/update', UpdateFavorite.as_view(), name='update_favorite'),
     path('favorite/delete', DeleteFavorite.as_view(), name='delete_favorite'),
     path('favorite/<str:id>', GetFavorites.as_view(), name='get_favorite_by_id'),
 ]

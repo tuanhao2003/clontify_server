@@ -84,6 +84,15 @@ class FavoritesRepo:
             return None
 
     @staticmethod
+    def update(favorite: Favorites):
+        try:
+            favorite.updatedAt = now()
+            favorite.save()
+            return favorite
+        except Exception:
+            None
+
+    @staticmethod
     def delete(favorite: Favorites):
         try:
             favorite.isActive = False

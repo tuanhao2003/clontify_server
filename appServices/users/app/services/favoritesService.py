@@ -103,6 +103,21 @@ class FavoritesService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
+    def doUpdate(profileId: str, songId: str, isActive: bool = True):
+        try:
+            if not profileId or not songId or profileId == "" or songId == "":
+                return None, ErrorCodes.INVALID_INPUT
+            currentFavorite = FavoritesRepo.getExactly(uuid.UUID(profileId),uuid.UUID(songId))
+            if not currentFavorite:
+                return None, ErrorCodes.NOT_FOUND
+            currentFavorite.isActive = isActive
+            result = FavoritesRepo.update(currentFavorite)
+            if not result:
+                None, ErrorCodes.UPDATE_FAILED
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
+
+    @staticmethod
     def doDelete(profileId: str, songId: str):
         try:
             profileId = uuid.UUID(profileId)
