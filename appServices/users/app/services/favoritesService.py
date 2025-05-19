@@ -145,3 +145,18 @@ class FavoritesService:
                 musicClient.close()
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED 
+    
+    @staticmethod
+    def doHardDelete(profileId: str, songId: str):
+        try:
+            profileId = uuid.UUID(profileId)
+            songId = uuid.UUID(songId)
+            favorite = FavoritesRepo.getExactly(profileId, songId)
+            if not favorite:
+                return None, ErrorCodes.NOT_FOUND
+            result = FavoritesRepo.hardDelete(favorite)
+            if not result:
+                return None, ErrorCodes.DELETE_FAILED
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED

@@ -112,4 +112,13 @@ class FavoritesRepo:
             favorite.save()
             return favorite
         except Exception:
-            return None 
+            return None
+        
+    @staticmethod
+    def hardDelete(favorite: Favorites):
+        try:
+            deleting = favorite
+            favorite.delete()
+            return deleting
+        except Exception:
+            return None

@@ -122,7 +122,7 @@ class DeleteFavorite(View):
             if not profileId or not songId:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
             
-            favorite, error = FavoritesService.doDelete(profileId, songId)
+            favorite, error = FavoritesService.doHardDelete(profileId, songId)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
