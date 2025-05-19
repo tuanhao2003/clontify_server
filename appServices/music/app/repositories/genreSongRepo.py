@@ -91,3 +91,12 @@ class GenreSongRepo:
             return genreSong
         except Exception:
             return None
+    
+    @staticmethod
+    def hardDelete(genreSong: GenreSong):
+        try:
+            deleting = genreSong
+            genreSong.delete()
+            return deleting
+        except Exception:
+            return None

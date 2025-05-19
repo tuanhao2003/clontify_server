@@ -113,3 +113,17 @@ class GenreSongService:
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
     
+    @staticmethod
+    def doHardDelete(genreId: str, songId: str):
+        try:
+            genreId = uuid.UUID(genreId)
+            songId = uuid.UUID(songId)
+            genreSong = GenreSongRepo.getExactly(genreId, songId)
+            if not genreSong:
+                return None, ErrorCodes.NOT_FOUND
+            result = GenreSongRepo.hardDelete(genreSong)
+            if not result:
+                return None, ErrorCodes.DELETE_FAILED
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED

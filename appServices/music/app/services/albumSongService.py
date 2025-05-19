@@ -115,4 +115,19 @@ class AlbumSongService:
             return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
+        
+    @staticmethod
+    def doHardDelete(albumId: str, songId: str):
+        try:
+            albumId = uuid.UUID(albumId)
+            songId = uuid.UUID(songId)
+            albumSong = AlbumSongRepo.getExactly(albumId, songId)
+            if not albumSong:
+                return None, ErrorCodes.NOT_FOUND
+            result = AlbumSongRepo.hardDelete(albumSong)
+            if not result:
+                return None, ErrorCodes.DELETE_FAILED
+            return result, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
     

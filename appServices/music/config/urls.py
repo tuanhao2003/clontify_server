@@ -3,6 +3,8 @@ from django.urls import path
 from app.controllers.albumsController import *
 from app.controllers.songsController import *
 from app.controllers.genresController import *
+from app.controllers.albumSongController import *
+from app.controllers.genreSongController import *
 
 urlpatterns = [
     path('admin', admin.site.urls),
@@ -24,4 +26,12 @@ urlpatterns = [
     path('genre/delete', DeleteGenre.as_view(), name='delete_genre'),
     path('genre/<str:id>', GetGenres.as_view(), name='get_genre_by_id'),
     path('genres', GetGenres.as_view(), name='get_genres'),
+
+    path('album-songs', GetAlbumSong.as_view(), name='get_album_songs'),
+    path('album-song/create', CreateAlbumSong.as_view(), name='create_album_song'),
+    path('album-song/delete', DeleteAlbumSong.as_view(), name='delete_album_song'),
+
+    path('genre-songs', GetGenreSong.as_view(), name='get_genre_songs'),
+    path('genre-song/create', CreateGenreSong.as_view(), name='create_genre_song'),
+    path('genre-song/delete', DeleteGenreSong.as_view(), name='delete_genre_song'),
 ]

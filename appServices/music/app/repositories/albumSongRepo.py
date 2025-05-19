@@ -91,3 +91,12 @@ class AlbumSongRepo:
             return albumSong
         except Exception:
             return None
+        
+    @staticmethod
+    def hardDelete(albumSong: AlbumSong):
+        try:
+            deleting = albumSong
+            albumSong.delete()
+            return deleting
+        except Exception:
+            return None
