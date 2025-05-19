@@ -151,7 +151,7 @@ class DeleteRole(View):
                     return BaseResponse.internalError("Lỗi hệ thống", str(error))
                 return BaseResponse.success("Thành công", RolesSerializer(role).data)
             if ids:
-                roles, error = RolesService.doDeleteMany(ids)
+                deletion_info, error = RolesService.doDeleteMany(ids)
                 if error:
                     if error == ErrorCodes.INVALID_INPUT:
                         return BaseResponse.badRequest("Dữ liệu không hợp lệ", str(error))
@@ -159,6 +159,9 @@ class DeleteRole(View):
                         return BaseResponse.notFound("Vai trò không tồn tại", str(error))
                     elif error == ErrorCodes.DELETE_FAILED:
                         return BaseResponse.internalError("Xóa vai trò thất bại", str(error))
-                return BaseResponse.success("Thành công", RolesSerializer(roles, many=True).data)
+                return BaseResponse.success("Thành công", {
+                    "deleted_count": deletion_info[0] if isinstance(deletion_info, tuple) else 0,
+                    "details": deletion_info[1] if isinstance(deletion_info, tuple) and len(deletion_info) > 1 else deletion_info
+                })
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e)) 
