@@ -197,11 +197,12 @@ class UpdateSong(View):
             duration = data.get("duration")
             description = data.get("description")
             songType = data.get("songType")
+            removeImage = data.get("removeImage")
             
             if not id:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            song, error = SongsService.doUpdate(id, title, storageImageId, duration, description, songType)
+            song, error = SongsService.doUpdate(id, title, storageImageId, duration, description, songType, removeImage)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")

@@ -234,10 +234,10 @@ async function testSongsController() {
     // console.log('\nTest 6: Update song');
     // const updateSong = await makeRequest(`${BASE_URL}/song/update`, 'POST', {
     //     id: songId, // Replace with actual song ID
-    //     title: 'go to hell',
+    //     title: 'go to disney',
     //     storageImageId: crypto.randomUUID(), // Replace with actual image ID
     //     duration: 200,
-    //     description: 'what the fuck',
+    //     description: 'new desc',
     //     songType: 'MUSIC_VIDEO'
     // });
     // console.log('Response:', updateSong);

@@ -239,7 +239,7 @@ class SongsService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doUpdate(id: str, title: str = None, storageImageId: str = None, duration: int = None, description: str = None, songType: str = None):
+    def doUpdate(id: str, title: str = None, storageImageId: str = None, duration: int = None, description: str = None, songType: str = None, removeImage: bool = False):
         try:
             if not id or id == "":
                 return None, ErrorCodes.INVALID_INPUT
@@ -252,6 +252,8 @@ class SongsService:
                 currentSong.title = title
             if storageImageId is not None:
                 currentSong.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
+            elif removeImage:
+                currentSong.storageImageId = None
             if duration is not None:
                 currentSong.duration = duration
             if description is not None:
