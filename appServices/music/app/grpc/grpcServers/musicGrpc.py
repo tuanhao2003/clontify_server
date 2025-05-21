@@ -378,7 +378,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 name=request.name,
                 description=request.description,
                 storageImageId=request.storageImageId,
-                artistId=request.artistId
+                artistId=request.artistId,
+                removeImage=request.removeImage
             )
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)

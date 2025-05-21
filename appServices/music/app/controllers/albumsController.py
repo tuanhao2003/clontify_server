@@ -143,11 +143,12 @@ class UpdateAlbum(View):
             name = data.get("name")
             description = data.get("description")
             storageImageId = data.get("storageImageId")
+            removeImage = data.get("removeImage")
 
             if not id or not name or not description or not storageImageId:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            album, error = AlbumsService.doUpdate(id, name, description, storageImageId)
+            album, error = AlbumsService.doUpdate(id, name, description, storageImageId, removeImage)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
