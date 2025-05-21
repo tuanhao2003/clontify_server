@@ -154,19 +154,16 @@ class AlbumsService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doUpdate(id, name=None, description=None, storageImageId=None):
+    def doUpdate(id, name, description, storageImageId):
         try:
             if not id:
                 return None, ErrorCodes.INVALID_INPUT
             currentAlbum = AlbumsRepo.getById(id)
             if not currentAlbum:
                 return None, ErrorCodes.NOT_FOUND
-            if name is not None:
-                currentAlbum.name = name
-            if description is not None:
-                currentAlbum.description = description
-            if storageImageId is not None:
-                currentAlbum.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
+            currentAlbum.name = name
+            currentAlbum.description = description
+            currentAlbum.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
 
             updated = AlbumsRepo.update(currentAlbum)
             if not updated:

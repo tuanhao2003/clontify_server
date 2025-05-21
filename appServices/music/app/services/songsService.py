@@ -248,16 +248,11 @@ class SongsService:
             if not currentSong:
                 return None, ErrorCodes.NOT_FOUND
 
-            if title is not None:
-                currentSong.title = title
-            if storageImageId is not None:
-                currentSong.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
-            if duration is not None:
-                currentSong.duration = duration
-            if description is not None:
-                currentSong.description = description
-            if songType is not None:
-                currentSong.songType = SongTypes[songType]               
+            currentSong.title = title
+            currentSong.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
+            currentSong.duration = duration
+            currentSong.description = description
+            currentSong.songType = SongTypes[songType]               
 
             updated = SongsRepo.update(currentSong)
             if not updated:

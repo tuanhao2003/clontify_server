@@ -144,7 +144,7 @@ class UpdateAlbum(View):
             description = data.get("description")
             storageImageId = data.get("storageImageId")
 
-            if not id or not name or not description or not storageImageId:
+            if not id:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
             album, error = AlbumsService.doUpdate(id, name, description, storageImageId)
