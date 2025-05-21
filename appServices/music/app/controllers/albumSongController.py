@@ -97,21 +97,36 @@ class CreateAlbumSong(View):
             data = json.loads(request.body.decode("utf-8"))
             albumId = data.get("albumID")
             songId = data.get("songID")
+            songIds = data.get("songIDs")
 
-            if not albumId or not songId or albumId == "" or songId == "":
+            if not albumId or (not songId and not songIds) or albumId == "" or (songId == "" and len(songIds) == 0):
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            result, error = AlbumSongService.doCreate(albumId=albumId, songId=songId)
-            if error:
-                if error == ErrorCodes.INVALID_INPUT:
-                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
-                elif error == ErrorCodes.ALREADY_EXISTS:
-                    return BaseResponse.badRequest("Đã tồn tại")
-                elif error == ErrorCodes.CREATE_FAILED:
-                    return BaseResponse.internalError("Tạo thất bại")
-                return BaseResponse.internalError("Lỗi hệ thống", str(error))
+            if songId:
+                result, error = AlbumSongService.doCreate(albumId=albumId, songId=songId)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.ALREADY_EXISTS:
+                        return BaseResponse.badRequest("Đã tồn tại")
+                    elif error == ErrorCodes.CREATE_FAILED:
+                        return BaseResponse.internalError("Tạo thất bại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
 
-            return BaseResponse.success("Thành công", AlbumSongSerializer(result).data)
+                return BaseResponse.success("Thành công", AlbumSongSerializer(result).data)
+            else:
+                result, error = AlbumSongService.doAddSongsToAlbum(albumId=albumId, songIds=songIds)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.ALREADY_EXISTS:
+                        return BaseResponse.badRequest("Đã tồn tại")
+                    elif error == ErrorCodes.CREATE_FAILED:
+                        return BaseResponse.internalError("Tạo thất bại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+
+                return BaseResponse.success("Thành công", AlbumSongSerializer(result, many=True).data)
+            
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))
 

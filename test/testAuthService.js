@@ -63,6 +63,12 @@ async function testCreateRoles(data) {
     console.log('Response:', response);
     return response;
 }
+async function testDeleteRoles(data) {
+    console.log('Testing Favorite...');
+    const response = await makeRequest('/role/delete', 'POST', data);
+    console.log('Response:', response);
+    return response;
+}
 
 // Example usage:
 // testGetRoles({
@@ -71,7 +77,11 @@ async function testCreateRoles(data) {
 //     pageSize:10
 // });
 
-testCreateRoles({
-    name: "MMSB",
-    description: "no cap"
+// testCreateRoles({
+//     name: "MMSB",
+//     description: "no cap"
+// });
+
+testDeleteRoles({
+    ids: ["5d6e3c44-cce3-470b-8a01-3b44894940e5","6d6e3c44-cce3-470b-8a01-3b44894940e5"]
 });

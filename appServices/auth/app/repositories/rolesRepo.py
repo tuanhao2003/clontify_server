@@ -1,6 +1,7 @@
 from app.entities.roles import Roles
 from django.core.paginator import Paginator
 import uuid
+from django.utils.timezone import now
 class RolesRepo:
     @staticmethod
     def getByID(id: uuid.UUID):
@@ -70,18 +71,20 @@ class RolesRepo:
     def update(role: Roles):
         try:
             role.save()
+            role.updatedAt = now()
             return role
         except Exception:
             return None
 
     @staticmethod
-    def delete(id: uuid.UUID):
+    def delete(role: Roles):
         try:
-            role = Roles.objects.get(id=id)
-            role.delete()
-            return True
+            role.isActive = False
+            role.deletedAt = now()
+            role.save()
+            return role
         except Exception:
-            return False 
+            return None 
         
     @staticmethod
     def deleteMany(ids: list[uuid.UUID]) -> tuple[int, dict[str, int]]:

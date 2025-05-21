@@ -100,6 +100,33 @@ class AlbumSongService:
             return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
+        
+    @staticmethod
+    def doAddSongsToAlbum(albumId: str, songIds: list[str]):
+        try:
+            if not albumId or not songIds:
+                return None, ErrorCodes.INVALID_INPUT
+            albumId = uuid.UUID(albumId)
+            songIds = [uuid.UUID(songId) for songId in songIds]
+            songs = SongsRepo.getByIds(songIds)
+            if not songs:
+                return None, ErrorCodes.NOT_FOUND
+            album = AlbumsRepo.getById(albumId)
+            if not album:
+                return None, ErrorCodes.NOT_FOUND
+            
+            addedSongs = []
+            for song in songs:
+                existing = AlbumSongRepo.getExactly(albumId, song.id)
+                if not existing:
+                    albumSong = AlbumSong(albumId=albumId, songId=song.id)
+                    result = AlbumSongRepo.create(albumSong)
+                    if not result:
+                        return None, ErrorCodes.CREATE_FAILED
+                    addedSongs.append(result)
+            return addedSongs, None
+        except Exception:
+            return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
     def doDelete(albumId: str, songId: str):

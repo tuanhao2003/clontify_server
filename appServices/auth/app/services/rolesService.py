@@ -125,7 +125,7 @@ class RolesService:
             currentRole = RolesRepo.getByID(uuid.UUID(id))
             if not currentRole:
                     return None, ErrorCodes.NOT_FOUND
-            deleted = RolesRepo.delete(uuid.UUID(id))
+            deleted = RolesRepo.delete(currentRole)
             if not deleted:
                 return None, ErrorCodes.DELETE_FAILED
             return deleted, None 
@@ -133,24 +133,19 @@ class RolesService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doDeleteMany(ids: list[str]) -> tuple[tuple[int, dict[str, int]], int]:
+    def doDeleteMany(ids: list[str]) -> tuple[list[Roles], int]:
         try:
             if not ids or len(ids) == 0:
                 return None, ErrorCodes.INVALID_INPUT
-            listUUID = [uuid.UUID(i) for i in ids]
-            deleted_count, deletion_info = RolesRepo.deleteMany(listUUID)
-            if deleted_count == 0:
-                return None, ErrorCodes.DELETE_FAILED
-            return (deleted_count, deletion_info), None
-            # result = []
-            # for i in ids:
-            #     currentRole = RolesRepo.getByID(uuid.UUID(i))
-            #     if not currentRole:
-            #         return None, ErrorCodes.NOT_FOUND
-            #     deleted = RolesRepo.delete(uuid.UUID(i))
-            #     if not deleted:
-            #         return None, ErrorCodes.DELETE_FAILED
-            #     result.append(deleted)
-            # return result, None
+            result = []
+            for i in ids:
+                currentRole = RolesRepo.getByID(uuid.UUID(i))
+                if not currentRole:
+                    return None, ErrorCodes.NOT_FOUND
+                deleted = RolesRepo.delete(currentRole)
+                if not deleted:
+                    return None, ErrorCodes.DELETE_FAILED
+                result.append(deleted)
+            return result, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
