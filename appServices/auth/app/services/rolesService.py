@@ -125,7 +125,7 @@ class RolesService:
             currentRole = RolesRepo.getByID(uuid.UUID(id))
             if not currentRole:
                     return None, ErrorCodes.NOT_FOUND
-            deleted = RolesRepo.delete(uuid.UUID(id))
+            deleted = RolesRepo.delete(currentRole)
             if not deleted:
                 return None, ErrorCodes.DELETE_FAILED
             return deleted, None 
