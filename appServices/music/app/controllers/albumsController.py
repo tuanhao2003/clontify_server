@@ -108,8 +108,8 @@ class CreateAlbum(View):
             logger.info("Received album creation request")
             data = json.loads(request.body.decode('utf-8'))
             name = data.get("name")
-            description = data.get("description")
-            storageImageId = data.get("storageImageId")
+            description = data.get("description", None)
+            storageImageId = data.get("storageImageId", None)
             artistId = data.get("artistId")
 
             logger.info(f"Album creation data - name: {name}, artistId: {artistId}, storageImageId: {storageImageId}")
