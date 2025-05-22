@@ -5,6 +5,21 @@ from common.errorCodes import ErrorCodes
 from django.contrib.auth.hashers import make_password
 
 class AccountsService:
+
+    @staticmethod
+    def findAll():
+        accounts = AccountsRepo.filterAll()
+        if not accounts:
+            return None, ErrorCodes.NOT_FOUND
+        return accounts, None
+
+    @staticmethod
+    def findAllPaginated(page: int, pageSize: int):
+        accounts = AccountsRepo.filterAllPaginated(page, pageSize)
+        if not accounts:
+            return None, ErrorCodes.NOT_FOUND
+        return accounts, None
+
     @staticmethod
     def findById(id: str):
         if not id:
