@@ -108,6 +108,25 @@ services:
     networks:
       - clontify-network
 
+  chatbot:
+    build:
+      context: ./appServices/chatbot
+      dockerfile: Dockerfile
+    container_name: chatbot_service
+    restart: no
+    volumes:
+      - ./appServices/common:/chatbot_service/common
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/chatbot_service/common
+    depends_on:
+      - postgres
+    ports:
+      - "8084:8084"
+    networks:
+      - clontify-network
+
 
 volumes:
   postgres_data:
