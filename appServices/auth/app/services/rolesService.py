@@ -140,7 +140,7 @@ class RolesService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doDeleteMany(ids: list[str]):
+    def doDeleteMany(ids: list[str]) -> tuple[list[Roles], int]:
         try:
             if not ids or len(ids) == 0:
                 return None, ErrorCodes.INVALID_INPUT

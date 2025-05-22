@@ -85,3 +85,12 @@ class RolesRepo:
             return role
         except Exception:
             return None 
+        
+    @staticmethod
+    def deleteMany(ids: list[uuid.UUID]) -> tuple[int, dict[str, int]]:
+        try:
+            roles = Roles.objects.filter(id__in=ids)
+            deleted_count, deletion_info = roles.delete()
+            return deleted_count, deletion_info
+        except Exception:
+            return 0

@@ -239,7 +239,7 @@ class SongsService:
             return None, ErrorCodes.OPERATION_FAILED
 
     @staticmethod
-    def doUpdate(id: str, title: str = None, storageImageId: str = None, duration: int = None, description: str = None, songType: str = None):
+    def doUpdate(id: str, title: str = None, storageImageId: str = None, duration: int = None, description: str = None, songType: str = None, removeImage: bool = False):
         try:
             if not id or id == "":
                 return None, ErrorCodes.INVALID_INPUT
@@ -248,11 +248,18 @@ class SongsService:
             if not currentSong:
                 return None, ErrorCodes.NOT_FOUND
 
-            currentSong.title = title
-            currentSong.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
-            currentSong.duration = duration
-            currentSong.description = description
-            currentSong.songType = SongTypes[songType]               
+            if title is not None:
+                currentSong.title = title
+            if storageImageId is not None:
+                currentSong.storageImageId = uuid.UUID(storageImageId) if storageImageId else None
+            elif removeImage:
+                currentSong.storageImageId = None
+            if duration is not None:
+                currentSong.duration = duration
+            if description is not None:
+                currentSong.description = description
+            if songType is not None:
+                currentSong.songType = SongTypes[songType]               
 
             updated = SongsRepo.update(currentSong)
             if not updated:
@@ -291,6 +298,43 @@ class SongsService:
             return deleted, None
         except Exception:
             return None, ErrorCodes.OPERATION_FAILED
+        
+    @staticmethod
+    def doDeleteMany(ids: list):
+        results = {
+            "success": [],
+            "failed": []
+        }
+
+        if not isinstance(ids, list) or not ids:
+            # If input is invalid, return empty results with a failed message for all
+            return results
+
+        for id in ids:
+            try:
+                song, error = SongsService.doDelete(id)
+                if error:
+                    results["failed"].append({
+                        "song": song,
+                        "success": False,
+                        "message": f"Failed to delete song with id {id}: {error}"
+                    })
+                else:
+                    results["success"].append({
+                        "song": song,
+                        "success": True,
+                        "message": f"Deleted song with id {id} successfully"
+                    })
+            except Exception as e:
+                # Exception case, song not available
+                results["failed"].append({
+                    "song": None,
+                    "success": False,
+                    "message": f"Exception occurred while deleting song with id {id}: {str(e)}"
+                })
+
+        return results
+
 
     @staticmethod
     def findBySongType(songType: str):

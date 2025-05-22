@@ -197,11 +197,12 @@ class UpdateSong(View):
             duration = data.get("duration")
             description = data.get("description")
             songType = data.get("songType")
+            removeImage = data.get("removeImage")
             
             if not id:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
 
-            song, error = SongsService.doUpdate(id, title, storageImageId, duration, description, songType)
+            song, error = SongsService.doUpdate(id, title, storageImageId, duration, description, songType, removeImage)
             if error:
                 if error == ErrorCodes.INVALID_INPUT:
                     return BaseResponse.badRequest("Dữ liệu không hợp lệ")
@@ -219,18 +220,40 @@ class DeleteSong(View):
         try:
             data = json.loads(request.body.decode('utf-8'))
             id = data.get("id")
-            if not id:
+            ids = data.get("ids")
+            if not id and not ids:
                 return BaseResponse.badRequest("Dữ liệu không hợp lệ")
             
-            song, error = SongsService.doDelete(id)
-            if error:
-                if error == ErrorCodes.INVALID_INPUT:
-                    return BaseResponse.badRequest("Dữ liệu không hợp lệ")
-                elif error == ErrorCodes.NOT_FOUND:
-                    return BaseResponse.notFound("Bài hát không tồn tại")
-                elif error == ErrorCodes.DELETE_FAILED:
-                    return BaseResponse.internalError("Xóa bài hát thất bại")
-                return BaseResponse.internalError("Lỗi hệ thống", str(error))
-            return BaseResponse.success("Thành công", SongsSerializer(song).data)
+            if id:
+                song, error = SongsService.doDelete(id)
+                if error:
+                    if error == ErrorCodes.INVALID_INPUT:
+                        return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+                    elif error == ErrorCodes.NOT_FOUND:
+                        return BaseResponse.notFound("Bài hát không tồn tại")
+                    elif error == ErrorCodes.DELETE_FAILED:
+                        return BaseResponse.internalError("Xóa bài hát thất bại")
+                    return BaseResponse.internalError("Lỗi hệ thống", str(error))
+                return BaseResponse.success("Thành công", SongsSerializer(song).data)
+            
+            if not isinstance(ids, list):
+                return BaseResponse.badRequest("Dữ liệu không hợp lệ")
+
+            result = SongsService.doDeleteMany(ids)
+            # Serialize songs in results if needed
+            def serialize_entry(entry):
+                song = entry["song"]
+                return {
+                    "song": SongsSerializer(song).data if song else None,
+                    "success": entry["success"],
+                    "message": entry["message"]
+                }
+
+            response_data = {
+                "success": [serialize_entry(e) for e in result["success"]],
+                "failed": [serialize_entry(e) for e in result["failed"]],
+            }
+
+            return BaseResponse.success("Thành công", response_data)
         except Exception as e:
             return BaseResponse.internalError("Lỗi hệ thống", str(e))

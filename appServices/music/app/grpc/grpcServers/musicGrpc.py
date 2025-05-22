@@ -196,7 +196,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 storageImageId=request.storageImageId,
                 duration=request.duration,
                 description=request.description,
-                songType=request.songType
+                songType=request.songType,
+                removeImage=request.removeImage
             )
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
@@ -377,7 +378,8 @@ class MusicGrpc(musicService_pb2_grpc.MusicServiceServicer):
                 name=request.name,
                 description=request.description,
                 storageImageId=request.storageImageId,
-                artistId=request.artistId
+                artistId=request.artistId,
+                removeImage=request.removeImage
             )
             if error:
                 context.set_code(grpc.StatusCode.INTERNAL)
