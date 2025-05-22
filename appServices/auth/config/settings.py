@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-w7q2=jy0k#82vt*uzbeotbz$b#8(u#crbn*uznh_36^-i5hv+p"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 # Application definition
 
@@ -182,23 +182,18 @@ SIMPLE_JWT = {
 }
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+corsCsrfAllowedHosts = os.getenv("CORS_CSRF_ALLOWED_HOSTS", "http://localhost")
+ports = [50052, 8082, 50051, 8081, 50050, 8080, 50053, 8083, 5173]
+allowedCorsCsrfOrigins = [f"{corsCsrfAllowedHosts}:{port}" for port in ports]
 
 CORS_ALLOWED_ORIGINS = [
     "https://fe-spotify.vercel.app",
-    "http://localhost:50052",
-    "http://localhost:8082",
-    "http://localhost:50051",
-    "http://localhost:8081",
-    "http://localhost:5173",
+    *allowedCorsCsrfOrigins
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://fe-spotify.vercel.app",
-    "http://localhost:50052",
-    "http://localhost:8082",
-    "http://localhost:50051",
-    "http://localhost:8081",
-    "http://localhost:5173",
+    *allowedCorsCsrfOrigins
 ]
 
 CORS_ALLOW_CREDENTIALS = parseBoolean(os.environ.get("CORS_ALLOW_CREDENTIALS", "True"))

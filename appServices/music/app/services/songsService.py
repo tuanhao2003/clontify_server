@@ -277,16 +277,12 @@ class SongsService:
             if error:
                 return None, error
 
-            albumSongs, error = AlbumSongService.findBySongId(id)
-            if error:
-                return None, error
+            albumSongs, _ = AlbumSongService.findBySongId(id)
             if albumSongs:
                 for albumSong in albumSongs:
                     AlbumSongService.doDelete(str(albumSong.albumId), str(albumSong.songId))
 
-            genreSongs, error = GenreSongService.findBySongId(id)
-            if error:
-                return None, error
+            genreSongs, _ = GenreSongService.findBySongId(id)
             if genreSongs:
                 for genreSong in genreSongs:
                     GenreSongService.doDelete(str(genreSong.genreId), str(genreSong.songId))

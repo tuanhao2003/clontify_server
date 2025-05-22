@@ -82,7 +82,14 @@ class RolesService:
                 return None, ErrorCodes.INVALID_INPUT
 
             if RolesRepo.filterByName(name):
-                return None, ErrorCodes.ALREADY_EXISTS
+                if RolesRepo.filterByName(name).isActive == True:
+                    return None, ErrorCodes.ALREADY_EXISTS
+                else:
+                    RolesRepo.filterByName(name).isActive = True
+                    updated = RolesRepo.update(RolesRepo.filterByName(name))
+                    if not updated:
+                        return None, ErrorCodes.CREATE_FAILED
+                    return updated, None
 
             role = Roles(
                 name=name,

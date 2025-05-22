@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-8hskitxszl=lc1$cxxsln9-$^@r@39gy)l=pyag&o3jrd7&ojp'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -134,24 +134,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+corsCsrfAllowedHosts = os.getenv("CORS_CSRF_ALLOWED_HOSTS", "http://localhost")
+ports = [50052, 8082, 50051, 8081, 50050, 8080, 50053, 8083, 5173]
+allowedCorsCsrfOrigins = [f"{corsCsrfAllowedHosts}:{port}" for port in ports]
 
 CORS_ALLOWED_ORIGINS = [
     "https://fe-spotify.vercel.app",
-    "http://localhost:50050",
-    "http://localhost:8080",
-    "http://localhost:50051",
-    "http://localhost:8081",
-    "http://localhost:5173",
+    *allowedCorsCsrfOrigins
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://fe-spotify.vercel.app",
-    "http://localhost:50050",
-    "http://localhost:8080",
-    "http://localhost:50051",
-    "http://localhost:8081",
-    "http://localhost:5173",
+    *allowedCorsCsrfOrigins
 ]
 PUBLIC_ENDPOINTS = [
 
