@@ -4,28 +4,24 @@ import os
 import json
 from common.baseResponse import BaseResponse
 
+
 class RequestDeepseek(View):
     def post(self, request):
         try:
-            data = json.loads(request.body.decode('utf-8'))
+            data = json.loads(request.body.decode("utf-8"))
             prompt = data.get("prompt")
             apiKey = os.getenv("DEEPSEEK_API_KEY")
             if not apiKey:
                 return BaseResponse.externalServiceError("Apikey không hợp lệ")
 
-            url = "https://api.deepseek.com/chat/completions"
+            url = "https://openrouter.ai/api/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {apiKey}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
             payload = {
-                "model": "deepseek-chat",
-                "messages": [
-                    {"role": "system", "content": "You are a helpful assistant."},
-                    {"role": "user", "content": prompt}
-                ],
-                "temperature": 0.7,
-                "stream": False
+                "model": "deepseek/deepseek-chat:free",
+                "messages": [{"role": "user", "content": prompt}],
             }
 
             response = requests.post(url, json=payload, headers=headers)
