@@ -22,6 +22,8 @@ class GetAccount(View):
         isActive = data.get("isActive")
         start = data.get("start")
         end = data.get("end")
+        page = int(data.get("page", "1"))
+        pageSize = int(data.get("pageSize", "10"))
 
         if id:
             result, error = AccountsService.findById(id)
@@ -76,9 +78,20 @@ class GetAccount(View):
             return BaseResponse.success(
                 "Thành công", AccountSerializer(result, many=True).data
             )
-
-        return BaseResponse.badRequest("Không có tham số nào hợp lệ")
-
+        
+        result, error = AccountsService.findAllPaginated(page, pageSize)
+        if error == ErrorCodes.INVALID_INPUT:
+            return BaseResponse.badRequest("Ngày không hợp lệ")
+        if error == ErrorCodes.NOT_FOUND:
+            return BaseResponse.notFound("Không tìm thấy tài khoản nào")
+        if error:
+            return BaseResponse.internalError("Lỗi hệ thống")
+        return BaseResponse.success("Thành công", {
+                'result': AccountSerializer(result['result'], many=True).data,
+                'total': result['total'],
+                'totalPages': result['totalPages'],
+                'currentPage': result['currentPage']
+            })
 
 class DeleteAccount(View):
     def post(self, request):

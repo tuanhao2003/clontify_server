@@ -6,6 +6,19 @@ import uuid
 
 class AccountsRepo:
     @staticmethod
+    def filterAll():
+        try:
+            return Accounts.objects.all().order_by("-createdAt")
+        except Exception:
+            return None
+    @staticmethod
+    def filterAllPaginated(page: int, pageSize: int):
+        try:
+            return Accounts.objects.all().order_by("-createdAt").paginate(page, pageSize)
+        except Exception:
+            return None
+
+    @staticmethod
     def getById(id: uuid.UUID):
         try:
             return Accounts.objects.get(id=id)
